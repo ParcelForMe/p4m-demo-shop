@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Simple Shop</title>
+    @*Styles.Render("~/Content/css")*@
+    <script src="~/Scripts/webcomponentsjs/webcomponents.min.js"></script>
+
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Content/Site.css">
+
+    @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="/Content/card.css">
+    <link rel="stylesheet" href="~/Content/TestShop.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI"></script>
+</head>
+<body>
+        
+        <div class="bs-component">
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    @Html.ActionLink("Isla Clothing", "Index", "Home", null, new { @class = "navbar-brand" })
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                        @if (Request.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin Area <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li>@Html.ActionLink("Orders", "Index", "Orders")</li>
+                                    <li>@Html.ActionLink("Catagorie", "Index", "Catagories")</li>
+                                    <li>@Html.ActionLink("Analytics", "Index", "Analytics")</li>
+                                    <li class="divider"></li>
+                                    <li class="dropdown-header">Roles Admin</li>
+                                    <li>@Html.ActionLink("RolesAdmin", "Index", "RolesAdmin")</li>
+                                    <li>@Html.ActionLink("UsersAdmin", "Index", "UsersAdmin")</li>
+                                </ul>
+                            </li>
+                        }
+                        <li>@Html.ActionLink("Shop", "Index", "Items")</li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">About us <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("About", "About", "Home")</li>
+                                <li class="divider"></li>
+                                <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    @Html.Partial("_LoginPartial")
+
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="container body-content">
+            @RenderBody()
+            <hr />
+            <footer>
+                <p>&copy; @DateTime.Now.Year - A Simple Shop</p>
+            </footer>
+        </div>
+
+        <link rel="import" href="~/Scripts/widgets/gfs-supported-carriers/gfs-supported-carriers.html">
+        <link rel="import" href="~/Scripts/widgets/gfs-checkout-widget/gfs-checkout-widget.html">
+
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+        @RenderSection("scripts", required: false)
+   
+
+</body>
+</html>

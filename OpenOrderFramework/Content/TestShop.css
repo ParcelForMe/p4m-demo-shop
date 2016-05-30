@@ -1,0 +1,29 @@
+﻿body{
+
+    font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+p{
+    font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+
+}
+
+.NavBarPad {
+    padding-right:30px;
+
+}
+
+.jumbotron{
+    background-color:transparent;
+   box
+  
+
+}
+@media (min-width: 1000px) {
+    .jumbotron {
+        background-image:url("../Images/Catwomenmainimg.jpg");
+        background-repeat:no-repeat;
+    
+    background-position:right;
+  
+    }
+}
