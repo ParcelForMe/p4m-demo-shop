@@ -80,8 +80,11 @@ ipch/
 *.opensdf
 *.sdf
 *.cachefile
+<<<<<<< HEAD
 *.VC.db
 *.VC.VC.opendb
+=======
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
 
 # Visual Studio profiler
 *.psess
@@ -140,16 +143,23 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
+<<<<<<< HEAD
 # TODO: Comment the next line if you want to checkin your web deploy settings
+=======
+# TODO: Comment the next line if you want to checkin your web deploy settings
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
 
+<<<<<<< HEAD
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained
 # in these scripts will be unencrypted
 PublishScripts/
 
+=======
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
 # NuGet Packages
 *.nupkg
 # The packages folder can be ignored because of Package Restore
@@ -170,11 +180,20 @@ csx/
 ecf/
 rcf/
 
+<<<<<<< HEAD
 # Windows Store app package directories and files
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
 _pkginfo.txt
+=======
+# Microsoft Azure ApplicationInsights config file
+ApplicationInsights.config
+
+# Windows Store app package directory
+AppPackages/
+BundleArtifacts/
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
 
 # Visual Studio cache files
 # files ending in .cache can be ignored
@@ -193,10 +212,13 @@ ClientBin/
 node_modules/
 orleans.codegen.cs
 
+<<<<<<< HEAD
 # Since there are multiple workflows, uncomment next line to ignore bower_components
 # (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
 #bower_components/
 
+=======
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
 # RIA/Silverlight projects
 Generated_Code/
 
@@ -242,6 +264,7 @@ _Pvt_Extensions
 
 # Paket dependency manager
 .paket/paket.exe
+<<<<<<< HEAD
 paket-files/
 
 # FAKE - F# Make
@@ -301,3 +324,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+=======
+
+# FAKE - F# Make
+.fake/
+>>>>>>> cf7bcbd7b96d0f9e42d8272ce0ca75bd189a3b34
