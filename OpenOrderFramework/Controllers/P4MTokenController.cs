@@ -35,9 +35,10 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("/getConsumerAccessToken")]
-        public async Task<string> GetToken(string code)
-//        public async Task<ActionResult> GetToken(string code)
+        public async Task<string> GetToken(string code, string state)
+//        public async Task<ActionResult> GetToken(string code, string state)
         {
+            // state could/should be validated here - get from cookie
             var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
             var response = await client.RequestAuthorizationCodeAsync(code, P4MConstants.LocalCallbackUrl);
             if (!string.IsNullOrEmpty(response.AccessToken))
