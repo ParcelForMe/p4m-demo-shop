@@ -5,7 +5,7 @@
 
     <template>
         <iron-ajax
-            id="ajaxget"
+            id="apiAjax"
             method="GET"
             handle-as="json"
             content-type="application/json"
@@ -37,7 +37,7 @@
             },
 
             ready: function() {
-                this.$apiAjax.headers = '{"Authorization":"Bearer '+this.consumerToken+'"}';
+                this.$.apiAjax.headers = '{"Authorization":"Bearer '+this.consumerToken+'"}';
             },
 
             getConsumerDetails: function(callback) {
