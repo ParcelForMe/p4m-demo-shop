@@ -1,6 +1,5 @@
 ﻿using OpenOrderFramework.Models;
 using System.Data.Entity;
-using System.Net;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -13,7 +12,6 @@ namespace OpenOrderFramework
     {
         protected void Application_Start()
         {
-            ServicePointManager.ServerCertificateValidationCallback += (s, cert, chain, sslPolicyErrors) => true;
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
