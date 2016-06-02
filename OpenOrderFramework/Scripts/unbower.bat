@@ -1,0 +1,1 @@
+xcopy .\bower_components\* . /H /I /C /E /Y

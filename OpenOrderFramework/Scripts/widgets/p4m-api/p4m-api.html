@@ -1,0 +1,62 @@
+<link rel="import" href="../../polymer/polymer.html" />
+<link rel="import" href="../../iron-ajax/iron-ajax.html" />
+
+<dom-module id="p4m-api">
+
+    <template>
+        <iron-ajax
+            id="ajaxget"
+            method="GET"
+            handle-as="json"
+            content-type="application/json"
+            on-response="_handleResponse"
+            debounce-duration="300">
+        </iron-ajax>
+    </template>
+
+    <script>
+        var Endpoints = {
+            GET_CONSUMER_DETAILS: "getConsumerDetails"
+        };
+
+        Polymer({
+            is: "p4m-api",
+
+            properties: {
+                baseUrl: {
+                    type: String,
+                    value: "https://api.parcelfor.me:44321/api/v1/"
+                },
+                consumerToken: {
+                    type: String
+                }
+
+            },
+            listeners: {
+
+            },
+
+            ready: function() {
+                this.$apiAjax.headers = '{"Authorization":"Bearer '+this.consumerToken+'"}';
+            },
+
+            getConsumerDetails: function(callback) {
+                this.$.apiAjax.url = this._prepareApiCall(Endpoints.GET_CONSUMER_DETAILS, callback);
+                this.$.apiAjax.generateRequest();
+            },
+
+            _prepareApiCall: function(endPointCode, callback) {
+                this.$.apiAjax.url = this.baseUrl + EndPoints[endpoint];
+                this.$.apiAjax.params = { "client": this.consumerToken };
+                this._callback = callback;
+            },
+
+            _handleResponse: function(e) {
+                if (this._callback) {
+                    this._callback(e.detail.response);
+                }
+            }
+
+        });
+    </script>
+</dom-module>

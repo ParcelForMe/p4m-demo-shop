@@ -1,0 +1,247 @@
+﻿<link rel="import" href="../../polymer/polymer.html" />
+
+<dom-module id="gfs-droppoint">
+
+    <template>
+        <style>
+            .dp-heading {
+            }
+
+            .label
+            {
+                color:white;
+                font-weight:bold;
+            }
+
+            .dp-content
+            {
+                width:100%;
+            }
+            .dp-address
+            {
+                text-align:left;
+            }
+
+            .opening-hours
+            {
+                font-size: 14px;
+            }
+
+            .choose-droppoint
+            {
+                background-color: #555555;
+                border: none;
+                color: white;
+                margin-top: 4px;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+            }
+
+            .choose-droppoint.chosen {
+                 background-color: #4CAF50; /* Green */
+            }
+
+            div.dp-day-name {
+                font-size: 11px;
+                margin-top: 2px;
+                font-weight: bold;
+            }
+
+            div.dp-day-time-slot {
+                margin-bottom: 1px;
+                font-size: 10px;
+            }
+
+            .b-tick
+            {
+                display: block;
+                height: 32px;
+                width: 32px;
+            }
+
+            .b-tick.unchosen
+            {
+                background-image: url('assets/tick.png')
+            }
+
+            .b-tick.chosen
+            {
+                background-image: url('assets/tick_on.png')
+            }
+
+        </style>
+
+        <div class="dp-icon">
+            <img src="{{droppointData.providerLogo}}" class="imageicon" width="45" height="45"></img>
+        </div>
+        <div class="dp-heading">{{droppointData.providerName}}</div>
+        <div id="dp-address">
+            <template is="dom-repeat" items="{{droppointData.geoLocation.addressLines}}">
+                {{item}}
+                <br />
+            </template>
+            {{droppointData.geoLocation.town}}, {{droppointData.geoLocation.postCode}}
+        </div>
+
+        <template is="dom-if" if="{{showOpeningHours}}">
+            <div class="dp-opening-hours">
+                <h5 class="dp-heading">Opening Hours</h5>
+                <template is="dom-repeat" items="{{droppointData.collectionSlots}}">
+                    <div class="dp-day-name">{{item.day}}</div>
+                    <div class="dp-day-time-slots">
+                        <template is="dom-repeat" items={{item.timeSlots}}>
+                            <div class="dp-day-time-slot">{{item.fromTime}} - {{item.toTime}}</div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+        </template>  
+        <template is="dom-if" if="{{isTickButton}}">
+            <div class$="b-tick {{buttonClass}}" on-click="toggleChooseDropPoint"></div>
+        </template>
+        <template is="dom-if" if="{{isStandardButton}}">
+            <button on-click="toggleChooseDropPoint" class$="button choose-droppoint {{buttonClass}}">{{buttonText}}</button>
+        </template>         
+    </template>
+
+    <script>
+
+        Polymer({
+            is: "gfs-droppoint",
+
+            properties: {
+                droppointData: {
+                    type: Object,
+                    value: {}
+                },
+                buttonType: {
+                    type: String,
+                    value: "standard"
+                },
+                showOpeningHours: {
+                    type: Object,
+                    value: false
+                },
+                chosen: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                droppointId: {
+                    type: String                
+                },
+                buttonClass: {
+                    type: String,
+                    value: "unchosen"
+                },
+                buttonText: {
+                    type: String,
+                    value: "Choose"
+                }
+            },
+            listeners: {
+                'chosen-changed': 'chosenChanged'
+            },
+
+
+            ready: function()
+            {             
+                
+                var self = this;
+                this.initData();
+                this.isTickButton = (this.buttonType === "tick");
+                this.isStandardButton = !this.isTickButton;
+
+                window.addEventListener('droppointChosen', this.onDroppointChosen.bind(this), false);
+                window.addEventListener('droppointUnchosen', this.onDroppointUnchosen.bind(this), false);
+
+            },
+
+            initData: function() {
+                //this.chosen = this.droppointData.chosen;
+                this.droppointId = this.droppointData.droppointId;
+                if (this.droppointData && this.droppointData.collectionSlots) {
+                    this.droppointData.distanceInKm = (Math.round(this.droppointData.DistanceInMeters / 100)) / 10;
+
+                    var dayCount = 0;
+                    var self = this;
+                    this.droppointData.collectionSlots.forEach(function (collectionSlot) {
+                        dayCount++;
+                        if (dayCount <= 7) {
+
+                            collectionSlot.collectionDateTime = self._getUtcTime(new Date(collectionSlot.collectionDate));
+                            collectionSlot.day = DOW_NAMES[collectionSlot.collectionDateTime.getDay()];
+
+                            collectionSlot.timeSlots.forEach(function (timeSlot) {
+                                timeSlot.fromDateTime = self._getUtcTime(new Date(timeSlot.from));
+                                timeSlot.toDateTime = self._getUtcTime(new Date(timeSlot.to));
+                                timeSlot.fromTime = self._getTimeStr(timeSlot.fromDateTime);
+                                timeSlot.toTime = self._getTimeStr(timeSlot.toDateTime);
+                            });
+                        }
+                    });
+                }
+            },
+
+            onDroppointChosen: function(e) {
+                if (this.chosen && e.detail.droppointData.droppointId !== this.droppointData.droppointId) {
+                    this.chosen = false;
+                }
+                else if (!this.chosen) {
+                    this.chosen = true;
+                }
+            },
+
+            onDroppointUnchosen: function (e) {
+                if (this.chosen && e.detail.droppointData.droppointId == this.droppointData.droppointId) {
+                    this.chosen = false;
+                }
+            },
+
+            chosenChanged: function (e) {
+                if (typeof(this.chosen) === "null") return;
+                if (this.chosen) {
+                    this.fire("droppointChosen", this, true);
+                }
+                else if (!this.chosen) {
+                    this.fire("droppointUnchosen", this, true);
+                }
+                if (this.chosen) {
+                    this.buttonClass = "chosen";
+                    this.buttonText = "Chosen";
+                }
+                else {
+                    this.buttonClass = "unchosen";
+                    this.buttonText = "Choose";
+                }
+                this.initData();
+            },
+
+            toggleChooseDropPoint: function()
+            {
+                this.chosen = !this.chosen;
+            },
+
+            _getUtcTime: function (d) {
+                var utc = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+                return utc;
+            },
+
+            _getTimeStr: function (d) {
+                var minutes = d.getMinutes().toString().length == 1 ? '0' + d.getMinutes() : d.getMinutes();
+                var hours = (d.getHours() % 12).toString();
+                var ampm = d.getHours() >= 12 ? 'pm' : 'am';
+                return hours + ':' + minutes + ampm;
+            },
+
+            _listenForChoose: function (e) {
+
+            }
+
+        });
+    </script>
+</dom-module>

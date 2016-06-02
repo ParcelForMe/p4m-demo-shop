@@ -1,0 +1,48 @@
+﻿<link rel="import" href="/polymer/polymer.html" />
+
+<link rel="import" href="../../polymer/polymer.html" />
+<link rel="import" href="../gfs-carrier-icon/gfs-carrier-icon.html" />
+
+<dom-module id="gfs-supported-carriers">
+
+    <template>
+        <style>
+           gfs-carrier-icon {
+               margin: 5px;
+           }
+        </style>
+        <template is="dom-repeat" items="{{_carrierList}}">
+            <gfs-carrier-icon carrier-code="{{item}}"></gfs-carrier-icon>
+        </template>
+        
+    </template>
+
+    <script>
+
+        Polymer({
+            is: "gfs-supported-carriers",
+
+            properties: {
+                'carriers': {
+                    type: String,
+                    value: ''
+                },
+                'iconSize': {
+                    type: String,
+                    value: 'medium'
+                },
+                '_carrierList': {
+                    type: Array
+                }
+            },
+            listeners: {
+
+            },
+
+            ready: function()
+            {
+                this._carrierList = this.carriers.split(' ');
+            }
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,68 @@
+<link rel="import" href="/polymer/polymer.html" />
+
+<dom-module id="test-widget">
+
+  <template>
+
+    <div id="widgetContainer">
+        <ul>
+            <template is="dom-repeat" items="{{_data}}" >
+                <li>
+                    <input type="radio" id={{item.label}} checked="{{item.selected}}" value="hello" />
+                    <label for$="s_method_{{item.code}}">{{item.label}}</label>
+                </li>
+            </template>
+        </ul>
+    </div>
+  </template>
+  
+
+  <script>
+  
+    // element registration
+    Polymer({
+        is: "test-widget",
+        
+        // add properties and methods on the element's prototype
+        
+        properties: {
+                   
+            _data: {
+                type: Array,
+                value: [
+                    {
+
+                        label: "red"
+                    },
+                    {
+                        label: "orange"
+                    },
+                     {
+                        label: "yellow"
+                    },
+                    {
+                        label: "green"
+                    },
+
+                ],
+                notify: true
+            }
+            
+        },
+
+        ready: function()
+        {
+                 
+        },
+
+        selectItem: function()
+        {
+            this._data[2].selected =true;
+            document.getElementById('orange').checked = true;
+        }
+
+
+          
+    });
+  </script> 
+</dom-module>

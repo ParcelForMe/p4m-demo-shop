@@ -1,0 +1,75 @@
+﻿<link rel="import" href="../../polymer/polymer.html" />
+<dom-module id="gfs-carrier-icon">
+
+    <template>
+        <style>
+            .icon {
+                display: inline-block;
+            }
+        </style>
+
+        <div class="icon">
+            <img src="{{imageUrl}}"  />
+        </div>
+           
+    </template>
+
+    <script>
+
+        Polymer({
+            is: "gfs-carrier-icon",
+
+            properties: {
+                carrierCode: {
+                    type: String
+                },
+                iconSize: {
+                    type: String,
+                    value: "medium"
+                },
+                imageUrl: {
+                    type: String
+                },
+                _carrierIndex: {
+                    type: Object,
+                    value: {
+                        'dpd': {
+                            'small': '///test.checkout.justshoutgfs.com/logos/DPD.png',
+                            'medium': '///test.checkout.justshoutgfs.com/logos/DPD.png',
+                            'large': '///test.checkout.justshoutgfs.com/logos/DPD.png'
+                        },
+                        'doddle': {
+                            'small': '///test.checkout.justshoutgfs.com/logos/Doddle.png',
+                            'medium': '///test.checkout.justshoutgfs.com/logos/Doddle.png',
+                            'large': '///test.checkout.justshoutgfs.com/logos/Doddle.png'
+                        },
+                        'collectplus': {
+                            'small': '///test.checkout.justshoutgfs.com/logos/Collect%20Plus.png',
+                            'medium': '///test.checkout.justshoutgfs.com/logos/Collect%20Plus.png',
+                            'large': '///test.checkout.justshoutgfs.com/logos/Collect%20Plus.png'
+                        },
+                        'hermes': {
+                            'small': '///test.checkout.justshoutgfs.com/logos/Hermes.png',
+                            'medium': '///test.checkout.justshoutgfs.com/logos/Hermes.png',
+                            'large': '///test.checkout.justshoutgfs.com/logos/Hermes.png'
+                        },
+                        'inpost': {
+                            'small': '///test.checkout.justshoutgfs.com/logos/Inpost.png',
+                            'medium': '///test.checkout.justshoutgfs.com/logos/Inpost.png',
+                            'large': '///test.checkout.justshoutgfs.com/logos/Inpost.png'
+                        }
+                    }
+                }
+
+            },
+            listeners: {
+
+            },
+
+            ready: function()
+            {
+                this.imageUrl = this._carrierIndex[this.carrierCode][this.iconSize];
+            }
+        });
+    </script>
+</dom-module>
