@@ -789,7 +789,7 @@
     <Content Include="Scripts\promise-polyfill\LICENSE" />
     <Content Include="Scripts\promise-polyfill\package.json" />
     <Content Include="Scripts\promise-polyfill\README.md" />
-    <Content Include="Views\p4m\ReturnToken.cshtml" />
+    <Content Include="Views\P4MToken\ReturnToken.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
