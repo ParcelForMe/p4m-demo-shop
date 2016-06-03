@@ -15,9 +15,6 @@
     </template>
 
     <script>
-        var Endpoints = {
-            GET_CONSUMER_DETAILS: "getConsumerDetails"
-        };
 
         Polymer({
             is: "p4m-api",
@@ -29,8 +26,65 @@
                 },
                 consumerToken: {
                     type: String
+                },
+                _endPoints: {
+                    type: Object,
+                    value: {
+                        "getConsumerDetails": {
+                            "name": "getConsumerDetails",
+                            "method": "GET"
+                        },
+                        "newConsumerCart": {
+                            "name": "newConsumerCart",
+                            "method": "POST",
+                            "fields": [
+                                {
+                                    "name": "Cart",
+                                    "required": true
+                                },
+                                { "name": "NewAddress" },
+                                { "name": "AddressIsDelivery" },
+                                { "name": "AddressIsBilling" }
+                            ]
+                        },
+                        "updConsumerCart": {
+                            "name": "updConsumerCart",
+                            "method": "POST",
+                            "fields": [
+                                {
+                                    "name": "Cart",
+                                    "required": true
+                                },
+                                { "name": "NewAddress" },
+                                { "name": "AddressIsDelivery" },
+                                { "name": "AddressIsBilling" }
+                            ]
+                        },
+                        "confirmCartPurchase": {
+                            "name": "confirmCartPurchase",
+                            "method": "POST",
+                            "fields": [
+                                {
+                                    "name": "Cart",
+                                    "required": true
+                                },
+                                { "name": "NewAddress" },
+                                { "name": "AddressIsDelivery" },
+                                { "name": "AddressIsBilling" }
+                            ]
+                        },
+                        "cartReachedCheckout": {
+                            "name": "cartReachedCheckout",
+                            "method": "GET",
+                            "params": [
+                                {
+                                    "name": "cartId",
+                                    "required": true
+                                }
+                            ]
+                        }
+                    }
                 }
-
             },
             listeners: {
 
@@ -40,23 +94,81 @@
                 this.$.apiAjax.headers = '{"Authorization":"Bearer '+this.consumerToken+'"}';
             },
 
-            getConsumerDetails: function(callback) {
-                this.$.apiAjax.url = this._prepareApiCall(Endpoints.GET_CONSUMER_DETAILS, callback);
-                this.$.apiAjax.generateRequest();
+            call: function (name, params, data, callback) {
+                var endPoint = this._endPoints[name]
+                if (!endPoint) {
+                    console.error("Invalid endpoint:", name);
+                }
+                else
+                {
+                    var apiRequest = {
+                        "endPoint": endPoint,
+                        "data": data,
+                        "params": params
+                    }
+                    this._prepareApiCall(apiRequest, callback);
+                    this.$.apiAjax.generateRequest();
+                }
+
             },
 
-            _prepareApiCall: function(endPointCode, callback) {
-                this.$.apiAjax.url = this.baseUrl + EndPoints[endpoint];
-                this.$.apiAjax.params = { "client": this.consumerToken };
-                this._callback = callback;
+            _prepareApiCall: function (apiRequest, callback) {
+                if (this._validateApiRequest(apiRequest)) {
+                    this.$.apiAjax.url = this.baseUrl + apiRequest.endPoint.name;
+                    this.$.apiAjax.method = apiRequest.endPoint.method;
+                    if (apiRequest.params && apiRequest.params)
+                    {
+                        this.$.apiAjax.params = apiRequest.params;
+                    }
+                    if (apiRequest.endPoint.method === "POST") {
+                        this.$.apiAjax.body = apiRequest.data;
+                    }
+                    if (this._callback) {
+                        console.warn("Making new API call before previous call has completed");
+                    }
+                    this._callback = callback;
+                }
+            },
+
+            _validateApiRequest: function (apiRequest) {
+
+                //=== PARAMETER VALIDATION
+
+                //Missing required params  
+                var missingParams = getMissingRequiredItems(apiRequest.params, apiRequest.endPoint.params);
+                missingParams.forEach(function (p) {
+                    console.error("Missing required parameter: " + p.name);
+                });                 
+
+                //=== FIELD VALIDATION
+
+                //Missing required fields
+                var missingFields = getMissingRequiredItems(apiRequest.fields, apiRequest.endPoint.fields);
+                missingFields.forEach(function (f) {
+                    console.error("Missing required field: " + f.name);
+                });
+
+                //Return false if any missing params or fields
+                return !((missingParams.length || missingFields.length));
             },
 
             _handleResponse: function(e) {
                 if (this._callback) {
                     this._callback(e.detail.response);
                 }
+                this._callback = null;
             }
 
         });
+
+        function getMissingRequiredItems(obj, templateItems) {
+            return (templateItems||[])
+            .filter(function (i) { //Return list of required items
+                return i.required
+            })
+            .filter(function (i) { //Of those, return those missing from the obj
+                return (typeOf(obj[i.name]) === "undefined")
+            });
+        }
     </script>
 </dom-module>

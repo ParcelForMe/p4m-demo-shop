@@ -59,6 +59,7 @@
             launchPopup: function()
             {
                 window.open(this._authUrl);
+                this._waitForAuthCompletion();
             },
 
             _makeState: function() {
@@ -100,7 +101,7 @@
 
             _onAuthCompletion: function() {
                 console.log("Make request for profile data");
-                this.$.api.getConsumerDetails(this._onConsumerDetails.bind(this))
+                this.$.api.call("getConsumerDetails", null, null, this._onConsumerDetails.bind(this));
 
             },
 
