@@ -680,6 +680,9 @@
     <Content Include="Scripts\widgets\local-image-widget\local-image.html" />
     <Content Include="Scripts\widgets\local-image\local-image.html" />
     <Content Include="Scripts\widgets\map-region-manager\map-region-manager.html" />
+    <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
+    <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
+    <Content Include="Scripts\widgets\p4m-profile\p4m-profile.html" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
