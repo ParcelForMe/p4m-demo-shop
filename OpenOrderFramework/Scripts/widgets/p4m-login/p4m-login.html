@@ -101,6 +101,7 @@
 
             _onAuthCompletion: function() {
                 console.log("Make request for profile data");
+                this.$.api.consumerToken = this.p4mToken;
                 this.$.api.call("getConsumerDetails", null, null, this._onConsumerDetails.bind(this));
 
             },

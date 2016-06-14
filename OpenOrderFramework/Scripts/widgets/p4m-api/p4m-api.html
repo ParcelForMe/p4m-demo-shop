@@ -91,10 +91,11 @@
             },
 
             ready: function() {
-                this.$.apiAjax.headers = '{"Authorization":"Bearer '+this.consumerToken+'"}';
+               
             },
 
             call: function (name, params, data, callback) {
+                this.$.apiAjax.headers = { 'Authorization': 'Bearer ' + this.consumerToken };
                 var endPoint = this._endPoints[name]
                 if (!endPoint) {
                     console.error("Invalid endpoint:", name);
@@ -127,6 +128,7 @@
                         console.warn("Making new API call before previous call has completed");
                     }
                     this._callback = callback;
+                    this._currentCall = apiRequest.endPoint.name;
                 }
             },
 
@@ -157,6 +159,8 @@
                     this._callback(e.detail.response);
                 }
                 this._callback = null;
+                this.fire("p4m_" + this._currentCall, e.detail.response, true);
+                this._currentCall = null;
             }
 
         });
