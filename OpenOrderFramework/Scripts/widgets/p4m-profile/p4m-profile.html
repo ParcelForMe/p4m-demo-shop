@@ -1,0 +1,40 @@
+﻿<link rel="import" href="../../polymer/polymer.html" />
+
+<dom-module id="p4m-profile">
+
+    <template>
+        <img id="profileImage" src$="{{p4mData.Consumer.ProfilePicUrl}}" />
+        {{p4mData.Consumer.ProfilePicUrl}}
+        <p>{{p4mData.Consumer.GivenName}} {{p4mData.Consumer.LastName}}</p>
+    </template>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-profile",
+
+            properties: {
+                p4mData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+                window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this))
+            },
+
+            update: function () {
+                this.$.api.call();
+
+            },
+
+            onProfile: function(e) {
+                this.p4mData = e.detail;
+            }
+
+
+        });
+    </script>
+</dom-module>
