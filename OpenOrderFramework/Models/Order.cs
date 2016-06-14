@@ -84,6 +84,12 @@ namespace OpenOrderFramework.Models
         public string Email { get; set; }
 
         [ScaffoldColumn(false)]
+        public decimal Tax { get; set; }
+        [ScaffoldColumn(false)]
+        public decimal Shipping { get; set; }
+        [ScaffoldColumn(false)]
+        public decimal Discount { get; set; }
+        [ScaffoldColumn(false)]
         public decimal Total { get; set; }
         public List<OrderDetail> OrderDetails { get; set; }
 

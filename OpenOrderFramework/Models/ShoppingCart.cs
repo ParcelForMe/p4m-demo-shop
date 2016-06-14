@@ -11,6 +11,7 @@ namespace OpenOrderFramework.Models
         ApplicationDbContext storeDB = new ApplicationDbContext();
         string ShoppingCartId { get; set; }
         public const string CartSessionKey = "CartId";
+        public const string OrderSessionKey = "OrderId";
 
         public static ShoppingCart GetCart(HttpContextBase context)
         {
