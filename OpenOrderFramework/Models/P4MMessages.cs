@@ -12,6 +12,11 @@ namespace OpenOrderFramework.Models
         public string Error { get; set; }
     }
 
+    public class ConsumerMessage : P4MBaseMessage
+    {
+        public Consumer Consumer { get; set; }
+    }
+
     public class DiscountMessage : P4MBaseMessage
     {
         public decimal Tax { get; set; }

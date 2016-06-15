@@ -29,6 +29,13 @@ namespace OpenOrderFramework.Models
         public List<string> PreferredCarriers { get; set; }
 
         public string PrefDeliveryAddressId { get; set; }
+        public Address PrefDeliveryAddress {
+            get {
+                if (this.Addresses != null && PrefDeliveryAddressId != null)
+                    return Addresses.FirstOrDefault(a => a.Id == PrefDeliveryAddressId);
+                return null;
+            }
+        }
         public string BillingAddressId { get; set; }
         public string DefaultPayMethodToken { get; set; }
         public string ProfilePicHash { get; set; }
