@@ -32,7 +32,7 @@ namespace OpenOrderFramework.Controllers
         {
             await GetOrderAsync();
             // Return the view
-            return View("Delivery");
+            return View("P4MCheckout");
         }
 
         // We're using HttpContextBase to allow access to cookies.

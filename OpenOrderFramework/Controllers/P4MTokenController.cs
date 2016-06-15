@@ -66,6 +66,14 @@ namespace OpenOrderFramework.Controllers
             return View("error");
         }
 
+        void LocalConsumerLogin(string token)
+        {
+            // get the consumer's details from P4M. 
+            // Check if there is a local ID and login. 
+            // If not try to match on Email. If found then store local ID for consumer and login.
+            // If not local ID or Email then create a new user and store the new local ID
+        }
+
         bool ValidateToken(string token, string nonce)
         {
             // this x509 string is taken from https://id.parcelfor.me:44333/core/.well-known/jwks "x5c" - if using a different server then might need to get a different cert from that server
