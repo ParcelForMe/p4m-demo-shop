@@ -19,7 +19,8 @@ namespace OpenOrderFramework.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
+            this.AutomaticMigrationDataLossAllowed = true;
         }
 
         protected override void Seed(OpenOrderFramework.Models.ApplicationDbContext context)

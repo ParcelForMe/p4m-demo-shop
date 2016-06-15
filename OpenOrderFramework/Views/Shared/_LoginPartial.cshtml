@@ -15,6 +15,7 @@
 else {
     <ul class="nav navbar-nav navbar-right NavBarPad" style="padding-right:40px">
         <li class="active">@{Html.RenderAction("CartSummary", "ShoppingCart");}</li>
+        <li><p4m-login></p4m-login></li>
         <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>
         <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
      
