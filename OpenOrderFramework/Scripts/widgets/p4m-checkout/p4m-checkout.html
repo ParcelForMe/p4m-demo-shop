@@ -1,0 +1,99 @@
+<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../p4m-profile/p4m-profile.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
+
+<dom-module id="p4m-checkout">
+
+    <template>
+        <p4m-api></p4m-api>
+        <div id="container">
+            <div id="topPanel" class="topPanel"><h2>Review Order</h2><p4m-profile mode="basic"></p4m-profile></div>
+            <div id="panelContainer">
+                <div id="detailPanel" class="p4m-panel">
+                </div>
+                <div id="summaryPanel" class="p4m-panel">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <style>
+        #container {
+            width: 80%;
+            margin: auto;
+        }
+        #panelContainer {
+            display: flex;
+            border-radius: 5px;
+            background-color: white;
+
+        }
+        .topPanel {
+            width: 100%;
+            background-color: #E0E0E0;
+            border: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 20px;
+        }
+        .topPanel h2 {
+            margin: 0px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .topPanel p4m-profile {
+            float: right;
+            margin-top: -8px;
+        }   
+        .panelContainer {
+            border-bottom-right-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .p4m-panel {
+            width: 50%; 
+            height: 200px;
+            border: none;
+        }
+        .p4m-panel#summaryPanel {
+            border-left: solid 1px #E0E0E0;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-checkout",
+
+            properties: {
+                consumerData: {
+                    type: Object,
+                    notify: true
+                },
+                cartData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+            },
+
+            update: function () {
+                //this.$.api.call();
+
+            }
+
+
+
+
+        });
+    </script>
+</dom-module>
+
+{
+consumer: {},
+cart: {}
+}

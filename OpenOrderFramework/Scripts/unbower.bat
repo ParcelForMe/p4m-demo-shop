@@ -1,1 +1,1 @@
-xcopy .\bower_components\* . /H /I /C /E /Y
+xcopy .\bower_components\* .\Lib /H /I /C /E /Y
