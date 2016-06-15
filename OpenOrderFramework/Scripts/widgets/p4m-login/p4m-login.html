@@ -2,20 +2,16 @@
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 
-<link rel="import" href="../p4m-api/p4m-api.html" />
-
 <dom-module id="p4m-login">
 
     <template>
         <button on-click="launchPopup">Log in</button>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value={{_state}}></polymer-cookie>
-        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>    
-        <p4m-api id="api" consumer-token="{{p4mToken}}"></p4m-api>   
+        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>     
     </template>
 
-    <script>
-    //	
+    <script></script>
         Polymer({
             is: "p4m-login",
 
@@ -100,10 +96,6 @@
             },
 
             _onAuthCompletion: function() {
-                console.log("Make request for profile data");
-                this.$.api.consumerToken = this.p4mToken;
-                //	this.$.api.call("getConsumerDetails", null, null, this._onConsumerDetails.bind(this));
-
             },
 
             _onConsumerDetails: function(data) {

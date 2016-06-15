@@ -1,28 +1,97 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
 
 <dom-module id="p4m-profile">
 
     <template>
-        <img id="profileImage" src$="{{p4mData.Consumer.ProfilePicUrl}}" />
-        {{p4mData.Consumer.ProfilePicUrl}}
-        <p>{{p4mData.Consumer.GivenName}} {{p4mData.Consumer.LastName}}</p>
+        <div id="p4m-profile-container" class$="{{_topClass}}">
+            
+            <p4m-api id="api" ></p4m-api>
+            <div id="profileName">{{p4mData.Consumer.GivenName}}</div>
+            <img id="profileImage" src$="{{p4mData.Consumer.ProfilePicUrl}}" />  
+            <paper-spinner id="spinner" active></paper-spinner>         
+        </div>
     </template>
+
+    <style>
+
+        #p4m-profile-container {
+            display: flex;
+            flex-direction: row;
+        }
+        #profileImage {
+            height: 50px;
+            border-radius: 50px;
+            -webkit-border-radius: 25px;
+            -moz-border-radius: 25px;
+        }
+        #profileName {
+            font-size: 18px;
+            margin-top: 12px;
+            margin-right: 6px;
+        }
+        #profileImage.hide-image {
+            display: none;
+        }
+        #profileName.hide-name {
+            display: none;
+        }
+
+        #spinner {
+            width: 50px;
+            height: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 
     <script>
     //
         Polymer({
             is: "p4m-profile",
 
-            properties: {
+            properties: {   
                 p4mData: {
                     type: Object,
                     notify: true
+                },
+                mode: {
+                    type: String
+                },
+                hideImage: {
+                    type: Object,
+                    value: false
+                },
+                hideName: {
+                    type: Object,
+                    value: false
+                },
+                autoLoad: {
+                    type: Object,
+                    value: true
+                },
+                _topClass: {
+                    type: String,
+                    value: ""
                 }
             },
 
             ready: function()
             {
-                window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this))
+                if (this.mode == "basic") {
+                    this.hideImage = false;
+                    this.hideName = true;
+                }
+                if (this.hideImage) this.topClass += " hide-image";
+                if (this.hideName) this.topClass += " hide-name";
+
+                window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this));
+                if (this.autoLoad) {
+                    this.$.api.call('getConsumerDetails');
+                }
             },
 
             update: function () {
@@ -30,7 +99,9 @@
 
             },
 
-            onProfile: function(e) {
+            onProfile: function (e) {
+                this.$.spinner.active = false;
+                this.$.spinner.classList.add('hidden');
                 this.p4mData = e.detail;
             }
 

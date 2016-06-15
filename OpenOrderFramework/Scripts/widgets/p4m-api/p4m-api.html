@@ -12,6 +12,7 @@
             on-response="_handleResponse"
             debounce-duration="300">
         </iron-ajax>
+        <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
     </template>
 
     <script>
@@ -95,6 +96,10 @@
             },
 
             call: function (name, params, data, callback) {
+                if (!this.consumerToken) {
+                    this.consumerToken = this.$.p4mTokenCookie.readCookie();
+                }
+
                 this.$.apiAjax.headers = { 'Authorization': 'Bearer ' + this.consumerToken };
                 var endPoint = this._endPoints[name]
                 if (!endPoint) {
