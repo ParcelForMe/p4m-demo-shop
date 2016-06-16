@@ -686,6 +686,8 @@
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
     <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
     <Content Include="Scripts\widgets\p4m-profile\p4m-profile.html" />
+    <Content Include="Scripts\widgets\p4m-profile\peli-logo-green.png" />
+    <Content Include="Scripts\widgets\p4m-profile\peli-logo-grey.png" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

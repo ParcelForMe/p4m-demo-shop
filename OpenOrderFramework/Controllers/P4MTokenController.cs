@@ -249,6 +249,15 @@ namespace OpenOrderFramework.Controllers
         //    return jwt.ToString();
         //}
 
+        public static void Logoff(HttpResponseBase response)
+        {
+            // clear the local P4M cookies
+            response.Cookies["p4mToken"].Value = string.Empty;
+            response.Cookies["p4mToken"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mAvatarUrl"].Value = string.Empty;
+            response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow;
+        }
+
         void GetTempState(out string state, out string nonce)
         {
             state = null;
