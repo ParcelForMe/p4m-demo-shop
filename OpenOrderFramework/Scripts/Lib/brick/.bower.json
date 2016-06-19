@@ -43,5 +43,6 @@
   },
   "_source": "https://github.com/mozbrick/brick.git",
   "_target": "^2.0.0",
-  "_originalSource": "brick"
+  "_originalSource": "brick",
+  "_direct": true
 }

@@ -16,75 +16,122 @@
     </template>
 
     <script>
+        var apiEndpoints = {};
+        apiEndpoints.v1 = {
+            "getConsumerDetails": {
+                "name": "getConsumerDetails",
+                "method": "GET"
+            },
+            "newConsumerCart": {
+                "name": "newConsumerCart",
+                "method": "POST",
+                "fields": [
+                    {
+                        "name": "Cart",
+                        "required": true
+                    },
+                    { "name": "NewAddress" },
+                    { "name": "AddressIsDelivery" },
+                    { "name": "AddressIsBilling" }
+                ]
+            },
+            "updConsumerCart": {
+                "name": "updConsumerCart",
+                "method": "POST",
+                "fields": [
+                    {
+                        "name": "Cart",
+                        "required": true
+                    },
+                    { "name": "NewAddress" },
+                    { "name": "AddressIsDelivery" },
+                    { "name": "AddressIsBilling" }
+                ]
+            },
+            "confirmCartPurchase": {
+                "name": "confirmCartPurchase",
+                "method": "POST",
+                "fields": [
+                    {
+                        "name": "Cart",
+                        "required": true
+                    },
+                    { "name": "NewAddress" },
+                    { "name": "AddressIsDelivery" },
+                    { "name": "AddressIsBilling" }
+                ]
+            },
+            "cartReachedCheckout": {
+                "name": "cartReachedCheckout",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "cartId",
+                        "required": true
+                    }
+                ]
+            }
+        };
+        apiEndpoints.v2 = {
+            "consumer": {
+                "name": "consumer",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "DeliveryPreferences",
+                        "required": false,
+                        "help": "Comma-delimited list of preferences. Possible preference values: useMyDropPoints,useRetailerDropPoint,useMyDeliveryAddress"
+                    }
+                ]
+            },
+            "consumerExtras": {
+                "name": "consumerExtras",
+                "method": "POST",
+            },
+            "cart": {
+                "name": "cart/{id}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "id",
+                        "required": true
+                    }
+                ]
+            }
+
+        };
+
 
         Polymer({
             is: "p4m-api",
 
             properties: {
-                baseUrl: {
+                ssl: {
+                    type: Object,
+                    value: true
+                },
+                hostBaseDomain: {
                     type: String,
-                    value: "https://dev.parcelfor.me:44321/api/v1/"
+                    value: "parcelfor.me"
+                },
+                hostType: {
+                    type: String,
+                    value: "live" //dev, test, live
+                },
+                port: {
+                    type: Number,
+                    value: 44321
+                },
+                version: {
+                    type: String,
+                    value: "v1"
                 },
                 consumerToken: {
                     type: String
                 },
                 _endPoints: {
                     type: Object,
-                    value: {
-                        "getConsumerDetails": {
-                            "name": "getConsumerDetails",
-                            "method": "GET"
-                        },
-                        "newConsumerCart": {
-                            "name": "newConsumerCart",
-                            "method": "POST",
-                            "fields": [
-                                {
-                                    "name": "Cart",
-                                    "required": true
-                                },
-                                { "name": "NewAddress" },
-                                { "name": "AddressIsDelivery" },
-                                { "name": "AddressIsBilling" }
-                            ]
-                        },
-                        "updConsumerCart": {
-                            "name": "updConsumerCart",
-                            "method": "POST",
-                            "fields": [
-                                {
-                                    "name": "Cart",
-                                    "required": true
-                                },
-                                { "name": "NewAddress" },
-                                { "name": "AddressIsDelivery" },
-                                { "name": "AddressIsBilling" }
-                            ]
-                        },
-                        "confirmCartPurchase": {
-                            "name": "confirmCartPurchase",
-                            "method": "POST",
-                            "fields": [
-                                {
-                                    "name": "Cart",
-                                    "required": true
-                                },
-                                { "name": "NewAddress" },
-                                { "name": "AddressIsDelivery" },
-                                { "name": "AddressIsBilling" }
-                            ]
-                        },
-                        "cartReachedCheckout": {
-                            "name": "cartReachedCheckout",
-                            "method": "GET",
-                            "params": [
-                                {
-                                    "name": "cartId",
-                                    "required": true
-                                }
-                            ]
-                        }
-                    }
+                    value: apiEndpoints
                 }
             },
             listeners: {
@@ -95,13 +142,17 @@
                
             },
 
+            _baseUrl: function() {
+                return (this.ssl ? "https" : "http") + "://" + this.hostType + this.hostBaseDomain + "/api/" + this.version + "/";
+            },
+
             call: function (name, params, data, callback) {
                 if (!this.consumerToken) {
                     this.consumerToken = this.$.p4mTokenCookie.readCookie();
                 }
 
                 this.$.apiAjax.headers = { 'Authorization': 'Bearer ' + this.consumerToken };
-                var endPoint = this._endPoints[name]
+                var endPoint = this._endPoints[this.version][name]
                 if (!endPoint) {
                     console.error("Invalid endpoint:", name);
                 }
@@ -122,8 +173,12 @@
                 if (this._validateApiRequest(apiRequest)) {
                     this.$.apiAjax.url = this.baseUrl + apiRequest.endPoint.name;
                     this.$.apiAjax.method = apiRequest.endPoint.method;
-                    if (apiRequest.params && apiRequest.params)
+                    if (apiRequest.params)
                     {
+                        apiRequest.params.forEach(function (item) {
+                            //Swap in parameters if specified in the URL. Leftovers get added as query params below
+                        });
+                        //Query params
                         this.$.apiAjax.params = apiRequest.params;
                     }
                     if (apiRequest.endPoint.method === "POST") {

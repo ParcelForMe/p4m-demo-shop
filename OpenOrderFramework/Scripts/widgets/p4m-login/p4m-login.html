@@ -5,13 +5,14 @@
 <dom-module id="p4m-login">
 
     <template>
+        Parcel For Me
         <button on-click="launchPopup">Log in</button>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value={{_state}}></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>     
     </template>
 
-    <script></script>
+    <script>
         Polymer({
             is: "p4m-login",
 

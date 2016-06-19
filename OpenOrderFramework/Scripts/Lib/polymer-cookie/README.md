@@ -1,9 +1,4 @@
 # polymer-cookie
-
-<img src="http://benschwarz.github.io/bower-badges/badge@2x.png" width="130" height="30">
-
-[![Bower version](https://badge.fury.io/bo/polymer-cookie.svg)](https://badge.fury.io/bo/polymer-cookie)
-
 Cookie Web Component for Polymer 1.0
 
 ```html
@@ -11,7 +6,7 @@ Cookie Web Component for Polymer 1.0
   id="test_cookie"
   name="test_cookie"
   value="hello world"
-  time="2"
+  time=2
   format="h">
 </polymer-cookie>
 
@@ -29,15 +24,11 @@ Note: The `params` attribute must be double quoted JSON.
 
 Add the library using the Javascript package manager [Bower](http://bower.io/):
 
-```
-bower install --save polymer-cookie
-```
+    bower install --save polymer-cookie
 
 Or clone this repository inside your project folder using Git:
 
-```
-git clone https://github.com/andreasonny83/polymer-cookie.git
-```
+    git clone https://github.com/andreasonny83/polymer-cookie.git
 
 ## Properties
 
@@ -76,19 +67,17 @@ type: String
 Default value: 'd'
 
 The expiration format time
-
-*   's' : seconds
-*   'm' : minutes
-*   'h' : hours
-*   'd' : days
+* 's' : seconds
+* 'm' : minutes
+* 'h' : hours
+* 'd' : days
 
 ### auto-set
 
 type: Boolean
 Default value: false
 
-If set, creates the cookie as the element is rendered on the page without
-the need of manually invoking createCookie
+If set, creates the cookie as the element is rendered on the page without the need of manually invoking createCookie
 
 ## Methods
 
@@ -96,63 +85,32 @@ the need of manually invoking createCookie
 
 Write the cookie
 
-```
-var cookie = Polymer.dom(document).querySelector('#user_cookie');
-cookie.createCookie();
-```
+    var cookie = Polymer.dom(document).querySelector('#user_cookie');
+    cookie.createCookie();
 
 ### readCookie
 
 Read the cookie if any, and the returns its value
 
-```
-var cookie = Polymer.dom(document).querySelector('#user_cookie');
-var cookie_value = cookie.readCookie();
-```
+    var cookie = Polymer.dom(document).querySelector('#user_cookie');
+    var cookie_value = cookie.readCookie();
 
 ### eraseCookie
 
 Destroy the cookie
 
-```
-var cookie = Polymer.dom(document).querySelector('#user_cookie');
-cookie.eraseCookie();
-```
+    var cookie = Polymer.dom(document).querySelector('#user_cookie');
+    cookie.eraseCookie();
 
-## Rendering in a demo page
-
-### Install Polymer CLI.
-
-Install the Polymer CLI to serve the demo locally with:
-
-```
-npm install -g polymer-cli
-```
-
-### Run the demo
-
-To run the element demo:
-
-Run polymer serve from the repo directory:
-
-```
-polymer serve
-```
-
-Then open localhost:8080/components/polymer-cookie/demo/ in your browser.
-
-For more information about Polymer CLI have a look at the
-[official documentation](https://www.polymer-project.org/1.0/start/first-element/intro)
 
 ## Contributing
 
-A special thanks to [Cameron](https://github.com/cameronwp)
-and [Pascal](https://github.com/MeTaNoV) for their contributions.
+A special thanks to [Cameron](https://github.com/cameronwp) and [Pascal](https://github.com/MeTaNoV) for their contributions.
 
-1.   Fork it!
-2.  Create your feature branch: `git checkout -b my-new-feature`
+1. Fork it!
+2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -m 'Add some feature'`
-4.  Push to the branch: `git push origin my-new-feature`
+4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
 
@@ -162,39 +120,22 @@ and [Pascal](https://github.com/MeTaNoV) for their contributions.
 
 ## Changelog
 
-### 1.0.4
-
-*   minor code refactoring
-*   documentation updated
-*   cookie expiration time bug fixed when time is set to '-1'
-*   demo page introduced
-
-2016.06.02
-
 ### 1.0.3
-
-*   autoSet implementation
-*   fixes createCookie
-*   removes encodeURIComponent
-*   fixes readCookie declaration
-*   documentation updated
-
+* autoSet implementation
+* fixes createCookie
+* removes encodeURIComponent
+* fixes readCookie declaration
+* documentation updated<br>
 2016.02.12
 
 ### 0.1.2
-
-*   Implemented reflectToAttribute capability
-
+* Implemented reflectToAttribute capability<br>
 2015.29.01
 
 ### 0.1.1
-
-*   first stable version
-
+* first stable version<br>
 2015.07.01
 
 ### 0.1.0
-
-*   initial commit
-
+* initial commit<br>
 2015.06.30
