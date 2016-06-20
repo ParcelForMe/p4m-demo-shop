@@ -1,14 +1,14 @@
 <link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
-
 <dom-module id="p4m-login">
 
     <template>
         <p4m-profile on-click="launchPopup"></p4m-profile>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
-        <polymer-cookie id="p4mStateCookie" name="p4mState" value={{_state}}></polymer-cookie>
-        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>  
+        <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
+        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
     </template>
 
     <script>
@@ -18,7 +18,7 @@
             properties: {
                 authBaseUrl: {
                     type: String,
-                    value: "https://local.parcelfor.me:44333/core/connect/authorize"
+                    value: "https://dev.parcelfor.me:44333/core/connect/authorize"
                 },
                 clientId: {
                     type: String,
@@ -34,7 +34,7 @@
                 },
                 logoutUrl: {
                     type: String,
-                    value: "https://local.parcelfor.me:44333/core/connect/endsession"
+                    value: "https://dev.parcelfor.me:44333/core/connect/endsession"
                 },
                 p4mToken: {
                     type: String
@@ -84,10 +84,10 @@
             },
 
             _makeAuthUrl: function() {
-                this._authUrl = 
+                this._authUrl =
                     this.authBaseUrl
                     + "?response_type=code&client_id=" + this.clientId
-                    + "&redirect_uri=" + this.redirectUrl 
+                    + "&redirect_uri=" + this.redirectUrl
                     + "&scope=openid%20p4mApi%20p4mRetail"
                     + "&state=" + this._state
                     + "&nonce=" + this._nonce

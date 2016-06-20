@@ -8,6 +8,7 @@
             id="apiAjax"
             method="GET"
             handle-as="json"
+
             content-type="application/json"
             on-response="_handleResponse"
             debounce-duration="300">
@@ -144,7 +145,7 @@
             },
 
             _baseUrl: function() {
-                return (this.ssl ? "https" : "http") + "://" + this.hostType + this.hostBaseDomain + "/api/" + this.version + "/";
+                return (this.ssl ? "https" : "http") + "://" + this.hostType + "." + this.hostBaseDomain + ":" + this.port + "/api/" + this.version + "/";
             },
 
             call: function (name, params, data, callback) {
@@ -172,16 +173,27 @@
 
             _prepareApiCall: function (apiRequest, callback) {
                 if (this._validateApiRequest(apiRequest)) {
-                    this.$.apiAjax.url = this.baseUrl + apiRequest.endPoint.name;
-                    this.$.apiAjax.method = apiRequest.endPoint.method;
+                    var url = this._baseUrl() + apiRequest.endPoint.name;
+                    this.$.apiAjax.params = {};
                     if (apiRequest.params)
                     {
-                        apiRequest.params.forEach(function (item) {
-                            //Swap in parameters if specified in the URL. Leftovers get added as query params below
-                        });
-                        //Query params
-                        this.$.apiAjax.params = apiRequest.params;
+                        //Swap in parameters if specified in the URL, otherwise add as query params
+                        for (var paramName in apiRequest.params) {
+                           
+                            //If this parameter is present in the URL
+                            var paramValue = apiRequest.params[paramName];
+                            var subKey = "{" + paramName + "}";
+                            if (url.indexOf(subKey) > -1) {
+                                url = url.replace(subKey, paramValue);
+                            }
+                            else {
+                                //Query params
+                                this.$.apiAjax.params[paramName] = paramValue;                             
+                            }
+                        };
                     }
+                    this.$.apiAjax.url = url;
+                    this.$.apiAjax.method = apiRequest.endPoint.method;
                     if (apiRequest.endPoint.method === "POST") {
                         this.$.apiAjax.body = apiRequest.data;
                     }
