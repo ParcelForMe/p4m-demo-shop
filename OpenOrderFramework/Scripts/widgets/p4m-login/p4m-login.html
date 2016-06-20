@@ -5,11 +5,10 @@
 <dom-module id="p4m-login">
 
     <template>
-        Parcel For Me
-        <button on-click="launchPopup">Log in</button>
+        <p4m-profile on-click="launchPopup"></p4m-profile>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value={{_state}}></polymer-cookie>
-        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>     
+        <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>  
     </template>
 
     <script>
@@ -19,7 +18,7 @@
             properties: {
                 authBaseUrl: {
                     type: String,
-                    value: "https://dev.parcelfor.me:44333/core/connect/authorize"
+                    value: "https://local.parcelfor.me:44333/core/connect/authorize"
                 },
                 clientId: {
                     type: String,
@@ -28,6 +27,14 @@
                 redirectUrl: {
                     type: String,
                     value: "http://localhost:3000/getP4MAccessToken"
+                },
+                logoutForm: {
+                    type: String,
+                    value: "logoutForm"
+                },
+                logoutUrl: {
+                    type: String,
+                    value: "https://local.parcelfor.me:44333/core/connect/endsession"
                 },
                 p4mToken: {
                     type: String
@@ -47,16 +54,26 @@
 
             },
 
-            ready: function() {
-                //Make AuthUrl
-                this._makeState();
-                this._makeAuthUrl();
+            ready: function () {
+                this._getTokenCookie();
             },
 
             launchPopup: function()
             {
-                window.open(this._authUrl);
-                this._waitForAuthCompletion();
+                if (!this.p4mToken || this.p4mToken === '') {
+                    //Make AuthUrl
+                    this._makeState();
+                    this._makeAuthUrl();
+                    window.open(this._authUrl);
+                    this._waitForAuthCompletion();
+                }
+                else {
+                    window.open(this.logoutUrl);
+                    if (this.logoutForm && this.logoutForm != '') {
+                        document.getElementById(this.logoutForm).submit();
+//                        window.location.reload(true);
+                    }
+                }
             },
 
             _makeState: function() {
@@ -96,7 +113,8 @@
 
             },
 
-            _onAuthCompletion: function() {
+            _onAuthCompletion: function () {
+                window.location.reload(true);
             },
 
             _onConsumerDetails: function(data) {

@@ -10,6 +10,12 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using OpenOrderFramework.Models;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.AspNet.Identity;
+using Microsoft.Owin.Security;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -21,12 +27,10 @@ namespace OpenOrderFramework.Controllers
         public const string CredClientSecret = "123456";
         public const string ClientGuestId = "codeclient_guest";
 
-        //public const string BaseAddress = "https://localhost:44333/core";
-        //public const string BaseApiAddress = "https://localhost:44321/api/v1/";
-        public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
-        public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v1/";
-        //public const string BaseAddress = "https://id.parcelfor.me:44333/core";
-        //public const string BaseApiAddress = "https://id.parcelfor.me:44321/api/v1/";
+        public const string BaseAddress = "https://local.parcelfor.me:44333/core";
+        public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
+        //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
+        //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
         public const string LocalCallbackUrl = "http://localhost:3000/getP4MAccessToken";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
@@ -42,6 +46,46 @@ namespace OpenOrderFramework.Controllers
         public P4MTokenController()
         {
         }
+
+        public P4MTokenController(ApplicationUserManager userManager)
+        {
+            UserManager = userManager;
+        }
+
+        private ApplicationUserManager _userManager;
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
+
+        private SignInHelper _helper;
+        private SignInHelper SignInHelper
+        {
+            get
+            {
+                if (_helper == null)
+                {
+                    _helper = new SignInHelper(UserManager, AuthenticationManager);
+                }
+                return _helper;
+            }
+        }
+
+        private IAuthenticationManager AuthenticationManager
+        {
+            get
+            {
+                return HttpContext.GetOwinContext().Authentication;
+            }
+        }
+
 
         [HttpGet]
         [Route("getP4MAccessToken")]
@@ -61,17 +105,107 @@ namespace OpenOrderFramework.Controllers
                 //var parsedToken = ParseJwt(response.AccessToken);
                 this.Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
                 this.Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddYears(1);
+                await LocalConsumerLogin(tokenResponse.AccessToken);
                 return View("ReturnToken");
             }
             return View("error");
         }
 
-        void LocalConsumerLogin(string token)
+        async Task LocalConsumerLogin(string token)
         {
             // get the consumer's details from P4M. 
             // Check if there is a local ID and login. 
             // If not try to match on Email. If found then store local ID for consumer and login.
             // If not local ID or Email then create a new user and store the new local ID
+            var consumer = await GetConsumerAsync(token);
+            this.Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
+            this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
+            var localId = string.Empty;
+            if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
+                localId = consumer.Extras["LocalId"];
+            if (await LocalLoginAsync(token, localId, consumer.Email))
+                return;
+            // local user has not been found for the P4M consumer so we need to create one and log them in
+            var address = consumer.PrefDeliveryAddress;
+            var idResult = await UserManager.CreateAsync(new ApplicationUser {
+                UserName = consumer.Email,
+                Email = consumer.Email,
+                EmailConfirmed = true,
+                FirstName = consumer.GivenName,
+                LastName = consumer.FamilyName,
+                Address = address.Street1 ?? address.Street2,
+                City = address.City,
+                State = address.State,
+                PostalCode = address.PostCode,
+                Country = address.Country,
+                LockoutEnabled = false,
+                Phone = consumer.MobilePhone,
+                PhoneNumber = consumer.MobilePhone
+            });
+            if (idResult.Succeeded)
+            {
+                ApplicationUser user = await UserManager.FindByEmailAsync(consumer.Email);
+                var password = GeneratePassword();
+                await UserManager.AddPasswordAsync(user.Id, password);
+                await SaveLocalIdAsync(token, user.Id);
+            }
+        }
+
+        const int passLength = 20;
+        const string validChars = "abcdefghijklmnozABCDEFGHIJKLMNOZ1234567890!@#$%^&*()-=";
+        Random random = new Random();
+        string GeneratePassword()
+        {
+            StringBuilder strB = new StringBuilder(100);
+            int i = 0;
+            while (i++ < passLength)
+            {
+                strB.Append(validChars[random.Next(validChars.Length)]);
+            }
+            return strB.ToString();
+        }
+
+        async Task<bool> LocalLoginAsync(string token, string localId, string email)
+        {
+            ApplicationUser user = await UserManager.FindByIdAsync(localId);
+            if (user == null)
+            {
+                user = await UserManager.FindByEmailAsync(email);
+                if (user == null)
+                    return false;
+                await SaveLocalIdAsync(token, user.Id);
+            }
+            var identity = await UserManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
+            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, new ClaimsIdentity(identity));
+            return true;
+        }
+
+        async Task<Consumer> GetConsumerAsync(string token)
+        {
+            // get the consumer's details from P4M. 
+            var client = new HttpClient();
+            client.SetBearerToken(token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var result = await client.GetAsync(P4MConstants.BaseApiAddress + "consumer");
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
+            if (message.Consumer == null || !message.Success)
+                throw new Exception(message.Error);
+            return message.Consumer;
+        }
+
+        async Task SaveLocalIdAsync(string token, string id)
+        {
+            // get the consumer's details from P4M. 
+            var client = new HttpClient();
+            client.SetBearerToken(token);
+            string json = "{\"LocalId\":\""+id+"\"}";
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var result = await client.PostAsync(P4MConstants.BaseApiAddress + "consumerExtras", content);
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<P4MBaseMessage>(messageString);
+            if (!message.Success)
+                throw new Exception(message.Error);
         }
 
         bool ValidateToken(string token, string nonce)
@@ -114,6 +248,15 @@ namespace OpenOrderFramework.Controllers
         //    var jwt = JObject.Parse(part);
         //    return jwt.ToString();
         //}
+
+        public static void Logoff(HttpResponseBase response)
+        {
+            // clear the local P4M cookies
+            response.Cookies["p4mToken"].Value = string.Empty;
+            response.Cookies["p4mToken"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mAvatarUrl"].Value = string.Empty;
+            response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow;
+        }
 
         void GetTempState(out string state, out string nonce)
         {

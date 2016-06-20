@@ -27,7 +27,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("p4mCheckout")]
+        [Route("checkout/p4mCheckout")]
         public async Task<ActionResult> P4MCheckout(string session)
         {
            // await GetOrderAsync();

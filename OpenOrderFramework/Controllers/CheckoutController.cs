@@ -20,10 +20,25 @@ namespace OpenOrderFramework.Controllers
 
         public List<String> CreditCardTypes { get { return appConfig.CreditCardType;} }
 
+        // ***** P4M *****
+        public ActionResult Index()
+        {
+            if (!string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
+                return RedirectToAction("p4mCheckout", "checkout");
+            else
+                return RedirectToAction("Address");
+        }
+        // ***** P4M *****
+
         //.
         // GET: /Checkout/Address
         public ActionResult Address()
         {
+            // ***** P4M *****
+            if (!string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
+                return RedirectToAction("p4mCheckout", "checkout");
+            // ***** P4M *****
+
             ViewBag.CreditCardTypes = CreditCardTypes;
             var previousOrder = storeDB.Orders.FirstOrDefault(x => x.Username == User.Identity.Name);
            

@@ -426,6 +426,9 @@ namespace OpenOrderFramework.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut();
+            // ***** P4M *****
+            P4MTokenController.Logoff(this.Response);
+            // ***** P4M *****
             return RedirectToAction("Index", "Home");
         }
 

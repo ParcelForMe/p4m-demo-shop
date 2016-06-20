@@ -7,11 +7,12 @@
 
     <template>
         <div id="p4m-profile-container" class$="{{_topClass}}">
-            
+            <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
+            <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <p4m-api id="api" ></p4m-api>
             <div id="profileName">{{p4mData.Consumer.GivenName}}</div>
-            <img id="profileImage" src$="{{p4mData.Consumer.ProfilePicUrl}}" />  
-            <paper-spinner id="spinner" active></paper-spinner>         
+            <img id="profileImage" src$="{{_profilePicUrl}}" />  
+            <paper-spinner id="spinner"></paper-spinner>         
         </div>
     </template>
 
@@ -71,16 +72,24 @@
                 },
                 autoLoad: {
                     type: Object,
-                    value: true
+                    value: false
+                },
+                _loggedIn: {
+                    type: Object,
+                    value: false
                 },
                 _topClass: {
                     type: String,
                     value: ""
+                },
+                _profilePicUrl: {
+                    type: String
                 }
             },
 
             ready: function()
             {
+                this.showAvatar();
                 if (this.mode == "basic") {
                     this.hideImage = false;
                     this.hideName = true;
@@ -90,22 +99,38 @@
 
                 window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this));
                 if (this.autoLoad) {
+                    this.showSpinner();
                     this.$.api.call('getConsumerDetails');
                 }
             },
 
-            update: function () {
-                this.$.api.call();
-
+            showAvatar: function () {
+                this.hideSpinner();
+                var token = this.$.p4mTokenCookie.readCookie();
+                this._loggedIn = token != "";
+                this._profilePicUrl = this.$.p4mAvatarCookie.readCookie();
+                if (!this._profilePicUrl) {
+                    if (this._loggedIn)
+                        this._profilePicUrl = "/Scripts/widgets/p4m-profile/peli-logo-green.png";
+                    else
+                        this._profilePicUrl = "/Scripts/widgets/p4m-profile/peli-logo-grey.png";
+                }
             },
 
             onProfile: function (e) {
+                this.p4mData = e.detail;
+                this.showAvatar();
+            },
+
+            hideSpinner: function () {
                 this.$.spinner.active = false;
                 this.$.spinner.classList.add('hidden');
-                this.p4mData = e.detail;
+            },
+
+            showSpinner: function () {
+                this.$.spinner.active = true;
+                this.$.spinner.classList.remove('hidden');
             }
-
-
         });
     </script>
 </dom-module>
