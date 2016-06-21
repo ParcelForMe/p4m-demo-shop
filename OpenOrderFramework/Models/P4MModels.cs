@@ -90,4 +90,45 @@ namespace OpenOrderFramework.Models
         public int ExpiryMonth { get; set; }
         public int ExpiryYear { get; set; }
     }
+
+    public class P4MCart
+    {
+        public string Id { get; set; }
+        public string Reference { get; set; }
+        public string AddressId { get; set; }
+        public string BillingAddressId { get; set; }
+        public DateTime? Date { get; set; }
+        public string Currency { get; set; }
+        public double ShippingAmt { get; set; }
+        public double Tax { get; set; }
+        public double Total { get; set; }
+        public string ServiceLevel { get; set; }
+        public DateTime? ExpDeliveryDate { get; set; }
+        public string CarrierToken { get; set; }
+        public string Carrier { get; set; }
+        public string ConsignmentId { get; set; }
+        public string PaymentType { get; set; }     // "DB" or "PA"
+        public string PayMethodToken { get; set; }
+        public string PaymentId { get; set; }
+        public List<P4MCartItem> Items { get; set; }
+        public List<Discount> Discounts { get; set; }
+    }
+
+    public class P4MCartItem
+    {
+        public string LineId { get; set; }
+        public string Make { get; set; }
+        public string Sku { get; set; }
+        public string Desc { get; set; }
+        public double Qty { get; set; }
+        public double Price { get; set; }
+        public double Discount { get; set; }
+        public string LinkToImage { get; set; }
+        public string LinkToItem { get; set; }
+        public string Tags { get; set; }
+        public int Rating { get; set; }
+        public string SiteReference { get; set; }   // retailer defined e.g. page code where consumer selected item
+        // item options - stores the options selected by the consumer when this item was purchased
+        public Dictionary<string, string> Options { get; set; }
+    }
 }
