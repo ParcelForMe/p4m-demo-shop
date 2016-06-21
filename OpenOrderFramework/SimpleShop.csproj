@@ -684,6 +684,7 @@
     <Content Include="Scripts\widgets\local-image\local-image.html" />
     <Content Include="Scripts\widgets\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
+    <Content Include="Scripts\widgets\p4m-checkout\p4m-checkout.html" />
     <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
     <Content Include="Scripts\widgets\p4m-profile\p4m-profile.html" />
     <Content Include="Scripts\widgets\p4m-profile\peli-logo-green.png" />
@@ -798,6 +799,7 @@
     <Content Include="Scripts\Lib\promise-polyfill\package.json" />
     <Content Include="Scripts\Lib\promise-polyfill\README.md" />
     <Content Include="Views\P4MToken\ReturnToken.cshtml" />
+    <Content Include="Views\P4M\P4MCheckout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

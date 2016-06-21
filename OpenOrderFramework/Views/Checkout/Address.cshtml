@@ -5,9 +5,10 @@
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="~/Scripts/card.js"></script>
-<link rel="stylesheet" href="~/Content/card.css">
-<script>
+<link rel="import" href="/Scripts/widgets/p4m-login/p4m-login.html">
+
+<!--
+    <script>
     $('.active form').card({ container: $('.card-wrapper') })
     $('form').card({
         // a selector or jQuery object for the container
@@ -22,6 +23,8 @@
         formatting: true // optional - default true
     });
 </script>
+-->
+
 
 <!--<div class="col-lg-4">
     <div class="demo-container">
@@ -45,6 +48,7 @@
     @using (Html.BeginForm(new { @class = "form-horizontal" }))
     {
        <h2>Address</h2>
+        <p4m-login></p4m-login>
         <fieldset>
             <legend>Your Address</legend>
 

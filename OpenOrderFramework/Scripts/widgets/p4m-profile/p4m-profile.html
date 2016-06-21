@@ -9,8 +9,9 @@
         <div id="p4m-profile-container" class$="{{_topClass}}">
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
-            <p4m-api id="api" ></p4m-api>
-            <div id="profileName">{{p4mData.Consumer.GivenName}}</div>
+            <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
+            <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
+            <div id="profileName">{{_profileName}}</div>
             <img id="profileImage" src$="{{_profilePicUrl}}" />  
             <paper-spinner id="spinner"></paper-spinner>         
         </div>
@@ -89,7 +90,6 @@
 
             ready: function()
             {
-                this.showAvatar();
                 if (this.mode == "basic") {
                     this.hideImage = false;
                     this.hideName = true;
@@ -97,18 +97,38 @@
                 if (this.hideImage) this.topClass += " hide-image";
                 if (this.hideName) this.topClass += " hide-name";
 
-                window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this));
-                if (this.autoLoad) {
+                //window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this));
+                window.addEventListener('p4m_consumer', this.onProfileData.bind(this));
+                this.load();
+
+            },
+
+            load: function() {
+
+                //Try to read all data from cookies first
+                this._profilePicUrl = this.$.p4mAvatarCookie.readCookie();
+                if (this._profilePicUrl === "") this._profilePicUrl = null;
+                this._profileName = this.$.p4mGivenNameCookie.readCookie();
+
+                //Check to see if the user is logged in
+                var token = this.$.p4mTokenCookie.readCookie();
+                this._loggedIn = token !== "";
+         
+                //If profile data not present in cookies, and user is logged in, retrieve data from API instead
+                if ((!this._profilePicUrl) && this._loggedIn) {
+                    //Display the avatar after the API request returns
                     this.showSpinner();
-                    this.$.api.call('getConsumerDetails');
+                    this.$.api.call('consumer'); //callback to this.onProfileData(), which will call this.show()
+                }
+                else {
+                    //Display the avatar immediately
+                    this.show();
                 }
             },
 
-            showAvatar: function () {
+            show: function () {
                 this.hideSpinner();
-                var token = this.$.p4mTokenCookie.readCookie();
-                this._loggedIn = token != "";
-                this._profilePicUrl = this.$.p4mAvatarCookie.readCookie();
+             
                 if (!this._profilePicUrl) {
                     if (this._loggedIn)
                         this._profilePicUrl = "/Scripts/widgets/p4m-profile/peli-logo-green.png";
@@ -117,9 +137,11 @@
                 }
             },
 
-            onProfile: function (e) {
+            onProfileData: function (e) {
                 this.p4mData = e.detail;
-                this.showAvatar();
+                this._profilePicUrl = this.p4mData.Consumer.ProfilePicUrl;
+                this._profileName = this.p4mData.Consumer.GivenName;
+                this.show();
             },
 
             hideSpinner: function () {
