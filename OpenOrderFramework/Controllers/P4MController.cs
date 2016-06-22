@@ -94,7 +94,9 @@ namespace OpenOrderFramework.Controllers
                 // add cart details
                 order = cart.CreateOrder(order);
                 // Send tempCartId back to client as a cookie
-                this.HttpContext.Session[ShoppingCart.OrderSessionKey] = order.OrderId.ToString();
+                this.Response.Cookies[ShoppingCart.OrderSessionKey].Value = order.OrderId.ToString();
+                this.Response.Cookies[ShoppingCart.OrderSessionKey].Expires = DateTime.UtcNow.AddYears(1);
+                //this.HttpContext.Session[ShoppingCart.OrderSessionKey] = order.OrderId.ToString();
             }
             else
             {
@@ -115,6 +117,7 @@ namespace OpenOrderFramework.Controllers
 
             var cart = new P4MCart {
                 Reference = session,
+                SessionId = session,
                 Date = DateTime.UtcNow,
                 Currency = "GBP",
                 ShippingAmt = 10,
