@@ -27,10 +27,10 @@ namespace OpenOrderFramework.Controllers
         public const string CredClientSecret = "123456";
         public const string ClientGuestId = "codeclient_guest";
 
-        public const string BaseAddress = "https://local.parcelfor.me:44333/core";
-        public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
-        //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
-        //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
+        //public const string BaseAddress = "https://local.parcelfor.me:44333/core";
+        //public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
+        public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
+        public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
         public const string LocalCallbackUrl = "http://localhost:3000/getP4MAccessToken";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
@@ -123,28 +123,34 @@ namespace OpenOrderFramework.Controllers
             var localId = string.Empty;
             if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
                 localId = consumer.Extras["LocalId"];
-            if (await LocalLoginAsync(token, localId, consumer.Email))
-                return;
-            // local user has not been found for the P4M consumer so we need to create one and log them in
             var address = consumer.PrefDeliveryAddress;
-            var idResult = await UserManager.CreateAsync(new ApplicationUser {
-                UserName = consumer.Email,
-                Email = consumer.Email,
-                EmailConfirmed = true,
-                FirstName = consumer.GivenName,
-                LastName = consumer.FamilyName,
-                Address = address.Street1 ?? address.Street2,
-                City = address.City,
-                State = address.State,
-                PostalCode = address.PostCode,
-                Country = address.Country,
-                LockoutEnabled = false,
-                Phone = consumer.MobilePhone,
-                PhoneNumber = consumer.MobilePhone
-            });
+            // update the local user details with the current P4M details
+            ApplicationUser user = await UserManager.FindByEmailAsync(consumer.Email);
+            if (user == null)
+                user = new ApplicationUser();
+            user.UserName = consumer.Email;
+            user.Email = consumer.Email;
+            user.EmailConfirmed = true;
+            user.FirstName = consumer.GivenName;
+            user.LastName = consumer.FamilyName;
+            user.Address = address.Street1 ?? address.Street2;
+            user.City = address.City;
+            user.State = address.State;
+            user.PostalCode = address.PostCode;
+            user.Country = address.Country;
+            user.LockoutEnabled = false;
+            user.Phone = consumer.MobilePhone;
+            user.PhoneNumber = consumer.MobilePhone;
+            if (await LocalLoginAsync(token, localId, consumer.Email))
+            {
+                await UserManager.UpdateAsync(user);
+                return;
+            }
+            // local user has not been found for the P4M consumer so we need to create one and log them in
+            var idResult = await UserManager.CreateAsync(user);
             if (idResult.Succeeded)
             {
-                ApplicationUser user = await UserManager.FindByEmailAsync(consumer.Email);
+                user = await UserManager.FindByEmailAsync(consumer.Email);
                 var password = GeneratePassword();
                 await UserManager.AddPasswordAsync(user.Id, password);
                 await SaveLocalIdAsync(token, user.Id);

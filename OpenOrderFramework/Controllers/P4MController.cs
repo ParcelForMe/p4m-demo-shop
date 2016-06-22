@@ -14,12 +14,28 @@ using OpenOrderFramework.Models;
 using System.Linq;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
+using System.Net.Http.Headers;
+using System.Net.Http.Formatting;
+using Newtonsoft.Json;
 
 namespace OpenOrderFramework.Controllers
 {
     public class P4MController : Controller
     {
         ApplicationDbContext storeDB = new ApplicationDbContext();
+        private ApplicationUserManager _userManager;
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
         const decimal _taxPercent = 0.20M;
 
         public P4MController()
@@ -41,17 +57,42 @@ namespace OpenOrderFramework.Controllers
             Order order = null;
             if (this.HttpContext.Session[ShoppingCart.OrderSessionKey] == null)
             {
+                // get the current user details for creating the order
+                var localId = User.Identity.GetUserId();
+                var user = await UserManager.FindByIdAsync(localId);
+                if (user == null)
+                    throw new Exception("No logged in user");
                 // create and save the order, then store the id in a cookie
                 var cart = ShoppingCart.GetCart(this.HttpContext);
-                order = new Order();
-                order.Username = User.Identity.Name;
-                order.Email = User.Identity.Name;
-                order.OrderDate = DateTime.Now;
+                order = new Order()
+                {
+                    Username = User.Identity.Name,
+                    Email = User.Identity.Name,
+                    OrderDate = DateTime.Now,
+                    Experation = DateTime.Now.AddYears(10),
+                    Address = user.Address,
+                    City = user.City,
+                    PostalCode = user.PostalCode,
+                    State = user.State,
+                    Country = user.Country,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.Phone
+                };
+                //Save Order
+                storeDB.Orders.Add(order);
+                try
+                {
+                    // get the new order Id
+                    await storeDB.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    throw e;
+                }
                 // add cart details
                 order = cart.CreateOrder(order);
-                //Save Order
-                order = storeDB.Orders.Add(order);
-                await storeDB.SaveChangesAsync();
                 // Send tempCartId back to client as a cookie
                 this.HttpContext.Session[ShoppingCart.OrderSessionKey] = order.OrderId.ToString();
             }
@@ -59,8 +100,48 @@ namespace OpenOrderFramework.Controllers
             {
                 var id = Convert.ToInt32(this.HttpContext.Session[ShoppingCart.OrderSessionKey]);
                 order = storeDB.Orders.SingleOrDefault(o => o.OrderId == id);
+                order.OrderDetails = storeDB.OrderDetails.Where(od => od.OrderId == id).ToList();
             }
+            await AddItemsToP4MCartAsync(Request.Cookies["p4mToken"].Value, order.OrderId.ToString(), order);
             return order;
+        }
+
+        async Task AddItemsToP4MCartAsync(string token, string session, Order order)
+        {
+            // get the consumer's details from P4M. 
+            var client = new HttpClient();
+            client.SetBearerToken(token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var cart = new P4MCart {
+                Reference = session,
+                Date = DateTime.UtcNow,
+                Currency = "GBP",
+                ShippingAmt = 10,
+                Tax = 0,
+                Items = new List<P4MCartItem>()
+            };
+
+            foreach (var ordItem in order.OrderDetails)
+            {
+                var item = storeDB.Items.Single(i => i.ID == ordItem.ItemId);
+                cart.Items.Add(new P4MCartItem
+                {
+                    Make = item.Name,
+                    Sku = item.ID.ToString(),
+                    Desc = item.Name,
+                    Qty = ordItem.Quantity,
+                    Price = (double)item.Price,
+                    LinkToImage = item.ItemPictureUrl,
+                });
+            }
+            var cartMessage = new PostCartMessage { Cart = cart, ClearItems = true, Currency = "GBP", PaymentType = "DB", SessionId = session };
+            var content = new System.Net.Http.ObjectContent<PostCartMessage>(cartMessage, new JsonMediaTypeFormatter());
+            var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cart", content);
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<PostCartMessage>(messageString);
+            if (!message.Success)
+                throw new Exception(message.Error);
         }
 
         [HttpGet]
