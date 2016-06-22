@@ -1,0 +1,36 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../p4m-cart-card/p4m-cart-card.html" />
+
+<dom-module id="p4m-cart">
+
+    <template>
+
+        <template is="dom-repeat" items="{{cartData.Items}}">
+            <p4m-cart-card cart-item-data="{{item}}"></p4m-cart-card>
+        </template>
+
+    </template>
+
+    <style>
+
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-cart",
+
+            properties: {
+                cartData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+            }
+
+        });
+    </script>
+</dom-module>
