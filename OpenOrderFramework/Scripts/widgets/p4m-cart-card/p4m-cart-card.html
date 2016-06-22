@@ -1,0 +1,33 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+<dom-module id="p4m-cart-card">
+
+    <template>
+        <img href="{{cartItemData.LinkToImage}}" />
+        <h2>{{cartItemData.Desc}}</h2>
+        <h3>{{cartItemData.Price}}</h3>
+        <h4>{{cartItemData.Qty}}</h4>
+    </template>
+
+    <style>
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-cart-card",
+
+            properties: {
+                cartItemData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+            }
+
+        });
+    </script>
+</dom-module>

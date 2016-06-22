@@ -1,5 +1,6 @@
 <link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 
 <dom-module id="p4m-api">
 
@@ -20,11 +21,11 @@
         var apiEndpoints = {};
         apiEndpoints.v1 = {
             "getConsumerDetails": {
-                "name": "getConsumerDetails",
+                "stub": "getConsumerDetails",
                 "method": "GET"
             },
             "newConsumerCart": {
-                "name": "newConsumerCart",
+                "stub": "newConsumerCart",
                 "method": "POST",
                 "fields": [
                     {
@@ -37,7 +38,7 @@
                 ]
             },
             "updConsumerCart": {
-                "name": "updConsumerCart",
+                "stub": "updConsumerCart",
                 "method": "POST",
                 "fields": [
                     {
@@ -50,7 +51,7 @@
                 ]
             },
             "confirmCartPurchase": {
-                "name": "confirmCartPurchase",
+                "stub": "confirmCartPurchase",
                 "method": "POST",
                 "fields": [
                     {
@@ -63,7 +64,7 @@
                 ]
             },
             "cartReachedCheckout": {
-                "name": "cartReachedCheckout",
+                "stub": "cartReachedCheckout",
                 "method": "GET",
                 "params": [
                     {
@@ -75,7 +76,7 @@
         };
         apiEndpoints.v2 = {
             "consumer": {
-                "name": "consumer",
+                "stub": "consumer",
                 "method": "GET",
                 "params": [
                     {
@@ -86,15 +87,25 @@
                 ]
             },
             "consumerExtras": {
-                "name": "consumerExtras",
+                "stub": "consumerExtras",
                 "method": "POST",
             },
             "cart": {
-                "name": "cart/{id}",
+                "stub": "cart/{id}",
                 "method": "GET",
                 "params": [
                     {
                         "name": "id",
+                        "required": true
+                    }
+                ]
+            },
+            "currentCart": {
+                "stub": "currentCart/{sessionId}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "sessionId",
                         "required": true
                     }
                 ]
@@ -173,7 +184,7 @@
 
             _prepareApiCall: function (apiRequest, callback) {
                 if (this._validateApiRequest(apiRequest)) {
-                    var url = this._baseUrl() + apiRequest.endPoint.name;
+                    var url = this._baseUrl() + apiRequest.endPoint.stub;
                     this.$.apiAjax.params = {};
                     if (apiRequest.params)
                     {
@@ -201,7 +212,7 @@
                         console.warn("Making new API call before previous call has completed");
                     }
                     this._callback = callback;
-                    this._currentCall = apiRequest.endPoint.name;
+                    this._currentCall = apiRequest.endPoint.stub;
                 }
             },
 
@@ -244,7 +255,7 @@
                 return i.required
             })
             .filter(function (i) { //Of those, return those missing from the obj
-                return (typeOf(obj[i.name]) === "undefined")
+                return (typeof(obj[i.name]) === "undefined")
             });
         }
     </script>

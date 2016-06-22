@@ -1,0 +1,76 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
+
+<dom-module id="p4m-order-summary">
+
+    <template>
+        <div id="p4m-order-summry-container">
+            <h2>Order Summary</h2>
+            <table>
+                <tr>
+                    <td class="header-col">{{calcItemsCount(cartData)}} items</td>
+                    <td class="detail-col">{{calcItemsDescriptioncartData)}}</td>
+                    <td class="cost-col">{{calcItemsCost(cartData)}}</td>
+                </tr>
+                <tr>
+                    <td class="header-col">Delivery</td>
+                    <td class="detail-col">{{calcDeliveryDescription(cartData)}}</td>
+                    <td class="cost-col">$123.00</td>
+                </tr>
+                <tr>
+                    <td class="header-col">Discount</td>
+                    <td class="detail-col">Early bird special 10%</td>
+                    <td class="cost-col">$123.00</td>
+                </tr>
+                <tr>
+                    <td class="header-col">Tax</td>
+                    <td class="detail-col">10</td>
+                    <td class="cost-col">$123.00</td>
+                </tr>
+                <tr>
+                    <td class="header-col">Total</td>
+                    <td class="detail-col"></td>
+                    <td class="cost-col">$123.00</td>
+                </tr>
+            </table>
+
+        </div>
+    </template>
+
+    <style>
+        #p4m-profile-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #spinner {
+            width: 50px;
+            height: 50px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-profile",
+
+            properties: {
+                cartData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+
+            }
+        });
+    </script>
+</dom-module>
