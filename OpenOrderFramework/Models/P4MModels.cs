@@ -95,6 +95,7 @@ namespace OpenOrderFramework.Models
     {
         public string Id { get; set; }
         public string Reference { get; set; }
+        public string SessionId { get; set; }
         public string AddressId { get; set; }
         public string BillingAddressId { get; set; }
         public DateTime? Date { get; set; }
