@@ -30,7 +30,7 @@ namespace OpenOrderFramework.Controllers
         [Route("checkout/p4mCheckout")]
         public async Task<ActionResult> P4MCheckout(string session)
         {
-           // await GetOrderAsync();
+            await GetOrderAsync();
             // Return the view
             return View("P4MCheckout");
         }
