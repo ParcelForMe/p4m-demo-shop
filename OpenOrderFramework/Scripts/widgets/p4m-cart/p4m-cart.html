@@ -4,7 +4,7 @@
 <dom-module id="p4m-cart">
 
     <template>
-
+        <p>My cart items: {{cartData.Items.length}}</p>
         <template is="dom-repeat" items="{{cartData.Items}}">
             <p4m-cart-card cart-item-data="{{item}}"></p4m-cart-card>
         </template>

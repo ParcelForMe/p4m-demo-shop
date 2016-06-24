@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace OpenOrderFramework.Models
 {
@@ -16,5 +11,15 @@ namespace OpenOrderFramework.Models
         public int Count { get; set; }
         public System.DateTime DateCreated { get; set; }
         public virtual Item Item { get; set; }
+    }
+
+    public partial class ShoppingCart
+    {
+        [Key]
+        public string ShoppingCartId { get; set; }
+        public decimal Tax { get; set; }
+        public decimal Shipping { get; set; }
+        public decimal Discount { get; set; }
+        public decimal Total { get; set; }
     }
 }

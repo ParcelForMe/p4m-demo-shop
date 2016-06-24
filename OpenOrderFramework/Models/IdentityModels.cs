@@ -32,6 +32,7 @@ namespace OpenOrderFramework.Models {
 
 
         public DbSet<Item> Items { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Catagorie> Catagories { get; set; }
         public DbSet<Discount> Discounts { get; set; }

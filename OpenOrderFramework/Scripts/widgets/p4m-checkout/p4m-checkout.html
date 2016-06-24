@@ -10,9 +10,9 @@
 <dom-module id="p4m-checkout">
 
     <template>
-        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
+        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
         <div id="container">
-            <div id="topPanel" class="topPanel"><h2>Review Order</h2><p4m-profile mode="basic"></p4m-profile></div>
+            <div id="topPanel" class="topPanel"><h2>Review My Order</h2><p4m-profile mode="basic"></p4m-profile></div>
             <div id="panelContainer">
                 <div id="detailPanel" class="p4m-panel">
                     <paper-tabs selected="{{selectedTab}}">
@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <polymer-cookie id="sessionCookie" name="OrderId"></polymer-cookie>
+        <polymer-cookie id="sessionCookie" name="CartId"></polymer-cookie>
     </template>
 
     <style>
@@ -134,7 +134,7 @@
             },
 
             onCartData: function (data) {
-                this.cartData = data;
+                this.cartData = data.Cart;
             }
 
         });

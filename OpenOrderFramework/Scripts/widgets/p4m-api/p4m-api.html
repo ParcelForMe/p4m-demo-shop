@@ -78,13 +78,7 @@
             "consumer": {
                 "stub": "consumer",
                 "method": "GET",
-                "params": [
-                    {
-                        "name": "DeliveryPreferences",
-                        "required": false,
-                        "help": "Comma-delimited list of preferences. Possible preference values: useMyDropPoints,useRetailerDropPoint,useMyDeliveryAddress"
-                    }
-                ]
+                "params": []
             },
             "consumerExtras": {
                 "stub": "consumerExtras",
@@ -110,7 +104,6 @@
                     }
                 ]
             }
-
         };
 
 
@@ -128,7 +121,7 @@
                 },
                 hostType: {
                     type: String,
-                    value: "live" //dev, test, live
+                    value: "local" //local, dev, test, live
                 },
                 port: {
                     type: Number,
@@ -136,7 +129,7 @@
                 },
                 version: {
                     type: String,
-                    value: "v1"
+                    value: "v2"
                     //value: "https://local.parcelfor.me:44321/api/v2/"
                 },
                 consumerToken: {

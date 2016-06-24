@@ -27,10 +27,10 @@ namespace OpenOrderFramework.Controllers
         public const string CredClientSecret = "123456";
         public const string ClientGuestId = "codeclient_guest";
 
-        //public const string BaseAddress = "https://local.parcelfor.me:44333/core";
-        //public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
-        public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
-        public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
+        public const string BaseAddress = "https://local.parcelfor.me:44333/core";
+        public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
+        //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
+        //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
         public const string LocalCallbackUrl = "http://localhost:3000/getP4MAccessToken";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";

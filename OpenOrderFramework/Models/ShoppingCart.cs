@@ -3,22 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OpenOrderFramework.Models
 {
     public partial class ShoppingCart
     {
-        ApplicationDbContext storeDB = new ApplicationDbContext();
-        string ShoppingCartId { get; set; }
+        static ApplicationDbContext storeDB = new ApplicationDbContext();
+
         public const string CartSessionKey = "CartId";
         public const string OrderSessionKey = "OrderId";
-
-        public static ShoppingCart GetCart(HttpContextBase context)
-        {
-            var cart = new ShoppingCart();
-            cart.ShoppingCartId = cart.GetCartId(context);
-            return cart;
-        }
 
         // Helper method to simplify shopping cart calls
         public static ShoppingCart GetCart(Controller controller)
@@ -26,13 +20,33 @@ namespace OpenOrderFramework.Models
             return GetCart(controller.HttpContext);
         }
 
+        public static ShoppingCart GetCart(HttpContextBase context)
+        {
+            var shoppingCartId = GetCartId(context);
+            var cart = storeDB.ShoppingCarts.Find(shoppingCartId);
+            if (cart == null)
+            {
+                cart = new ShoppingCart { ShoppingCartId = shoppingCartId };
+                storeDB.ShoppingCarts.Add(cart);
+            }
+            cart.CalcTax();
+            return cart;
+        }
+
+        public void CalcTax(decimal taxPercent = 20M, Discount discount = null)
+        {
+            var itemsTotal = Items.Sum(d => d.Count * d.Item.Price);
+            if (discount != null)
+                this.Discount = (itemsTotal + this.Shipping) * (discount.Percentage / 100);
+            this.Tax = (itemsTotal + this.Shipping - this.Discount) * (taxPercent / 100);
+            this.Total = itemsTotal + this.Shipping + this.Tax - this.Discount;
+            storeDB.SaveChanges();
+        }
+
         public int AddToCart(Item item)
         {
             // Get the matching cart and item instances
-            var cartItem = storeDB.Carts.SingleOrDefault(
-                c => c.CartId == ShoppingCartId
-                && c.ItemId == item.ID);
-
+            var cartItem = storeDB.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId && c.ItemId == item.ID);
             if (cartItem == null)
             {
                 // Create a new cart item if no cart item exists
@@ -53,23 +67,14 @@ namespace OpenOrderFramework.Models
             }
             // Save changes
             storeDB.SaveChanges();
-
             return cartItem.Count;
         }
 
         public int RemoveFromCart(int id)
         {
-
-
             // Get the cart
-
-            var cartItem = storeDB.Carts.Single(
-                cart => cart.CartId == ShoppingCartId
-                && cart.ItemId == id);
-
-
+            var cartItem = storeDB.Carts.Single(cart => cart.CartId == ShoppingCartId && cart.ItemId == id);
             int itemCount = 0;
-
             if (cartItem != null)
             {
                 if (cartItem.Count > 1)
@@ -96,14 +101,23 @@ namespace OpenOrderFramework.Models
             {
                 storeDB.Carts.Remove(cartItem);
             }
+            storeDB.ShoppingCarts.Remove(this);
             // Save changes
             storeDB.SaveChanges();
         }
 
+        [NotMapped]
+        public List<Cart> Items
+        {
+            get { return GetCartItems(); }
+        }
+
         public List<Cart> GetCartItems()
         {
-            return storeDB.Carts.Where(
-                cart => cart.CartId == ShoppingCartId).ToList();
+            var result = storeDB.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList();
+            foreach (var item in result)
+                item.Item = storeDB.Items.Find(item.ItemId);
+            return result;
         }
 
         public int GetCount()
@@ -158,27 +172,27 @@ namespace OpenOrderFramework.Models
             // Save the order
             storeDB.SaveChanges();
             // Empty the shopping cart
-            //EmptyCart();
+            EmptyCart();
             // Return the OrderId as the confirmation number
             return order;
         }
 
         // We're using HttpContextBase to allow access to cookies.
-        public string GetCartId(HttpContextBase context)
+        public static string GetCartId(HttpContextBase context)
         {
             if (context.Session[CartSessionKey] == null)
             {
-                if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
-                {
-                    context.Session[CartSessionKey] = context.User.Identity.Name;
-                }
-                else
-                {
+                //if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
+                //{
+                //    context.Session[CartSessionKey] = context.User.Identity.Name;
+                //}
+                //else
+                //{
                     // Generate a new random GUID using System.Guid class
                     Guid tempCartId = Guid.NewGuid();
                     // Send tempCartId back to client as a cookie
                     context.Session[CartSessionKey] = tempCartId.ToString();
-                }
+                //}
             }
             return context.Session[CartSessionKey].ToString();
         }
