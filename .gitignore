@@ -248,7 +248,7 @@ _Pvt_Extensions
 
 # Paket dependency manager
 .paket/paket.exe
-<<<<<<< HEAD
+
 paket-files/
 
 # FAKE - F# Make
@@ -352,3 +352,6 @@ OpenOrderFramework/Scripts/paper-styles/
 OpenOrderFramework/Scripts/paper-toggle-button/
 OpenOrderFramework/Scripts/polymer-cookie/
 OpenOrderFramework/Scripts/Lib/
+
+
+bower_components/*
