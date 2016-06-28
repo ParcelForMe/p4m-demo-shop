@@ -631,7 +631,6 @@
     <Content Include="Scripts\Lib\webcomponentsjs\webcomponents.js" />
     <Content Include="Scripts\Lib\webcomponentsjs\webcomponents.min.js" />
     <Content Include="Scripts\widgets\gfs-carrier-icon\gfs-carrier-icon.html" />
-    <Content Include="Scripts\widgets\gfs-checkout-widget\assets.html" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\assets\back_button.png" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\assets\Collect Plus.png" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\assets\Doddle.png" />

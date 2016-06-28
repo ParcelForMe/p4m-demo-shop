@@ -1,10 +1,13 @@
 <link rel="import" href="../../Lib/polymer/polymer.html" />
-<link rel="import" href="../p4m-profile/p4m-profile.html" />
-<link rel="import" href="../p4m-api/p4m-api.html" />
-<link rel="import" href="../p4m-cart/p4m-cart.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 <link rel="import" href="../../Lib/paper-tabs/paper-tabs.html" />
 <link rel="import" href="../../Lib/iron-pages/iron-pages.html" />
+
+<link rel="import" href="../p4m-profile/p4m-profile.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../p4m-cart/p4m-cart.html" />
+<link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
+
 
 
 <dom-module id="p4m-checkout">
@@ -21,9 +24,10 @@
                         <paper-tab>Payment Options</paper-tab>
                         <paper-tab>Addresses</paper-tab>
                     </paper-tabs>
-                    <iron-pages selected="{{selectedTab}}">
+                    <iron-pages selected="{{selectedTab}}">                   
                         <iron-page>                       
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>
+                            
                         </iron-page>
                         <iron-page>
                             Delivery options here
@@ -37,15 +41,20 @@
                     </iron-pages>                 
                 </div>
                 <div id="summaryPanel" class="p4m-panel">
+                    <p4m-order-summary id="order-summary" cart-data="{{cartData}}"></p4m-order-summary> 
+                    <button class="p4m-button p4m-button-active">Update</button>  
                 </div>
+
             </div>
+            
         </div>
+
         <polymer-cookie id="sessionCookie" name="CartId"></polymer-cookie>
     </template>
 
     <style>
         #container {
-            width: 80%;
+            width: 100%;
             margin: auto;
         }
         #panelContainer {
@@ -79,8 +88,20 @@
         }
         .p4m-panel {
             width: 50%; 
-            height: 200px;
+            /*height: 200px;*/
             border: none;
+        }
+        .p4m-button {
+            padding: 10px;
+            background-color: #808080;
+            color: #000000;
+            border-radius: 4px;
+        }
+        .p4m-button.p4m-button-active {
+            background-color: #449044;
+            color: #FFFFFF;
+            border: none;
+            margin: 4px;
         }
         .p4m-panel#summaryPanel {
             border-left: solid 1px #E0E0E0;
@@ -107,12 +128,19 @@
                 cartData: {
                     type: Object,
                     notify: true
+                   
+                },
+                deliveryData: {
+                    type: Object,
+                    notify: true
                 },
                 selectedTab: {
                     type: Number,
                     value: 0
-                }
+                },
+                
             },
+            observers: ["onCartDataChange(cartData.Items.*)"],
 
             ready: function()
             {
@@ -125,9 +153,18 @@
                 }
             },
 
+            debug: function(e) {
+                console.log("p4m-checkout debug", this.cartData);
+            },
+
             updateCart: function () {
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this) );
             },
+
+            sendChanges: function() {
+                //TODO: Send changes to retail server
+                //Send changes to P4M
+            },       
 
             updateConsumer: function() {
 
@@ -135,6 +172,11 @@
 
             onCartData: function (data) {
                 this.cartData = data.Cart;
+            },
+
+            onCartDataChange: function (e) {
+                console.log('p4m-checkout: onCartDataChange()', e);
+
             }
 
         });

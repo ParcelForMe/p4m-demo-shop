@@ -26,6 +26,7 @@
     "polymer-cookie": "^1.0.3",
     "paper-spinner": "^1.2.0",
     "iron-pages": "^1.0.7",
-    "paper-tabs": "^1.6.2"
+    "paper-tabs": "^1.6.2",
+    "iron-input": "^1.0.10"
   }
 }
