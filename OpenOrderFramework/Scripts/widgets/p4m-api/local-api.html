@@ -2,14 +2,13 @@
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 
-<dom-module id="p4m-api">
+<dom-module id="local-api">
 
     <template>
         <iron-ajax
             id="apiAjax"
             method="GET"
             handle-as="json"
-
             content-type="application/json"
             on-response="_handleResponse"
             debounce-duration="300">
@@ -18,127 +17,51 @@
     </template>
 
     <script>
-        var apiEndpoints = {};
-        apiEndpoints.v1 = {
-            "getConsumerDetails": {
-                "stub": "getConsumerDetails",
-                "method": "GET"
-            },
-            "newConsumerCart": {
-                "stub": "newConsumerCart",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "updConsumerCart": {
-                "stub": "updConsumerCart",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "confirmCartPurchase": {
-                "stub": "confirmCartPurchase",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "cartReachedCheckout": {
-                "stub": "cartReachedCheckout",
-                "method": "GET",
-                "params": [
-                    {
-                        "name": "cartId",
-                        "required": true
-                    }
-                ]
-            }
-        };
-        apiEndpoints.v2 = {
-            "consumer": {
-                "stub": "consumer",
+        var apiEndpoints = {
+            "localLogin": {
+                "stub": "localLogin",
                 "method": "GET",
                 "params": []
             },
-            "consumerExtras": {
-                "stub": "consumerExtras",
-                "method": "POST",
+            "getP4MCart": {
+                "stub": "getP4MCart",
+                "method": "GET"
             },
-            "cart": {
-                "stub": "cart/{id}",
+            "shippingSelector": {
+                "stub": "shippingSelector",
+                "method": "GET"
+            },
+            "applyDiscountCode": {
+                "stub": "applyDiscountCode/{discountCode}",
                 "method": "GET",
                 "params": [
                     {
-                        "name": "id",
+                        "name": "discountCode",
                         "required": true
                     }
                 ]
             },
-            "currentCart": {
-                "stub": "currentCart/{sessionId}",
+            "itemQtyChanged": {
+                "stub": "itemQtyChanged",
                 "method": "GET",
                 "params": [
                     {
-                        "name": "sessionId",
+                        "name": "itemCode",
+                        "required": true
+                    },
+                    {
+                        "name": "qty",
                         "required": true
                     }
                 ]
             },
-            "postCart": {
-                "stub": "cart",
-                "method": "POST",
-            }
         };
 
 
         Polymer({
-            is: "p4m-api",
+            is: "local-api",
 
             properties: {
-                ssl: {
-                    type: Object,
-                    value: true
-                },
-                hostBaseDomain: {
-                    type: String,
-                    value: "parcelfor.me"
-                },
-                hostType: {
-                    type: String,
-                    value: "local" //local, dev, test, live
-                },
-                port: {
-                    type: Number,
-                    value: 44321
-                },
-                version: {
-                    type: String,
-                    value: "v2"
-                    //value: "https://local.parcelfor.me:44321/api/v2/"
-                },
-                consumerToken: {
-                    type: String
-                },
                 _endPoints: {
                     type: Object,
                     value: apiEndpoints
@@ -153,16 +76,11 @@
             },
 
             _baseUrl: function() {
-                return (this.ssl ? "https" : "http") + "://" + this.hostType + "." + this.hostBaseDomain + ":" + this.port + "/api/" + this.version + "/";
+                return "//" + window.location.host + "/";
             },
 
             call: function (name, params, data, callback) {
-                if (!this.consumerToken) {
-                    this.consumerToken = this.$.p4mTokenCookie.readCookie();
-                }
-
-                this.$.apiAjax.headers = { 'Authorization': 'Bearer ' + this.consumerToken };
-                var endPoint = this._endPoints[this.version][name]
+                var endPoint = this._endPoints[name]
                 if (!endPoint) {
                     console.error("Invalid endpoint:", name);
                 }
@@ -240,7 +158,7 @@
                     this._callback(e.detail.response);
                 }
                 this._callback = null;
-                this.fire("p4m_" + this._currentCall, e.detail.response, true);
+                this.fire("p4m_local_" + this._currentCall, e.detail.response, true);
                 this._currentCall = null;
             }
 

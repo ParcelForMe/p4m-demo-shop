@@ -189,7 +189,6 @@ namespace OpenOrderFramework.Controllers
                         await storeDB.SaveChangesAsync();
                     }
                     
-
                     //Save Order
                     storeDB.Orders.Add(order);
                     await storeDB.SaveChangesAsync();
@@ -197,13 +196,8 @@ namespace OpenOrderFramework.Controllers
                     var cart = ShoppingCart.GetCart(this.HttpContext);
                     order = cart.CreateOrder(order);
 
-
-
-                   // CheckoutController.SendOrderMessage(order.FirstName, "New Order: " + order.OrderId,order.ToString(order), appConfig.OrderEmail);
-
-                    return RedirectToAction("Complete",
-                        new { id = order.OrderId });
-                
+                    // CheckoutController.SendOrderMessage(order.FirstName, "New Order: " + order.OrderId,order.ToString(order), appConfig.OrderEmail);
+                    return RedirectToAction("Complete", new { id = order.OrderId });
             }
             catch
             {

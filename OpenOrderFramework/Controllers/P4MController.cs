@@ -95,14 +95,23 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("getP4MCart")]
-        public P4MCart GetCartWithItems()
+        public JsonResult GetCartWithItems()
         {
-            return GetP4MCartFromLocalCart();
+            var result = new CartMessage();
+            try
+            {
+                result.Cart = GetP4MCartFromLocalCart();
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         [Route("shippingSelector")]
-        public async Task<ActionResult> ShippingSelector(string session)
+        public async Task<ActionResult> ShippingSelector()
         {
             // Return the view
             return View("Delivery");
@@ -110,22 +119,21 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("applyDiscountCode")]
-        public async Task<DiscountMessage> ApplyDiscountCodeAsync(string session, string discCode)
+        public DiscountMessage ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
             try
             {
-                var discount = storeDB.Discounts.SingleOrDefault(d => d.Code == discCode);
+                var discount = storeDB.Discounts.SingleOrDefault(d => d.Code == discountCode);
                 if (discount == null)
-                    result.Error = string.Format("Discount code {0} does not exist", discCode);
+                    result.Error = string.Format("Discount code {0} does not exist", discountCode);
                 else
                 {
-                    //var order = await GetLocalCartAsync();
-                    //result.Description = discount.Description;
-                    //CalcTax(order, discount);
-                    //storeDB.SaveChanges();
-                    //result.Amount = order.Discount;
-                    //result.Tax = order.Tax;
+                    result.Description = discount.Description;
+                    var localCart = ShoppingCart.GetCart(this.HttpContext);
+                    localCart.CalcTax(discount);
+                    result.Amount = localCart.Discount;
+                    result.Tax = localCart.Tax;
                 }
             }
             catch (Exception e)
@@ -135,83 +143,27 @@ namespace OpenOrderFramework.Controllers
             return result;
         }
 
-        void CalcTaxFromCart(ShoppingCart cart, Discount discount = null)
-        {
-            var itemsTotal = cart.Items.Sum(d => d.Count * d.Item.Price);
-            if (discount != null)
-                cart.Discount = (itemsTotal + cart.Shipping) * (discount.Percentage / 100);
-            cart.Tax = (itemsTotal + cart.Shipping - cart.Discount) * _taxPercent;
-            cart.Total = itemsTotal + cart.Shipping + cart.Tax - cart.Discount;
-            storeDB.SaveChanges();
-        }
-
-        void CalcTaxFromOrder(Order order, Discount discount = null)
-        {
-            var itemsTotal = order.OrderDetails.Sum(d => d.Quantity * d.UnitPrice);
-            if (discount != null)
-                order.Discount = (itemsTotal + order.Shipping) * (discount.Percentage / 100);
-            order.Tax = (itemsTotal + order.Shipping - order.Discount) * _taxPercent;
-            order.Total = itemsTotal + order.Shipping + order.Tax - order.Discount;
-        }
-
         [HttpGet]
         [Route("itemQtyChanged")]
-        public async Task<CartUpdateMessage> ItemQtyChanged(string session, string itemCode, decimal qty)
+        public async Task<CartUpdateMessage> ItemQtyChanged(string itemCode, decimal qty)
         {
             var result = new CartUpdateMessage();
             try
             {
-                //var order = await GetLocalCartAsync();
-                //var intCode = Convert.ToInt32(itemCode);
-                //var item = storeDB.Items.Single(i => i.ID == intCode);
-                //var roundQty = (int)Math.Round(qty);
-                //if (roundQty <= 0)
-                //    RemoveFromCart(order, item.ID);
-                //else
-                //    UpdItem(order, item, roundQty);
-                //CalcTax(order);
+                var localCart = ShoppingCart.GetCart(this.HttpContext);
+                var intCode = Convert.ToInt32(itemCode);
+                var item = storeDB.Items.Single(i => i.ID == intCode);
+                var roundQty = (int)Math.Round(qty);
+                await localCart.SetItemQtyAsync(item.ID, roundQty);
+                localCart.CalcTax();
+                result.Tax = localCart.Tax;
+                result.Shipping = localCart.Shipping;
             }
             catch (Exception e)
             {
                 result.Error = e.Message;
             }
             return result;
-        }
-
-        void UpdItem(Order order, Item item, int qty)
-        {
-            // Get the matching cart and item instances
-            var orderItem = storeDB.OrderDetails.SingleOrDefault(c => c.OrderId == order.OrderId && c.ItemId == item.ID);
-
-            if (orderItem == null)
-            {
-                // Create a new cart item if no cart item exists
-                var orderDetail = new OrderDetail
-                {
-                    ItemId = item.ID,
-                    OrderId = order.OrderId,
-                    UnitPrice = item.Price,
-                    Quantity = qty
-                };
-                orderItem = storeDB.OrderDetails.Add(orderDetail);
-            }
-            else
-            {
-                orderItem.Quantity = qty;
-            }
-            // Save changes
-            storeDB.SaveChanges();
-        }
-
-        void RemoveFromCart(Order order, int itemId)
-        {
-            var orderItem = storeDB.OrderDetails.SingleOrDefault(c => c.OrderId == order.OrderId && c.ItemId == itemId);
-            if (orderItem != null)
-            {
-                storeDB.OrderDetails.Remove(orderItem);
-                // Save changes
-                storeDB.SaveChanges();
-            }
         }
 
         public async Task<Order> CreateLocalOrderAsync()
@@ -312,6 +264,15 @@ namespace OpenOrderFramework.Controllers
                 });
             }
             return cart;
+        }
+
+        void CalcTaxFromOrder(Order order, Discount discount = null)
+        {
+            var itemsTotal = order.OrderDetails.Sum(d => d.Quantity * d.UnitPrice);
+            if (discount != null)
+                order.Discount = (itemsTotal + order.Shipping) * (discount.Percentage / 100);
+            order.Tax = (itemsTotal + order.Shipping - order.Discount) * _taxPercent;
+            order.Total = itemsTotal + order.Shipping + order.Tax - order.Discount;
         }
     }
 }

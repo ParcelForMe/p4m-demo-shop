@@ -17,6 +17,11 @@ namespace OpenOrderFramework.Models
         public Consumer Consumer { get; set; }
     }
 
+    public class CartMessage : P4MBaseMessage
+    {
+        public P4MCart Cart { get; set; }
+    }
+
     public class DiscountMessage : P4MBaseMessage
     {
         public decimal Tax { get; set; }

@@ -651,6 +651,7 @@
     <Content Include="Scripts\widgets\local-image-widget\local-image.html" />
     <Content Include="Scripts\widgets\local-image\local-image.html" />
     <Content Include="Scripts\widgets\map-region-manager\map-region-manager.html" />
+    <Content Include="Scripts\widgets\p4m-api\local-api.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
     <Content Include="Scripts\widgets\p4m-cart-card\p4m-cart-card.html" />
     <Content Include="Scripts\widgets\p4m-cart\p4m-cart.html" />

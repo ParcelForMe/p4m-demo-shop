@@ -85,8 +85,7 @@ namespace OpenOrderFramework.Controllers
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
-
-
+        
         [HttpGet]
         [Route("getP4MAccessToken")]
         public async Task<ActionResult> GetToken(string code, string state)
@@ -105,10 +104,27 @@ namespace OpenOrderFramework.Controllers
                 //var parsedToken = ParseJwt(response.AccessToken);
                 this.Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
                 this.Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddYears(1);
-                await LocalConsumerLogin(tokenResponse.AccessToken);
+                //await LocalConsumerLogin(tokenResponse.AccessToken);
                 return View("ReturnToken");
             }
             return View("error");
+        }
+
+        [HttpGet]
+        [Route("localLogin")]
+        public async Task<P4MBaseMessage> LocalLogin()
+        {
+            var result = new P4MBaseMessage();
+            try
+            {
+                var token = this.Request.Cookies["p4mToken"].Value;
+                await LocalConsumerLogin(token);
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return result;
         }
 
         async Task LocalConsumerLogin(string token)
