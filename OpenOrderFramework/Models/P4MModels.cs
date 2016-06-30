@@ -132,4 +132,10 @@ namespace OpenOrderFramework.Models
         // item options - stores the options selected by the consumer when this item was purchased
         public Dictionary<string, string> Options { get; set; }
     }
+
+    public class ChangedItem
+    {
+        public string ItemCode { get; set; }
+        public decimal Qty { get; set; }
+    }
 }
