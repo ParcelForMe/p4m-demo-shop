@@ -4,7 +4,7 @@
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 <dom-module id="p4m-login">
 
-    <template>
+    <template>  
         <p4m-profile on-click="launchPopup"></p4m-profile>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
@@ -18,7 +18,7 @@
             properties: {
                 authBaseUrl: {
                     type: String,
-                    value: "https://dev.parcelfor.me:44333/core/connect/authorize"
+                    value: "https://local.parcelfor.me:44333/core/connect/authorize"
                 },
                 clientId: {
                     type: String,
@@ -34,7 +34,7 @@
                 },
                 logoutUrl: {
                     type: String,
-                    value: "https://dev.parcelfor.me:44333/core/connect/endsession"
+                    value: "https://local.parcelfor.me:44333/core/connect/endsession"
                 },
                 p4mToken: {
                     type: String
