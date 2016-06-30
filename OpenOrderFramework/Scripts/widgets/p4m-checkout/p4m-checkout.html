@@ -138,6 +138,10 @@
                     type: Number,
                     value: 0
                 },
+                _changeTimer: {
+                    //Timer object to allow sending of changes once user has finished interaction
+                    type: Object
+                }
                 
             },
             observers: ["onCartDataChange(cartData.Items.*)"],
@@ -161,13 +165,28 @@
                 this.$.localApi.call('getP4MCart',null, null, this.onCartData.bind(this) );
             },
 
-            updateCart: function () {
+            getP4mCart: function () {
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this));
             },
 
-            sendChanges: function () {
-                //Send changes to P4M
-                var cartMessage =
+            sendChangesToLocal: function(callback) {
+
+            },
+
+            sendCartChanges: function () {
+                console.log("Sending changes");
+                //Send changes to local API, then to P4m
+                var changes = [];
+                for (var sku in this.$.cart.changes) {
+                    changes.push({ItemCode: sku, Qty: this.$.cart.changes[sku]});
+                }
+
+                this.$.localApi.call('itemQtyChanged', {}, changes, function () {
+                    console.log("Called local api itemQtyChanged");
+
+
+                    //Send changes to P4M
+                    /*var cartMessage =
                     {
                         "SessionId": this.sessionId,
                         "PaymentType": "DB",
@@ -176,7 +195,8 @@
                         "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
                         "Cart": this.cartData
                     };
-                this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));
+                    this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));*/
+                });
             },
 
             updateConsumer: function() {
@@ -186,18 +206,27 @@
             onCartData: function (data) {
                 if (data.Success) {
                     this.cartData = data.Cart;
-                    if (this.cartData.Id === null)
-                        // in this case we have retrieved the cart from the local server so we need to update P4M
-                        this.sendChanges();
+                    if (this.cartData.Id === null) {
+                        //TODO: in this case we have retrieved the cart from the local server so we need to update P4M
+                        //this.sendChanges();
+                    }
                 }
                 else
                     alert(data.Error);
             },
 
             onCartDataChange: function (e) {
-                console.log('p4m-checkout: onCartDataChange()', e);
+                console.log('p4m-checkout: onCartDataChange()', JSON.stringify(e));
+                //If this is a valid change record,
+                if (e.path) {
+                    //Start timer, then send changes.
+                    //If more changes are detected while the timer is active, reset the timer.
+                    if (this._changeTimer) window.clearTimeout(this._changeTimer);
+                    this._changeTimer = window.setTimeout(this.sendCartChanges.bind(this), 2000);
+                }
+            },
 
-            }
+
 
         });
     </script>

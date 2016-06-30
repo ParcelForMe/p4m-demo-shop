@@ -34,6 +34,10 @@
                     notify: true,
                     observer: "onCartDataChange"
                 },
+                changes: {
+                    type: Object,
+                    value: {}
+                }
             },
             observers: [
                 "onCartDataChange(cartData.Items.*)"
@@ -48,7 +52,19 @@
             },
 
             onCartDataChange: function (e) {
-                console.log("p4m-cart: onCartDataChange()", e);
+                if (e && e.path) {
+                    console.log("p4m-cart: onCartDataChange()", e);
+                    //Parse path to identify change
+                    //cartData.Items.#1.Qty
+                    var tokens = e.path.split('.');
+                    if (tokens.length == 4) {
+                        var propertyChanged = tokens[3];
+                        var itemIndex = Number(tokens[2].replace('#', ''));
+                        this.changes[e.base[itemIndex].Sku] = e.value;
+                    }
+
+                }
+
             }
 
         });
