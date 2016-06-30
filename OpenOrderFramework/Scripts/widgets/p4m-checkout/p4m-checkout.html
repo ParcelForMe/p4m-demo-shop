@@ -5,15 +5,15 @@
 
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../p4m-api/local-api.html" />
 <link rel="import" href="../p4m-cart/p4m-cart.html" />
 <link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
-
-
 
 <dom-module id="p4m-checkout">
 
     <template>
         <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
+        <local-api id="localApi"></local-api>
         <div id="container">
             <div id="topPanel" class="topPanel"><h2>Review My Order</h2><p4m-profile mode="basic"></p4m-profile></div>
             <div id="panelContainer">
@@ -149,7 +149,7 @@
                     this.sessionId = this.$.sessionCookie.readCookie();
                 }
                 if (this.sessionId) {
-                    this.updateCart();
+                    this.getLocalCart();
                 }
             },
 
@@ -157,21 +157,41 @@
                 console.log("p4m-checkout debug", this.cartData);
             },
 
-            updateCart: function () {
-                this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this) );
+            getLocalCart: function () {
+                this.$.localApi.call('getP4MCart',null, null, this.onCartData.bind(this) );
             },
 
-            sendChanges: function() {
-                //TODO: Send changes to retail server
+            updateCart: function () {
+                this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this));
+            },
+
+            sendChanges: function () {
                 //Send changes to P4M
-            },       
+                var cartMessage =
+                    {
+                        "SessionId": this.sessionId,
+                        "PaymentType": "DB",
+                        "Currency": this.cartData.Currency,
+                        "PayMethodToken": "this.consumerData.PayMethodToken",   // TODO: load the consumer
+                        "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
+                        "Cart": this.cartData
+                    };
+                this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));
+            },
 
             updateConsumer: function() {
 
             },
 
             onCartData: function (data) {
-                this.cartData = data.Cart;
+                if (data.Success) {
+                    this.cartData = data.Cart;
+                    if (this.cartData.Id === null)
+                        // in this case we have retrieved the cart from the local server so we need to update P4M
+                        this.sendChanges();
+                }
+                else
+                    alert(data.Error);
             },
 
             onCartDataChange: function (e) {

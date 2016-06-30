@@ -2,6 +2,8 @@
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
+<link rel="import" href="../p4m-api/local-api.html" />
+
 <dom-module id="p4m-login">
 
     <template>  
@@ -9,6 +11,7 @@
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
+        <local-api id="localApi"></local-api>
     </template>
 
     <script>
@@ -71,7 +74,6 @@
                     window.open(this.logoutUrl);
                     if (this.logoutForm && this.logoutForm != '') {
                         document.getElementById(this.logoutForm).submit();
-//                        window.location.reload(true);
                     }
                 }
             },
@@ -114,6 +116,10 @@
             },
 
             _onAuthCompletion: function () {
+                this.$.localApi.call('localLogin', null, null, this._onLocalLogin.bind(this));
+            },
+
+            _onLocalLogin: function () {
                 window.location.reload(true);
             },
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace OpenOrderFramework.Models
 {
@@ -33,7 +34,7 @@ namespace OpenOrderFramework.Models
             return cart;
         }
 
-        public void CalcTax(decimal taxPercent = 20M, Discount discount = null)
+        public void CalcTax(Discount discount = null, decimal taxPercent = 20M)
         {
             var itemsTotal = Items.Sum(d => d.Count * d.Item.Price);
             if (discount != null)
@@ -41,6 +42,17 @@ namespace OpenOrderFramework.Models
             this.Tax = (itemsTotal + this.Shipping - this.Discount) * (taxPercent / 100);
             this.Total = itemsTotal + this.Shipping + this.Tax - this.Discount;
             storeDB.SaveChanges();
+        }
+
+        public async Task SetItemQtyAsync(int itemId, int qty)
+        {
+            var cartItem = storeDB.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId && c.ItemId == itemId);
+            if (qty <= 0)
+                storeDB.Carts.Remove(cartItem);
+            else
+                cartItem.Count = qty;
+            await storeDB.SaveChangesAsync();
+            CalcTax();
         }
 
         public int AddToCart(Item item)
