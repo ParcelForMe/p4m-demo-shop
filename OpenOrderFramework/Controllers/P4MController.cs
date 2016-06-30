@@ -143,7 +143,7 @@ namespace OpenOrderFramework.Controllers
             return result;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("itemQtyChanged")]
         public async Task<CartUpdateMessage> ItemQtyChanged(List<ChangedItem> items)
         {
