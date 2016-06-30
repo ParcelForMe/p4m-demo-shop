@@ -145,16 +145,19 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("itemQtyChanged")]
-        public async Task<CartUpdateMessage> ItemQtyChanged(string itemCode, decimal qty)
+        public async Task<CartUpdateMessage> ItemQtyChanged(List<ChangedItem> items)
         {
             var result = new CartUpdateMessage();
             try
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
-                var intCode = Convert.ToInt32(itemCode);
-                var item = storeDB.Items.Single(i => i.ID == intCode);
-                var roundQty = (int)Math.Round(qty);
-                await localCart.SetItemQtyAsync(item.ID, roundQty);
+                foreach (var chgItem in items)
+                {
+                    var intCode = Convert.ToInt32(chgItem.ItemCode);
+                    var item = storeDB.Items.Single(i => i.ID == intCode);
+                    var roundQty = (int)Math.Round(chgItem.Qty);
+                    await localCart.SetItemQtyAsync(item.ID, roundQty);
+                }
                 localCart.CalcTax();
                 result.Tax = localCart.Tax;
                 result.Shipping = localCart.Shipping;
