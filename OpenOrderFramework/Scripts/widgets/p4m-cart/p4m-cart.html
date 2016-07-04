@@ -1,6 +1,7 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../p4m-cart-card/p4m-cart-card.html" />
 
+
 <dom-module id="p4m-cart">
 
     <template>
@@ -49,6 +50,10 @@
 
             debug: function() {
                 console.log(this.cartData);
+            },
+
+            clearChanges: function() {
+                this.changes = {};
             },
 
             onCartDataChange: function (e) {

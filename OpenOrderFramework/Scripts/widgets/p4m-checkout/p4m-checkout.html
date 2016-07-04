@@ -26,8 +26,7 @@
                     </paper-tabs>
                     <iron-pages selected="{{selectedTab}}">                   
                         <iron-page>                       
-                            <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>
-                            
+                            <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page>
                             Delivery options here
@@ -41,8 +40,8 @@
                     </iron-pages>                 
                 </div>
                 <div id="summaryPanel" class="p4m-panel">
-                    <p4m-order-summary id="order-summary" cart-data="{{cartData}}"></p4m-order-summary> 
-                    <button class="p4m-button p4m-button-active">Update</button>  
+                    <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+                    <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary> 
                 </div>
 
             </div>
@@ -169,50 +168,68 @@
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this));
             },
 
-            sendChangesToLocal: function(callback) {
-
-            },
 
             sendCartChanges: function () {
+
                 console.log("Sending changes");
+                var self = this;
                 //Send changes to local API, then to P4m
                 var changes = [];
+
                 for (var sku in this.$.cart.changes) {
                     changes.push({ItemCode: sku, Qty: this.$.cart.changes[sku]});
                 }
+                if (changes.length > 0) {
+                    this.$.localApi.call('itemQtyChanged', {}, changes, function () {
+                        console.log("Called local api itemQtyChanged");
+                        self.$.cart.clearChanges();
+                        self.updateP4mCart();
 
-                this.$.localApi.call('itemQtyChanged', {}, changes, function () {
-                    console.log("Called local api itemQtyChanged");
+
+                    });
+                }
+                else {
+                    console.log("No changes to send");
+                }
 
 
-                    //Send changes to P4M
-                    /*var cartMessage =
-                    {
-                        "SessionId": this.sessionId,
-                        "PaymentType": "DB",
-                        "Currency": this.cartData.Currency,
-                        "PayMethodToken": "this.consumerData.PayMethodToken",   // TODO: load the consumer
-                        "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
-                        "Cart": this.cartData
-                    };
-                    this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));*/
-                });
             },
 
             updateConsumer: function() {
 
             },
 
+            updateP4mCart: function () {
+                
+                this.$.orderSummary.showAsLoading();
+
+                //Send changes to P4M
+                var cartMessage =
+                {
+                    "SessionId": this.sessionId,
+                    "PaymentType": "DB",
+                    "Currency": this.cartData.Currency,
+                    "PayMethodToken": "this.consumerData.PayMethodToken",   // TODO: load the consumer
+                    "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
+                    "Cart": this.cartData
+                };
+                this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));
+            },
+
             onCartData: function (data) {
+                console.log("Received new cart data");
+                this.$.orderSummary.showAsLoaded();
                 if (data.Success) {
                     this.cartData = data.Cart;
                     if (this.cartData.Id === null) {
-                        //TODO: in this case we have retrieved the cart from the local server so we need to update P4M
-                        //this.sendChanges();
+                        console.log("Updating P4M");
+                        //In this case we have retrieved the cart from the local server so we need to update P4M
+                        this.updateP4mCart();
                     }
                 }
-                else
-                    alert(data.Error);
+                else {
+                    console.error(data.Error);
+                }                
             },
 
             onCartDataChange: function (e) {
@@ -224,9 +241,7 @@
                     if (this._changeTimer) window.clearTimeout(this._changeTimer);
                     this._changeTimer = window.setTimeout(this.sendCartChanges.bind(this), 2000);
                 }
-            },
-
-
+            }
 
         });
     </script>

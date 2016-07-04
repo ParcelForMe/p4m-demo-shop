@@ -1,9 +1,10 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 
 <dom-module id="p4m-order-summary">
 
     <template>
-        <div id="p4m-container">
+        <div id="p4mContainer">
             <h2>Order Summary</h2>
             <div class="p4m-table">
                 <div class="p4m-row">
@@ -14,7 +15,7 @@
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Delivery</div>
                     <div class="p4m-cell detail-col">Default delivery</div>
-                    <div class="p4m-cell cost-col">$123.00</div>
+                    <div class="p4m-cell cost-col">{{currencySymbol}}{{cartData.ShippingAmt}}</div>
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Discount</div>
@@ -23,23 +24,28 @@
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Tax</div>
-                    <div class="p4m-cell detail-col">10</div>
-                    <div class="p4m-cell cost-col">$123.00</div>
+                    <div class="p4m-cell detail-col">Total tax</div>
+                    <div class="p4m-cell cost-col">{{currencySymbol}}{{_tax}}</div>
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Total</div>
                     <div class="p4m-cell detail-col"></div>
-                    <div class="p4m-cell cost-col">$123.00</div>
+                    <div class="p4m-cell cost-col">{{currencySymbol}}{{_total}}</div>
                 </div>
             </div>
+            <paper-spinner id="spinner"></paper-spinner>
 
         </div>
     </template>
 
     <style>
-        #p4m-container {
+        #p4mContainer {
             width: 90%;
             margin: auto;
+            position: relative;
+        }
+        #p4mContainer.loading .p4m-table .p4m-cell {
+            color: #D0D0D0;
         }
         .p4m-table {
             display: flex;
@@ -70,6 +76,10 @@
         #spinner {
             width: 50px;
             height: 50px;
+            position: absolute;
+            top: 65px;
+            left: 40%;
+            margin: auto;
         }
 
         .hidden {
@@ -108,6 +118,9 @@
                     type: Number,
                     notify: true,
                     value: ''
+                },
+                _tax: {
+                    type: String
                 }
             },
             observers: [ "onCartDataModified(cartData.Items.*)"],
@@ -120,6 +133,7 @@
                 if (this.cartData) {
                     this._updateItemCount();
                     this._updateCartDescription();
+                    this._updateCurrencyAmounts();
                 }               
             },
 
@@ -146,11 +160,29 @@
                 });
             },
 
+            _updateCurrencyAmounts: function () {
+                this._tax = this.cartData.Tax.toFixed(2);
+                this._total = this.cartData.Total.toFixed(2);
+            },
+
 
             onCartDataModified: function (e) {
                 console.log("p4m-order-summary: onCartDataModified()", e);
                 this.update();
+            },
+         
+            showAsLoaded: function () {
+                this.$.spinner.active = false;
+                this.$.spinner.classList.add('hidden');
+                this.$.p4mContainer.classList.remove('loading');
+            },
+
+            showAsLoading: function () {
+                this.$.spinner.active = true;
+                this.$.spinner.classList.remove('hidden');
+                this.$.p4mContainer.classList.add('loading');
             }
+
         });
     </script>
 </dom-module>
