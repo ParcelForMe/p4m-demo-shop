@@ -1,0 +1,79 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
+
+<dom-module id="p4m-purchase">
+
+    <template>
+        <div id="p4m-purchase-container" class$="{{_topClass}}">
+            <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
+            <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
+            <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
+            <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
+            <paper-spinner id="spinner"></paper-spinner>         
+            <button id="p4mBuyNowBtn" on-tap="buyNow">Buy Now</button>
+        </div>
+    </template>
+
+    <style>
+
+        #p4m-purchase-container {
+            display: flex;
+            flex-direction: row;
+        }
+        #spinner {
+            width: 50px;
+            height: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-purchase",
+
+            properties: {
+                cartData: {
+                    type: Object,
+                    notify: true,
+                    observer: "onCartDataChange"
+                },
+                changes: {
+                    type: Object,
+                    value: {}
+                }
+            },
+            observers: [
+                "onCartDataChange(cartData.*)"
+            ],
+
+            ready: function()
+            {
+                this.load();
+            },
+
+            buyNow: function() {
+                alert("buy it");
+            },
+
+            load: function () {
+                //Check to see if the user is logged in
+                var token = this.$.p4mTokenCookie.readCookie();
+                this._loggedIn = token !== "";
+                this.enable();
+            },
+
+            onCartDataChange: function (e) {
+                this.enable();
+            },
+
+            enable: function () {
+                this.$.p4mBuyNowBtn.disabled = !this._loggedIn || !this.cartData;
+            },
+        });
+    </script>
+</dom-module>
