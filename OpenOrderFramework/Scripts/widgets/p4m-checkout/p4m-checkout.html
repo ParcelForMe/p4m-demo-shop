@@ -9,6 +9,7 @@
 <link rel="import" href="../p4m-cart/p4m-cart.html" />
 <link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
 <link rel="import" href="../p4m-address-list/p4m-address-list.html" />
+<link rel="import" href="../p4m-purchase/p4m-purchase.html" />
 
 <dom-module id="p4m-checkout">
 
@@ -43,6 +44,7 @@
                 <div id="summaryPanel" class="p4m-panel">
                     <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary> 
+                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}"></p4m-purchase>
                 </div>
 
             </div>

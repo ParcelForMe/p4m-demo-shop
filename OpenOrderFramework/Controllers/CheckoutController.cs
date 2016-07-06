@@ -20,15 +20,15 @@ namespace OpenOrderFramework.Controllers
 
         public List<String> CreditCardTypes { get { return appConfig.CreditCardType;} }
 
-        // ***** P4M *****
         public ActionResult Index()
         {
+            // ***** P4M *****
             if (!string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
                 return RedirectToAction("p4mCheckout", "checkout");
             else
+            // ***** P4M *****
                 return RedirectToAction("Address");
         }
-        // ***** P4M *****
 
         //.
         // GET: /Checkout/Address

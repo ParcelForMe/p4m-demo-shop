@@ -116,11 +116,16 @@
             },
 
             _onAuthCompletion: function () {
-                this.$.localApi.call('localLogin', null, null, this._onLocalLogin.bind(this));
+                var currentPage = { "currentPage": window.location.href };
+                this.$.localApi.call('localLogin', currentPage, null, this._onLocalLogin.bind(this));
             },
 
-            _onLocalLogin: function () {
-                window.location.reload(true);
+            _onLocalLogin: function (data) {
+                console.log(JSON.stringify(data));
+                if (data.RedirectUrl)
+                    window.location.href = data.RedirectUrl;
+                else
+                    window.location.reload(true);
             },
 
             _onConsumerDetails: function(data) {

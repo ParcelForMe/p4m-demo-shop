@@ -112,19 +112,21 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("localLogin")]
-        public async Task<P4MBaseMessage> LocalLogin()
+        public async Task<JsonResult> LocalLogin(string currentPage)
         {
-            var result = new P4MBaseMessage();
+            var result = new LoginMessage();
             try
             {
                 var token = this.Request.Cookies["p4mToken"].Value;
                 await LocalConsumerLogin(token);
+                if (currentPage.ToLower().Contains("/account/login"))
+                    result.RedirectUrl = "/checkout/p4mCheckout";
             }
             catch (Exception e)
             {
                 result.Error = e.Message;
             }
-            return result;
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         async Task LocalConsumerLogin(string token)

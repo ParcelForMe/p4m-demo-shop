@@ -663,6 +663,7 @@
     <Content Include="Scripts\widgets\p4m-profile\p4m-profile.html" />
     <Content Include="Scripts\widgets\p4m-profile\peli-logo-green.png" />
     <Content Include="Scripts\widgets\p4m-profile\peli-logo-grey.png" />
+    <Content Include="Scripts\widgets\p4m-purchase\p4m-purchase.html" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
