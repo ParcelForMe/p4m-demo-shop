@@ -39,6 +39,10 @@ namespace OpenOrderFramework.Controllers
         [Route("checkout/p4mCheckout")]
         public async Task<ActionResult> P4MCheckout()
         {
+            var localCart = ShoppingCart.GetCart(this.HttpContext);
+            var cart = GetP4MCartFromLocalCart();
+            if (localCart == null || cart == null || cart.Items.Count == 0)
+                return Redirect("/home");
             // update P4M with the current cart details
             await AddItemsToP4MCartAsync();
             // Return the view
