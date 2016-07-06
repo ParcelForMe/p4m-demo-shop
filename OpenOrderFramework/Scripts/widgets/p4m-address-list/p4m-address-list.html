@@ -1,0 +1,69 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
+<link rel="import" href="../p4m-address/p4m-address.html" />
+
+<dom-module id="p4m-address-list">
+
+    <template>
+        <div id="container">
+            <a href="#" on-tap="toggleNewAddress">Add a new address</a>
+
+            <iron-collapse id="newAddress">
+                <p4m-address address-data="{{newAddress}}" consumer-data="{{consumerData}}" mode="edit"></p4m-address>
+            </iron-collapse>
+            <template is="dom-repeat" items="{{addressListData}}">
+                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" read-only="true"></p4m-address>
+            </template>
+        </div>
+
+    </template>
+
+
+
+
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-address-list",
+
+            properties: {
+                addressListData: {
+                    type: Array,
+                    notify: true,
+                    observer: "onDataChange"
+                },
+                consumerData: {
+                    type: Object,
+                    notify: true,
+                    observer: "onDataChange"
+                },
+                newAddress: {
+                    type: Object,
+                    value: {},
+                    notify: true
+                }
+            },
+
+            ready: function()
+            {
+
+            },
+
+            toggleNewAddress: function() {
+                this.$.newAddress.toggle();
+            },
+
+            onDataChange: function (e) {
+            }
+
+        });
+    </script>
+</dom-module>

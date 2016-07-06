@@ -8,6 +8,7 @@
 <link rel="import" href="../p4m-api/local-api.html" />
 <link rel="import" href="../p4m-cart/p4m-cart.html" />
 <link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
+<link rel="import" href="../p4m-address-list/p4m-address-list.html" />
 
 <dom-module id="p4m-checkout">
 
@@ -35,7 +36,7 @@
                             Payment options here
                         </iron-page>
                         <iron-page>
-                            Addresses here
+                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
                 </div>
@@ -87,7 +88,7 @@
         }
         .p4m-panel {
             width: 50%; 
-            /*height: 200px;*/
+            min-height: 200px;
             border: none;
         }
         .p4m-button {
@@ -122,7 +123,8 @@
                 },
                 consumerData: {
                     type: Object,
-                    notify: true
+                    notify: true,
+                    observer: "onConsumerDataChange"
                 },              
                 cartData: {
                     type: Object,
@@ -154,6 +156,9 @@
                 if (this.sessionId) {
                     this.getLocalCart();
                 }
+                window.addEventListener('p4m_consumer', this.onConsumerData.bind(this));
+                this.$.api.call('consumer');
+                
             },
 
             debug: function(e) {
@@ -171,7 +176,7 @@
 
             sendCartChanges: function () {
 
-                console.log("Sending changes");
+                //console.log("Sending changes");
                 var self = this;
                 //Send changes to local API, then to P4m
                 var changes = [];
@@ -181,7 +186,7 @@
                 }
                 if (changes.length > 0) {
                     this.$.localApi.call('itemQtyChanged', {}, changes, function () {
-                        console.log("Called local api itemQtyChanged");
+                        //console.log("Called local api itemQtyChanged");
                         self.$.cart.clearChanges();
                         self.updateP4mCart();
 
@@ -189,14 +194,18 @@
                     });
                 }
                 else {
-                    console.log("No changes to send");
+                    //console.log("No changes to send");
                 }
 
 
             },
 
-            updateConsumer: function() {
+            onConsumerData: function(e) {
+                this.consumerData = e.detail.Consumer;
+            },
 
+            onConsumerDataChange: function(newVal, oldVal) {
+                console.log("Consumer data changed to", newVal);
             },
 
             updateP4mCart: function () {
@@ -217,12 +226,12 @@
             },
 
             onCartData: function (data) {
-                console.log("Received new cart data");
+               // console.log("Received new cart data");
                 this.$.orderSummary.showAsLoaded();
                 if (data.Success) {
                     this.cartData = data.Cart;
                     if (this.cartData.Id === null) {
-                        console.log("Updating P4M");
+                        //console.log("Updating P4M");
                         //In this case we have retrieved the cart from the local server so we need to update P4M
                         this.updateP4mCart();
                     }
@@ -233,7 +242,7 @@
             },
 
             onCartDataChange: function (e) {
-                console.log('p4m-checkout: onCartDataChange()', JSON.stringify(e));
+                //console.log('p4m-checkout: onCartDataChange()', JSON.stringify(e));
                 //If this is a valid change record,
                 if (e.path) {
                     //Start timer, then send changes.

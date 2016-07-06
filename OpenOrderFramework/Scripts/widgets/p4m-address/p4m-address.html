@@ -1,0 +1,250 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-input/iron-input.html" />
+<link rel="import" href="../../Lib/iron-pages/iron-pages.html" />
+<link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+<link rel="import" href="../../Lib/iron-icons/maps-icons.html">
+<link rel="import" href="../../Lib/iron-icons/editor-icons.html">
+
+<dom-module id="p4m-address">
+
+    <template>
+        <div id="container">  
+ 
+            <iron-pages selected="{{selectedMode}}">
+                <iron-page>
+                    <div class="card-panel">
+                        <div class="card-heading">
+                            <span class="p4m-address-label">{{addressData.Label}}</span>
+                            <span class="side-action"><a href="#" on-tap=""><iron-icon icon="editor:mode-edit"></iron-icon></a></span>
+                        </div>
+                        <div class="card-body">
+                            <div class="address-content">
+                                <div class="address-text">{{addressData.Street1}}</div>
+                                <div class="address-text">{{addressData.Street2}}</div>
+                                <div class="address-text">{{addressData.City}}</div>
+                                <div class="address-text">{{addressData.PostCode}}</div>
+                            </div>
+                        </div>
+
+                        <div class="address-actions">
+                            <div class="toggle-button">
+                                <a href="#" on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</a>
+                            </div>
+                            <div id="billingToggle" class="toggle-button">
+                                <a href="#" on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</a>
+                            </div>
+                            <template is="dom-if" if="{{isBilling}}"><div class="address-tag">Billing Address</div></template>
+                        </div>
+                    </div>
+
+                </iron-page>
+                <iron-page>
+                    <div class="address-form">
+                        <input is="iron-input" type="text" id="address-label" bind-value="{{addressData.Label}}" placeholder="Label, e.g. 'Home'" />
+                        <input is="iron-input" type="text" id="address-street-1" bind-value="{{addressData.Street1}}" placeholder="Street address" />
+                        <input is="iron-input" type="text" id="address-street-2" bind-value="{{addressData.Street2}}" placeholder="" />
+                        <input is="iron-input" type="text" id="address-city" bind-value="{{addressData.City}}" placeholder="City" />
+                        <input is="iron-input" type="text" id="address-postcode" bind-value="{{addressData.PostCode}}" placeholder="Postal code" />
+                    </div>
+                    <div class="address-actions">
+                        <a class="p4m-button" href="#" on-tap="saveAddress">Save</a>
+                    </div>
+                </iron-page>
+                <iron-page>
+                    <div class="address-content">
+                        <h3>Pending</h3>
+                        <p>Enter your security code to activate this address.</p>
+                        <div class="address-text">{{addressData.Label}}</div>
+                        <input is="iron-input" type="text" id="address-postcode" bind-value="{{securityCode}}" placeholder="Security code" />
+                    </div>
+                    <div class="address-actions">
+                        <a class="p4m-button" href="#" on-tap="confirmPending">Confirm</a>
+                    </div>
+                </iron-page>
+            </iron-pages>  
+  
+        </div>
+
+    </template>
+
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-action {
+            float: right;
+        }
+        .side-action a {
+            color: white;
+        }
+        .address-actions {
+            display: flex;
+            flex-direction: row;
+        }
+        .address-actions a {
+            color: black;
+        }
+
+        .toggle-button {
+            margin: 4px;
+            height: 50px;
+            width: 50px;
+            border-radius: 50px;
+            -webkit-border-radius: 25px;
+            -moz-border-radius: 25px;
+            background-color: #D0D0D0;
+        }
+
+        .toggle-button.chosen {
+            background-color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
+       
+        }
+
+        .toggle-button iron-icon {
+            margin: 13px;
+        }
+
+        .toggle-button.chosen iron-icon {
+            color: white;
+        }
+
+        .address-tag {
+            color: #D0D0D0;
+            letter-spacing: 3px;
+            text-transform: uppercase;   
+        }
+
+        .card-panel {
+            /*border: 1px #D0D0D0 solid;*/
+            border-radius: 7px;
+            margin: 8px;
+            box-shadow: rgba(128, 128, 128, 0.2) 0px 2px 6px 0px;
+        }
+
+        .card-heading {
+            background-color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
+            color: white;
+            padding: 4px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .card-body {
+           padding: 4px;
+        }
+
+        .p4m-button {
+            padding: 10px;
+            background-color: #808080;
+            color: #000000;
+            border-radius: 4px;
+        }
+
+
+        #actions {
+        }
+
+    </style>
+
+    <script>
+        var pageReference = {
+            "view": 0,
+            "edit": 1,
+            "pending": 2
+        };
+    //
+        Polymer({
+            is: "p4m-address",
+
+            properties: {
+                addressData: {
+                    type: Object,
+                    notify: true
+                    //observer: "onDataChange"
+                },
+                consumerData: {
+                    type: Object,
+                    notify: true,
+                    observer: "onDataChange"
+                },
+                mode: {
+                    type: String, //view, edit, pending
+                    value: "view",
+                    notify: true,
+                    observer: "onModeChange"
+                },
+                pending: { //
+                    type: Object,
+                    value: false
+                },
+                readOnly: {
+                    type: Object,
+                    value: false
+                },
+                selectedMode: {
+                    type: Number,
+                    value: 0
+                },
+              
+                isBilling: {
+                    type: Object,
+                    value: false
+                },
+                isDelivery: {
+                    type: Object,
+                    value: false
+                }
+            },
+
+            ready: function()
+            {
+            },
+
+           
+            markAsBilling: function () { 
+                this.consumerData.BillingAddressId = this.addressData.Id;
+            },
+
+            markAsDelivery: function() {
+
+            },
+
+            saveAddress: function () {
+                var apiWidgets = document.getElementsByTagName('p4m-api');
+                if (apiWidgets && apiWidgets.length) {
+                    var api = apiWidgets[0];
+                    api.call("postAddress", null, this.addressData, function (err) {
+                        console.log("postAddress():", err);
+                        //TODO: Update addressData
+                        //this.mode = "view";
+                    });
+                }
+                else {
+                    //this.mode = "view";
+                }
+
+
+            },
+
+            onDataChange: function (e) {
+
+                this.isBilling = (this.addressData && this.consumerData && (this.consumerData.BillingAddressId === this.addressData.Id));
+                if (this.isBilling) {
+                    this.$.billingToggle.classList.add('chosen');
+                }
+                else {
+                    this.$.billingToggle.classList.remove('chosen');
+                }
+            },
+
+            onModeChange: function (newValue) {
+                this.selectedMode = pageReference[newValue];
+            }
+
+
+
+        });
+    </script>
+</dom-module>
