@@ -58,7 +58,6 @@
 
             onCartDataChange: function (e) {
                 if (e && e.path) {
-                    console.log("p4m-cart: onCartDataChange()", e);
                     //Parse path to identify change
                     //cartData.Items.#1.Qty
                     var tokens = e.path.split('.');

@@ -6,20 +6,19 @@
 
     <template>
         <div id="container">
-            <a href="#" on-tap="toggleNewAddress">Add a new address</a>
-
-            <iron-collapse id="newAddress">
-                <p4m-address address-data="{{newAddress}}" consumer-data="{{consumerData}}" mode="edit"></p4m-address>
+            <a href="#" on-tap="addNewAddress">Add a new address</a>
+            <iron-collapse id="newAddressCollapse">
+                <template is="dom-repeat" items="{{addressListData}}" filter="filterNewOnly">
+                    <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" consumer-data="{{consumerData}}" mode="edit"></p4m-address>
+                </template>
             </iron-collapse>
-            <template is="dom-repeat" items="{{addressListData}}">
-                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" read-only="true"></p4m-address>
+
+            <template is="dom-repeat" items="{{addressListData}}" filter="filterOldOnly">
+                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" ></p4m-address>
             </template>
         </div>
 
     </template>
-
-
-
 
     <style>
         #container {
@@ -48,26 +47,51 @@
                 newAddress: {
                     type: Object,
                     value: {},
-                    notify: true
+                    notify: true,
+                    observer: "onNewAddressChange"
+                },
+                _addedNewAddress: {
+                    type: Object,
+                    value: false
                 }
             },
 
             observers: [
                 "onAddressDataChange(addressListData.*)",
-                "onConsumerPreferredAddressDataChange(consumerData.BillingAddressId)"
+                "onConsumerPreferredAddressDataChange(consumerData.BillingAddressId)",
+                "onConsumerPreferredAddressDataChange(consumerData.PrefDeliveryAddressId)"
             ],
 
             ready: function()
             {
-
+                
             },
 
-            toggleNewAddress: function() {
-                this.$.newAddress.toggle();
+            addNewAddress: function () {
+                this.$.newAddressCollapse.opened = true;
+                if (this.addressListData && !this._addedNewAddress) {
+                    this._addedNewAddress = true;
+                    //Add empty object to handle adding a new address
+                    this.push('addressListData', this.newAddress);
+
+                }
+ 
             },
+
+            cancelEdit: function(e) {
+                console.log("Cancel edit");
+                this.$.newAddressCollapse.opened = false;
+            },
+
 
             onAddressDataChange: function (e) {
-                console.log("Address list data changed");
+               
+
+               
+            },
+
+            onNewAddressChange: function(newVal, oldVal) {
+                
             },
 
             onConsumerPreferredAddressDataChange: function (e) {
@@ -81,8 +105,15 @@
                 }
 
                 //this.notifyPath('addressData', this.addressListData);
-            }
+            },
 
+            filterNewOnly: function (e) {
+                return (typeof(e.Label) === "undefined");
+            },
+
+            filterOldOnly: function (e) {
+                return (typeof(e.Label) === "string");
+            }
 
         });
     </script>

@@ -15,7 +15,7 @@
                     <div class="card-panel">
                         <div class="card-heading">
                             <span class="p4m-address-label">{{addressData.Label}}</span>
-                            <span class="side-action"><a href="#" on-tap=""><iron-icon icon="editor:mode-edit"></iron-icon></a></span>
+                            <span class="side-action"><a href="#" on-tap="edit"><iron-icon icon="editor:mode-edit"></iron-icon></a></span>
                         </div>
                         <div class="card-body">
                             <div class="address-content">
@@ -33,24 +33,35 @@
                             <div id="billingToggle" class="toggle-button">
                                 <a href="#" on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</a>
                             </div>
-                            <template is="dom-if" if="{{isBilling}}"><div class="address-tag">Billing Address</div></template>
-                            <template is="dom-if" if="{{isDelivery}}"><div class="address-tag">Delivery Address</div>
-                            </template>
+                            <div>
+                                <template is="dom-if" if="{{isBilling}}">
+                                    <div class="address-tag">Billing Address</div>
+                                </template>
+                                <template is="dom-if" if="{{isDelivery}}">
+                                    <div class="address-tag">Delivery Address</div>
+                                </template>
+                            </div>                           
                         </div>
                     </div>
 
                 </iron-page>
                 <iron-page>
-                    <div class="address-form">
-                        <input is="iron-input" type="text" id="address-label" bind-value="{{addressData.Label}}" placeholder="Label, e.g. 'Home'" />
-                        <input is="iron-input" type="text" id="address-street-1" bind-value="{{addressData.Street1}}" placeholder="Street address" />
-                        <input is="iron-input" type="text" id="address-street-2" bind-value="{{addressData.Street2}}" placeholder="" />
-                        <input is="iron-input" type="text" id="address-city" bind-value="{{addressData.City}}" placeholder="City" />
-                        <input is="iron-input" type="text" id="address-postcode" bind-value="{{addressData.PostCode}}" placeholder="Postal code" />
+                    <div class="card-panel">
+                        <div class="card-body">
+                            <div class="address-form">
+                                <input is="iron-input" type="text" id="address-label" bind-value="{{addressData.Label}}" placeholder="Label, e.g. 'Home'" />
+                                <input is="iron-input" type="text" id="address-street-1" bind-value="{{addressData.Street1}}" placeholder="Street address" />
+                                <input is="iron-input" type="text" id="address-street-2" bind-value="{{addressData.Street2}}" placeholder="" />
+                                <input is="iron-input" type="text" id="address-city" bind-value="{{addressData.City}}" placeholder="City" />
+                                <input is="iron-input" type="text" id="address-postcode" bind-value="{{addressData.PostCode}}" placeholder="Postal code" />
+                            </div>
+                            <div class="address-actions">
+                                <a class="p4m-button" href="#" on-tap="save">Save</a>
+                                <a class="p4m-button" href="#" on-tap="cancel">Cancel</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="address-actions">
-                        <a class="p4m-button" href="#" on-tap="saveAddress">Save</a>
-                    </div>
+
                 </iron-page>
                 <iron-page>
                     <div class="address-content">
@@ -126,7 +137,7 @@
         }
 
         .card-heading {
-            background-color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
+            background-color: #D0D0D0;
             color: white;
             padding: 4px;
             border-top-left-radius: 8px;
@@ -142,6 +153,22 @@
             background-color: #808080;
             color: #000000;
             border-radius: 4px;
+        }
+
+        .address-form {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .address-form input {
+            margin: 4px;
+            width: 50%;
+            max-width: 100%;
+        }
+
+        .address-form input#address-label {
+            width: 100%;
         }
 
 
@@ -199,7 +226,8 @@
                 isDelivery: {
                     type: Object,
                     notify: true,
-                    value: false
+                    value: false,
+                    observer: "onDataChange"
                 }
             },
 
@@ -222,7 +250,15 @@
                 this.isDelivery = true;
             },
 
-            saveAddress: function () {
+            edit: function() {
+                this.mode = "edit";
+            },
+
+            view: function () {
+                this.mode = "view";
+            },
+
+            save: function () {
                 var apiWidgets = document.getElementsByTagName('p4m-api');
                 if (apiWidgets && apiWidgets.length) {
                     var api = apiWidgets[0];
@@ -233,8 +269,7 @@
                         "isBillingAddr": this.isBilling
                     };
                     api.call("postAddress", null, postData, (function (result) {
-                        //this.push(this.consumerData.Addresses, result);
-                        //TODO: Update addressData
+                       // this.push('consumerData.Addresses', result.Address);
                         this.mode = "view";
                     }).bind(this));
                 }
@@ -243,6 +278,15 @@
                 }
 
 
+            },
+
+            cancel: function() {
+                if (!this.addressData.Id) {
+                    //var delPos = this.consumerData.Addresses.indexOf(this.addressData);
+                    //this.set('addressData', null);
+                    //this.splice('consumerData.Addresses', delPos, 1);
+                }
+                this.fire("canceledit", this);
             },
 
             onDataChange: function (e) {
