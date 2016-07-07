@@ -37,13 +37,13 @@
             properties: {
                 addressListData: {
                     type: Array,
-                    notify: true,
-                    observer: "onDataChange"
+                    notify: true
+                    //observer: "onAddressDataChange"
                 },
                 consumerData: {
                     type: Object,
-                    notify: true,
-                    observer: "onDataChange"
+                    notify: true
+                    //observer: "onConsumerDataChange"
                 },
                 newAddress: {
                     type: Object,
@@ -51,6 +51,11 @@
                     notify: true
                 }
             },
+
+            observers: [
+                "onAddressDataChange(addressListData.*)",
+                "onConsumerPreferredAddressDataChange(consumerData.BillingAddressId)"
+            ],
 
             ready: function()
             {
@@ -61,8 +66,23 @@
                 this.$.newAddress.toggle();
             },
 
-            onDataChange: function (e) {
+            onAddressDataChange: function (e) {
+                console.log("Address list data changed");
+            },
+
+            onConsumerPreferredAddressDataChange: function (e) {
+                var i = 0;
+                console.log("Changed preferred billing address");
+                if (this.addressListData) {
+                    this.addressListData.forEach((function (item) {
+                        this.notifyPath('addressListData.#' + i + "._update", Math.random());
+                        i++;
+                    }).bind(this));
+                }
+
+                //this.notifyPath('addressData', this.addressListData);
             }
+
 
         });
     </script>
