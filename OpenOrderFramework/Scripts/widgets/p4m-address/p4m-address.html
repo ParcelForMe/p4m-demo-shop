@@ -27,13 +27,15 @@
                         </div>
 
                         <div class="address-actions">
-                            <div class="toggle-button">
+                            <div id="deliveryToggle" class="toggle-button">
                                 <a href="#" on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</a>
                             </div>
                             <div id="billingToggle" class="toggle-button">
                                 <a href="#" on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</a>
                             </div>
                             <template is="dom-if" if="{{isBilling}}"><div class="address-tag">Billing Address</div></template>
+                            <template is="dom-if" if="{{isDelivery}}"><div class="address-tag">Delivery Address</div>
+                            </template>
                         </div>
                     </div>
 
@@ -161,8 +163,8 @@
             properties: {
                 addressData: {
                     type: Object,
-                    notify: true
-                    //observer: "onDataChange"
+                    notify: true,
+                    observer: "onDataChange"
                 },
                 consumerData: {
                     type: Object,
@@ -190,13 +192,20 @@
               
                 isBilling: {
                     type: Object,
-                    value: false
+                    notify: true,
+                    value: false,
+                    observer: "onDataChange"
                 },
                 isDelivery: {
                     type: Object,
+                    notify: true,
                     value: false
                 }
             },
+
+            observers: [
+                "onDataChange(addressData.*)"
+            ],
 
             ready: function()
             {
@@ -204,22 +213,30 @@
 
            
             markAsBilling: function () { 
-                this.consumerData.BillingAddressId = this.addressData.Id;
+                this.set('consumerData.BillingAddressId', this.addressData.Id);       
+                this.isBilling = true;
             },
 
             markAsDelivery: function() {
-
+                this.set('consumerData.PrefDeliveryAddressId', this.addressData.Id);
+                this.isDelivery = true;
             },
 
             saveAddress: function () {
                 var apiWidgets = document.getElementsByTagName('p4m-api');
                 if (apiWidgets && apiWidgets.length) {
                     var api = apiWidgets[0];
-                    api.call("postAddress", null, this.addressData, function (err) {
-                        console.log("postAddress():", err);
+                    var postData =
+                    {
+                        "Address": this.addressData,
+                        "isPrefDeliveryAddr": this.isDelivery,
+                        "isBillingAddr": this.isBilling
+                    };
+                    api.call("postAddress", null, postData, (function (result) {
+                        //this.push(this.consumerData.Addresses, result);
                         //TODO: Update addressData
-                        //this.mode = "view";
-                    });
+                        this.mode = "view";
+                    }).bind(this));
                 }
                 else {
                     //this.mode = "view";
@@ -229,13 +246,26 @@
             },
 
             onDataChange: function (e) {
+                console.log("p4m-address.onDataChange()");
+                this.updateUi();
+            },
 
+            updateUi: function()
+            {
                 this.isBilling = (this.addressData && this.consumerData && (this.consumerData.BillingAddressId === this.addressData.Id));
                 if (this.isBilling) {
                     this.$.billingToggle.classList.add('chosen');
                 }
                 else {
                     this.$.billingToggle.classList.remove('chosen');
+                }
+
+                this.isDelivery = (this.addressData && this.consumerData && (this.consumerData.PrefDeliveryAddressId === this.addressData.Id));
+                if (this.isDelivery) {
+                    this.$.deliveryToggle.classList.add('chosen');
+                }
+                else {
+                    this.$.deliveryToggle.classList.remove('chosen');
                 }
             },
 
