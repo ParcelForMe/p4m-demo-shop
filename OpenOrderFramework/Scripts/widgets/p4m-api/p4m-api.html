@@ -111,7 +111,21 @@
             "postAddress": {
                 "stub": "address",
                 "method": "POST"
-            }
+            },
+            "purchase": {
+                "stub": "purchase/{cartId}/{cvv}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "cartId",
+                        "required": true
+                    },
+                    {
+                        "name": "cvv",
+                        "required": true
+                    },
+                ]
+            },
         };
 
 
