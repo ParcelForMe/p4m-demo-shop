@@ -10,6 +10,7 @@
 <link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
 <link rel="import" href="../p4m-address-list/p4m-address-list.html" />
 <link rel="import" href="../p4m-purchase/p4m-purchase.html" />
+<link rel="import" href="../p4m-card-list/p4m-card-list.html" />
 
 <dom-module id="p4m-checkout">
 
@@ -34,7 +35,7 @@
                             Delivery options here
                         </iron-page>
                         <iron-page>
-                            Payment options here
+                            <p4m-card-list consumer-data="{{consumerData}}"></p4m-card-list>
                         </iron-page>
                         <iron-page>
                             <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}"></p4m-address-list>
@@ -232,7 +233,7 @@
                 this.$.orderSummary.showAsLoaded();
                 if (data.Success) {
                     this.cartData = data.Cart;
-                    if (this.cartData.Id === null) {
+                    if (this.cartData && this.cartData.Id === null) {
                         //console.log("Updating P4M");
                         //In this case we have retrieved the cart from the local server so we need to update P4M
                         this.updateP4mCart();

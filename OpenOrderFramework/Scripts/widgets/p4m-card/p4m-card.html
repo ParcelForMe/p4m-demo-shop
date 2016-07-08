@@ -1,0 +1,179 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+
+
+<dom-module id="p4m-card">
+
+    <template>
+        <div id="container">
+
+            <div class="card-panel">
+                 <div class="card-body">
+                    <div class$="card-content {{cardData.Issuer}}">
+                        <div class="card-description">{{cardData.Description}}</div>
+                        <div class="card-issuer">{{cardData.Issuer}}</div>
+                        <div class="card-logo"></div>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <div id="selectedToggle" class="toggle-button">
+                        <div href="#" on-tap="select"><iron-icon icon="credit-card" />Select</div>
+                    </div>
+                    <div>
+                        <template is="dom-if" if="{{isSelected}}">
+                            <div class="card-tag">Selected</div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </template>
+
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-actions a {
+            color: black;
+        }
+
+        .toggle-button {
+            margin: 4px;
+            height: 50px;
+            width: 50px;
+            border-radius: 50px;
+            -webkit-border-radius: 25px;
+            -moz-border-radius: 25px;
+            background-color: #D0D0D0;
+        }
+
+        .toggle-button.chosen {
+            background-color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
+        }
+
+        .toggle-button iron-icon {
+            margin: 13px;
+        }
+
+        .toggle-button.chosen iron-icon {
+            color: white;
+        }
+
+        .card-tag {
+            color: #D0D0D0;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .card-panel {
+            border-radius: 7px;
+            margin: 8px;
+            box-shadow: rgba(128, 128, 128, 0.2) 0px 2px 6px 0px;
+        }
+
+        .card-body {
+            padding: 4px;
+        }
+
+        .card-description {
+            letter-spacing: 3px;
+        }
+
+        .card-logo {
+            height: 80px;
+            width: 128px;
+        }
+
+        .Visa .card-logo {
+            background-image: url('assets/visa.png');
+        }
+
+        .Mastercard .card-logo {
+            background-image: url('assets/mastercard.png');
+        }
+
+        .Amex .card-logo {
+            background-image: url('assets/amex.png');
+        }
+
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-card",
+
+            properties: {
+                cardData: {
+                    type: Object,
+                    notify: true,
+                    observer: "onDataChange"
+                },
+                consumerData: {
+                    type: Object,
+                    notify: true,
+                    observer: "onDataChange"
+                },
+
+                isSelected: {
+                    type: Object,
+                    notify: true,
+                    value: false,
+                    observer: "onDataChange"
+                },
+
+            },
+
+            observers: [
+                "onDataChange(consumerData.*)"
+            ],
+
+            ready: function()
+            {
+            },
+
+
+            select: function() {
+                this.set('consumerData.DefaultPayMethodToken', this.cardData.Id);
+                this.isSelected = true;
+                this.fire('cardSelected', this);
+            },
+
+            edit: function() {
+                this.mode = "edit";
+            },
+
+            view: function () {
+                this.mode = "view";
+            },
+
+
+            onDataChange: function (e) {
+                this.updateUi();
+            },
+
+            updateUi: function()
+            {
+                this.isSelected = (this.cardData && this.consumerData && (this.consumerData.DefaultPayMethodToken === this.cardData.Id));
+                if (this.isSelected) {
+                    this.$.selectedToggle.classList.add('chosen');
+                }
+                else {
+                    this.$.selectedToggle.classList.remove('chosen');
+                }
+            },
+
+
+        });
+    </script>
+</dom-module>

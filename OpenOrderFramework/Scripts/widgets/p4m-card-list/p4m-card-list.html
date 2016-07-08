@@ -1,0 +1,56 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
+<link rel="import" href="../p4m-card/p4m-card.html" />
+
+<dom-module id="p4m-card-list">
+
+    <template>
+        <div id="container">
+            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}" filter="_cardsOnly">
+                <p4m-card card-data="{{item}}" on-card-selected="onCardSelected" consumer-data="{{consumerData}}"></p4m-card>
+            </template>
+        </div>
+
+    </template>
+
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-card-list",
+
+            properties: {
+                consumerData: {
+                    type: Object,
+                    notify: true
+                }
+            },
+
+            observers: [
+
+            ],
+
+            ready: function()
+            {
+
+            },
+
+            onCardSelected(e) {
+                console.log('Selected card', e.detail);
+                this.set("consumerData.DefaultPayMethodToken", e.detail.Id); //This should now trigger the other cards to update their UI
+            },
+
+            _cardsOnly: function (item) {
+                return (item && item.AccountType && item.AccountType === "Card");
+            }
+
+
+        });
+    </script>
+</dom-module>

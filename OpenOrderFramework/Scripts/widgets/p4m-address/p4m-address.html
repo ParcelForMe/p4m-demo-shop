@@ -259,6 +259,7 @@
             },
 
             save: function () {
+                //TODO: Look at replacing this with this.fire('save', this) and handle save behaviour externally.
                 var apiWidgets = document.getElementsByTagName('p4m-api');
                 if (apiWidgets && apiWidgets.length) {
                     var api = apiWidgets[0];
