@@ -7,7 +7,7 @@
 
     <template>
         <div id="container">
-            <p4m-new-card consumer-data="{{consumerData}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}} card-merchant-id={{cardMerchantId}}"></p4m-new-card>
+            <p4m-new-card consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{cardMerchantId}}"></p4m-new-card>
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}" filter="_cardsOnly">
                 <p4m-card card-data="{{item}}" on-card-selected="onCardSelected" consumer-data="{{consumerData}}"></p4m-card>
             </template>
@@ -33,13 +33,21 @@
                     notify: true
                 },
                 cardHash: {
-                    type: String
+                    type: String,
+                    notify: true
+                },
+                newCardId: {
+                    type: String,
+                    notify: true
                 },
                 cardTimestamp: {
-                    type: String
+                    type: String,
+                    notify: true
                 },
                 cardMerchantId: {
-                    type: String
+                    type: String,
+                    value: "parcelforme",
+                    notify: true
                 }
             },
 
