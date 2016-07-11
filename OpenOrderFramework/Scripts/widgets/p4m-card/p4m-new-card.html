@@ -1,12 +1,14 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 
 <dom-module id="p4m-new-card">
 
     <template>
-        <div id="container">
-
+        <div id="container" class="loading">
+            
             <p>Your card details are stored securely by our fully PCI compliant payment service. <a href="#">Read more</a></p>
-            <iframe name="realexIFrame" height="609"></iframe>
+            <paper-spinner id="spinner" active="true"></paper-spinner>
+            <iframe id="paymentIframe" name="realexIFrame" on-load="onFrameLoaded" height="609"></iframe>
             <form id="realexForm" method="POST" action="https://hpp.sandbox.realexpayments.com/pay" target="realexIFrame">
                 <input type="hidden" name="TIMESTAMP" value="{{cardTimestamp}}" />
                 <input type="hidden" name="MERCHANT_ID" value="{{cardMerchantId}}" />
@@ -29,6 +31,7 @@
                 <input type="hidden" name="PAYER_LOCALE" value="{{consumerData.Locale}}" />
                 <input type="hidden" name="CARD_PAYMENT_BUTTON" value="Use Card" />
             </form>
+            
 
         </div>
 
@@ -38,6 +41,7 @@
         #container {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .card-actions {
@@ -48,6 +52,26 @@
         .card-actions a {
             color: black;
         }
+
+
+        #container.loading #paymentIframe {
+            visibility: hidden;
+        }
+ 
+        #spinner {
+            display: none;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 130px;
+            left: 250px;
+            margin: auto;
+        }
+
+        #container.loading #spinner {
+            display: block;
+        }
+
     </style>
 
     <script>
@@ -101,7 +125,16 @@
             onCardHash: function () {
                 //We have received the hash data, now fill in the form and post  
                 console.log("Received card hash. Posting form...");
+                this._requestedForm = true;
                 this.$.realexForm.submit();
+            },
+
+            onFrameLoaded: function () {
+                if (this._requestedForm) {
+                    console.log("FRAME LOADED");
+                    this.$.container.classList.remove('loading');
+                }
+
             },
 
             onCardMerchantId: function () {
