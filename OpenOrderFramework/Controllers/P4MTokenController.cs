@@ -104,11 +104,47 @@ namespace OpenOrderFramework.Controllers
                 //var parsedToken = ParseJwt(response.AccessToken);
                 this.Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
                 this.Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddYears(1);
-                //await LocalConsumerLogin(tokenResponse.AccessToken);
+                //PostXMLData();
                 return View("ReturnToken");
             }
             return View("error");
         }
+
+        const string cardTokenResponseXml = @"<response timestamp='20160707104609'>
+    <merchantid>realexsandbox</merchantid>
+    <account>internet</account>
+    <orderid>AiCibJ5UR7utURy_slxhJw</orderid>
+    <authcode>12345</authcode>
+    <result>00</result>
+    <cvnresult>M</cvnresult>
+    <avspostcoderesponse>M</avspostcoderesponse>
+    <avsaddressresponse>M</avsaddressresponse>
+    <batchid>319440</batchid>
+    <message>[ test system ] AUTHORISED</message>
+    <pasref>14609996408372413</pasref>
+    <timetaken>2</timetaken>
+    <authtimetaken>1</authtimetaken>
+    <cardissuer>
+        <bank>AIB BANK</bank>
+        <country>IRELAND</country>
+        <countrycode>IE</countrycode>
+        <region>EUR</region>
+    </cardissuer>
+    <sha1hash>c0e029768f5f0039fc1917baca1230f77b0ce94d</sha1hash>
+</response>";
+
+        //public async Task PostXMLData()
+        //{
+        //    var client = new HttpClient();
+        //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+        //    client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("utf-8"));
+        //    byte[] bytes;
+        //    bytes = System.Text.Encoding.UTF8.GetBytes(cardTokenResponseXml);
+        //    var content = new System.Net.Http.ByteArrayContent(bytes);
+        //    var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cardTokenResponse", content);
+        //    var messageString = await result.Content.ReadAsStringAsync();
+        //    Console.Write(messageString);
+        //}
 
         [HttpGet]
         [Route("localLogin")]

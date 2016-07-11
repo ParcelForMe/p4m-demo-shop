@@ -57,7 +57,7 @@
             },
 
             buyNow: function() {
-                alert("buy it");
+                this.$.api.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
             },
 
             load: function () {
@@ -68,6 +68,11 @@
             },
 
             onCartDataChange: function (e) {
+                this.enable();
+            },
+
+            onPurchase: function (e) {
+                alert("Purchased");
                 this.enable();
             },
 

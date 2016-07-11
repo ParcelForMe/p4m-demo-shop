@@ -103,6 +103,7 @@
                 "stub": "address",
                 "method": "POST"
             },
+
             "cardTokenHash": {
                 "stub": "cardTokenHash",
                 "params": [
@@ -124,6 +125,20 @@
                     }
                 ],
                 "method": "GET"
+            },
+            "purchase": {
+                "stub": "purchase/{cartId}/{cvv}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "cartId",
+                        "required": true
+                    },
+                    {
+                        "name": "cvv",
+                        "required": true
+                    },
+                ]
             }
         };
         apiEndpoints.local = {
