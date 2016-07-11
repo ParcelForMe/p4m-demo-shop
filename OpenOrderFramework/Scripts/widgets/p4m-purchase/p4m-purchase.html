@@ -57,7 +57,7 @@
             },
 
             buyNow: function () {
-                this.$.api.call('purchase', { cartId: "this.cartData.Id", cvv: '123' }, null, this.onPurchase.bind(this));
+                this.$.api.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
             },
 
             load: function () {
@@ -77,7 +77,7 @@
             },
 
             enable: function () {
-                this.$.p4mBuyNowBtn.disabled = false;// !this._loggedIn || !this.cartData;
+                this.$.p4mBuyNowBtn.disabled = !this._loggedIn || !this.cartData;
             },
         });
     </script>
