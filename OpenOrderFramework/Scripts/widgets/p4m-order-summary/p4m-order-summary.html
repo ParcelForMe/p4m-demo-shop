@@ -19,8 +19,8 @@
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Discount</div>
-                    <div class="p4m-cell detail-col">Early bird special 10%</div>
-                    <div class="p4m-cell cost-col">$123.00</div>
+                    <div class="p4m-cell detail-col">None</div>
+                    <div class="p4m-cell cost-col">{{currencySymbol}}{{discount}}</div>
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Tax</div>
@@ -121,6 +121,10 @@
                 },
                 _tax: {
                     type: String
+                },
+                _discount: {
+                    type: Number,
+                    value: 0
                 }
             },
             observers: [ "onCartDataModified(cartData.Items.*)"],

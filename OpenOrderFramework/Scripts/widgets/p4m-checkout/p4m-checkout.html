@@ -144,16 +144,23 @@
                 },
                 currency: {
                     type: String,
-                    value: "AUD"
+                    value: "GBP"
+                },
+                newCardId: {
+                    type: String,
+                    notify: true
                 },
                 cardMerchantId: {
-                    type: String
+                    type: String,
+                    notify: true
                 },
                 cardHash: {
-                    type: String
+                    type: String,
+                    notify: true
                 },
                 cardTimestamp: {
-                    type: String
+                    type: String,
+                    notify: true
                 },
                 _changeTimer: {
                     //Timer object to allow sending of changes once user has finished interaction
@@ -173,20 +180,6 @@
                     this.getLocalCart();
                 }
                 this.$.api.call('consumer', null, null, this.onConsumerData.bind(this));
-
-                //TODO: child should signal for this when user adds a new card
-                //TODO: make proper GUID function
-                this.newCardId = Math.floor(Math.random() * 9999999) + "-" + Math.floor(Math.random() * 9999999);
-                var d = new Date();
-                var timeStampStr = d.getFullYear().toString() + '-' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1).toString() + '-' + d.getDate().toString() + "T" + (d.getHours() + 1 < 10 ? '0' : '') + d.getHours().toString() + ':' + (d.getMinutes() + 1 < 10 ? '0' : '') + d.getMinutes().toString() + ':' + (d.getSeconds() + 1 < 10 ? '0' : '') + d.getSeconds().toString();
-                this.$.api.call('cardTokenHash',
-                    {
-                        timestamp: timeStampStr,
-                        orderId: this.newCardId,
-                        currency: this.currency,
-                        payMethodId: this.newCardId
-                    }, null, this.onCardHashData.bind(this));
-                
             },
 
             debug: function(e) {
@@ -231,6 +224,20 @@
 
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
+
+                //TODO: child should signal for this when user adds a new card
+                //TODO: make proper GUID function
+                this.newCardId = Math.floor(Math.random() * 9999999) + "-" + Math.floor(Math.random() * 9999999);
+                var d = new Date();
+                var timeStampStr = (d.getFullYear().toString() + '-' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1).toString() + '-' + d.getDate().toString() + "T" + (d.getHours() + 1 < 10 ? '0' : '') + d.getHours().toString() + ':' + (d.getMinutes() + 1 < 10 ? '0' : '') + d.getMinutes().toString() + ':' + (d.getSeconds() + 1 < 10 ? '0' : '') + d.getSeconds().toString());
+
+                this.$.api.call('cardTokenHash',
+                {
+                    timestamp: timeStampStr,
+                    orderId: this.newCardId,
+                    currency: this.currency,
+                    payMethodId: this.newCardId
+                }, null, this.onCardHashData.bind(this));
             },
 
             onConsumerDataChange: function(newVal, oldVal) {
@@ -303,9 +310,10 @@
             },
 
             onCardHashData: function (data) {
-                this.cardHash = data.Hash;
-                this.cardTimestamp = data.TimeStamp || data.Timestamp; //TODO: Which?
-                this.cardMerchantId = data.MerchantId;
+                this.set('cardTimestamp', data.Timestamp);
+                this.set('cardMerchantId', data.MerchantId);
+                this.set('cardHash', data.Hash);
+               
             }
 
 

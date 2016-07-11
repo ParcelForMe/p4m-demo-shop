@@ -1,34 +1,37 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 
 <dom-module id="p4m-new-card">
 
     <template>
-        <div id="container">
-
+        <div id="container" class="loading">
+            
             <p>Your card details are stored securely by our fully PCI compliant payment service. <a href="#">Read more</a></p>
-            <iframe name="realexIFrame"></iframe>
+            <paper-spinner id="spinner" active="true"></paper-spinner>
+            <iframe id="paymentIframe" name="realexIFrame" on-load="onFrameLoaded" height="609"></iframe>
             <form id="realexForm" method="POST" action="https://hpp.sandbox.realexpayments.com/pay" target="realexIFrame">
-                <input type="text" name="TIMESTAMP" value="{{cardTimestamp}}">
-                <input type="text" name="MERCHANT_ID" value="{{cardMerchantId}}">
-                <input type="text" name="ACCOUNT" value="internet">
-                <input type="text" name="ORDER_ID" value="{{newCardId}}">
+                <input type="hidden" name="TIMESTAMP" value="{{cardTimestamp}}" />
+                <input type="hidden" name="MERCHANT_ID" value="{{cardMerchantId}}" />
+                <input type="hidden" name="ACCOUNT" value="internet" />
+                <input type="hidden" name="ORDER_ID" value="{{newCardId}}" />
                 <!--<input type="hidden" name="AMOUNT" value="1001">-->
-                <input type="text" name="CURRENCY" value="{{currency}}">
-                <input type="text" name="SHA1HASH" value="{{cardHash}}">
-                <input type="text" name="AUTO_SETTLE_FLAG" value="1">
-                <input type="text" name="HPP_VERSION" value="2">
+                <input type="hidden" name="CURRENCY" value="{{currency}}" />
+                <input type="hidden" name="SHA1HASH" value="{{cardHash}}" />
+                <input type="hidden" name="AUTO_SETTLE_FLAG" value="1" />
+                <input type="hidden" name="HPP_VERSION" value="2" />
                 <!-- Card Storage Fields -->
-                <input type="text" name="CARD_STORAGE_ENABLE" value="1">
-                <input type="text" name="OFFER_SAVE_CARD" value="0">
-                <input type="text" name="PAYER_EXIST" value="{{payerExist}}">
-                <input type="text" name="PAYER_REF" value="{{ConsumerData.Id}}">
-                <input type="text" name="PMT_REF" value="{{newCardId}}">
-                <input type="text" name="VALIDATE_CARD_ONLY" value="1">
+                <input type="hidden" name="CARD_STORAGE_ENABLE" value="1" />
+                <input type="hidden" name="OFFER_SAVE_CARD" value="0" />
+                <input type="hidden" name="PAYER_EXIST" value="{{payerExist}}" />
+                <input type="hidden" name="PAYER_REF" value="{{consumerData.Id}}" />
+                <input type="hidden" name="PMT_REF" value="{{newCardId}}" />
+                <input type="hidden" name="VALIDATE_CARD_ONLY" value="1" />
                 <!-- End Card Storage Fields -->
-                <input type="text" name="MERCHANT_RESPONSE_URL" value="{{responseUrl}}">
-                <input type="text" name="PAYER_LOCALE" value="{{ConsumerData.Locale}}">
-                <input type="text" name="CARD_PAYMENT_BUTTON" value="Use Card">
+                <input type="hidden" name="MERCHANT_RESPONSE_URL" value="{{responseUrl}}" />
+                <input type="hidden" name="PAYER_LOCALE" value="{{consumerData.Locale}}" />
+                <input type="hidden" name="CARD_PAYMENT_BUTTON" value="Use Card" />
             </form>
+            
 
         </div>
 
@@ -38,6 +41,7 @@
         #container {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .card-actions {
@@ -48,6 +52,26 @@
         .card-actions a {
             color: black;
         }
+
+
+        #container.loading #paymentIframe {
+            visibility: hidden;
+        }
+ 
+        #spinner {
+            display: none;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 130px;
+            left: 250px;
+            margin: auto;
+        }
+
+        #container.loading #spinner {
+            display: block;
+        }
+
     </style>
 
     <script>
@@ -62,7 +86,8 @@
                 },
                 cardHash: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: "onCardHash"
                 },
                 cardTimestamp: {
                     type: String,
@@ -70,7 +95,8 @@
                 },
                 cardMerchantId: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: "onCardMerchantId"
                 },
                 currency: {
                     type: String,
@@ -78,18 +104,17 @@
                     value: "GBP"
                 },
                 payerExist: {
-                    type: Object,
+                    type: String,
                     notify: true,
-                    value: false
+                    value: "0"
                 },
                 newCardId: {
-                    type: String,
-                    value: true
+                    type: String
                 }
             },
 
             observers: [
-                "onCardHash(cardHash)"
+               // "onCardHash(cardHash)"
             ],
 
             ready: function()
@@ -99,10 +124,23 @@
 
             onCardHash: function () {
                 //We have received the hash data, now fill in the form and post  
-                debugger;
                 console.log("Received card hash. Posting form...");
+                this._requestedForm = true;
                 this.$.realexForm.submit();
+            },
+
+            onFrameLoaded: function () {
+                if (this._requestedForm) {
+                    console.log("FRAME LOADED");
+                    this.$.container.classList.remove('loading');
+                }
+
+            },
+
+            onCardMerchantId: function () {
+                console.log("Received card merchant");
             }
+
 
         });
     </script>

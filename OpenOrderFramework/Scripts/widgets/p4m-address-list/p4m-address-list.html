@@ -7,15 +7,15 @@
     <template>
         <div id="container">
             <a href="#" on-tap="addNewAddress">Add a new address</a>
-            <iron-collapse id="newAddressCollapse">
+
                 <template is="dom-repeat" items="{{addressListData}}" filter="filterNewOnly">
                     <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" consumer-data="{{consumerData}}" mode="edit" on-save="onAddAddress"></p4m-address>
                 </template>
-            </iron-collapse>
 
             <template is="dom-repeat" items="{{addressListData}}" filter="filterOldOnly">
-                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" on-save="onUpdateAddress" ></p4m-address>
+                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" on-save="onUpdateAddress"></p4m-address>
             </template>
+
         </div>
 
     </template>
@@ -47,8 +47,8 @@
                 newAddress: {
                     type: Object,
                     value: {},
-                    notify: true,
-                    observer: "onNewAddressChange"
+                    notify: true
+                   // observer: "onNewAddressChange"
                 },
                 _addedNewAddress: {
                     type: Object,
@@ -57,7 +57,7 @@
             },
 
             observers: [
-                "onAddressDataChange(addressListData.*)",
+                //"onAddressDataChange(addressListData.*)",
                 "onConsumerPreferredAddressDataChange(consumerData.BillingAddressId)",
                 "onConsumerPreferredAddressDataChange(consumerData.PrefDeliveryAddressId)"
             ],
@@ -68,18 +68,23 @@
             },
 
             addNewAddress: function () {
-                this.$.newAddressCollapse.opened = true;
-                if (this.addressListData && !this._addedNewAddress) {
+               
+                if (this.addressListData) { // && !this._addedNewAddress) {
                     this._addedNewAddress = true;
                     //Add empty object to handle adding a new address
                     this.push('addressListData', this.newAddress);
+                    //this.$.newAddressCollapse.opened = true;
                 }
+                
  
             },
 
             cancelEdit: function(e) {
                 console.log("Cancel edit");
-                this.$.newAddressCollapse.opened = false;
+                this._addedNewAddress = false;
+                this.pop('addressListData');
+
+                //this.$.newAddressCollapse.opened = false;
             },
 
             onAddAddress: function(addressElement) {
