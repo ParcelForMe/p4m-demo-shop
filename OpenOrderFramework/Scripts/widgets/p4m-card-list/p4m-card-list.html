@@ -1,11 +1,13 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../p4m-card/p4m-card.html" />
+<link rel="import" href="../p4m-card/p4m-new-card.html" />
 
 <dom-module id="p4m-card-list">
 
     <template>
         <div id="container">
+            <p4m-new-card consumer-data="{{consumerData}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}} card-merchant-id={{cardMerchantId}}"></p4m-new-card>
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}" filter="_cardsOnly">
                 <p4m-card card-data="{{item}}" on-card-selected="onCardSelected" consumer-data="{{consumerData}}"></p4m-card>
             </template>
@@ -29,6 +31,15 @@
                 consumerData: {
                     type: Object,
                     notify: true
+                },
+                cardHash: {
+                    type: String
+                },
+                cardTimestamp: {
+                    type: String
+                },
+                cardMerchantId: {
+                    type: String
                 }
             },
 

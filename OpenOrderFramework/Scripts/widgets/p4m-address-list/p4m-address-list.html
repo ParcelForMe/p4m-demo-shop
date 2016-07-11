@@ -9,12 +9,12 @@
             <a href="#" on-tap="addNewAddress">Add a new address</a>
             <iron-collapse id="newAddressCollapse">
                 <template is="dom-repeat" items="{{addressListData}}" filter="filterNewOnly">
-                    <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" consumer-data="{{consumerData}}" mode="edit"></p4m-address>
+                    <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" consumer-data="{{consumerData}}" mode="edit" on-save="onAddAddress"></p4m-address>
                 </template>
             </iron-collapse>
 
             <template is="dom-repeat" items="{{addressListData}}" filter="filterOldOnly">
-                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" ></p4m-address>
+                <p4m-address address-data="{{item}}" consumer-data="{{consumerData}}" mode="view" on-save="onUpdateAddress" ></p4m-address>
             </template>
         </div>
 
@@ -73,7 +73,6 @@
                     this._addedNewAddress = true;
                     //Add empty object to handle adding a new address
                     this.push('addressListData', this.newAddress);
-
                 }
  
             },
@@ -83,15 +82,12 @@
                 this.$.newAddressCollapse.opened = false;
             },
 
-
-            onAddressDataChange: function (e) {
-               
-
-               
+            onAddAddress: function(addressElement) {
+                this.fire('add', addressElement);
             },
 
-            onNewAddressChange: function(newVal, oldVal) {
-                
+            onUpdateAddress: function(addressElement) {
+                this.fire('update', addressElement);
             },
 
             onConsumerPreferredAddressDataChange: function (e) {

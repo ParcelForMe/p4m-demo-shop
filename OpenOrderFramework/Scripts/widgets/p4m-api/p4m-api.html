@@ -5,15 +5,6 @@
 <dom-module id="p4m-api">
 
     <template>
-        <iron-ajax
-            id="apiAjax"
-            method="GET"
-            handle-as="json"
-
-            content-type="application/json"
-            on-response="_handleResponse"
-            debounce-duration="300">
-        </iron-ajax>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
     </template>
 
@@ -111,7 +102,62 @@
             "postAddress": {
                 "stub": "address",
                 "method": "POST"
+            },
+            "cardTokenHash": {
+                "stub": "cardTokenHash",
+                "params": [
+                    {
+                        "name": "timestamp",
+                        "required": true
+                    },
+                    {
+                        "name": "orderId",
+                        "required": true
+                    },
+                    {
+                        "name": "currency",
+                        "required": true
+                    },
+                    {
+                        "name": "payMethodId",
+                        "required": true
+                    }
+                ],
+                "method": "GET"
             }
+        };
+        apiEndpoints.local = {
+            "localLogin": {
+                "stub": "localLogin",
+                "method": "GET",
+                "params": [{
+                    "name": "currentPage",
+                    "required": true
+                }]
+            },
+            "getP4MCart": {
+                "stub": "getP4MCart",
+                "method": "GET"
+            },
+            "shippingSelector": {
+                "stub": "shippingSelector",
+                "method": "GET"
+            },
+            "applyDiscountCode": {
+                "stub": "applyDiscountCode/{discountCode}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "discountCode",
+                        "required": true
+                    }
+                ]
+            },
+            "itemQtyChanged": {
+                "stub": "itemQtyChanged",
+                "method": "POST",
+                "params": []
+            },
         };
 
 
@@ -143,29 +189,40 @@
                 consumerToken: {
                     type: String
                 },
+                isLocal: { //Make local-api a descendant of p4m-api
+                    type: Object,
+                    value: false
+                },
                 _endPoints: {
                     type: Object,
                     value: apiEndpoints
+                },
+                _queue: {
+                    type: Array,
+                    value: []
                 }
             },
             listeners: {
 
             },
 
-            ready: function() {
-               
+            ready: function () {
+                if (this.isLocal) {
+                    this.version = "local";
+                }             
             },
 
-            _baseUrl: function() {
-                return (this.ssl ? "https" : "http") + "://" + this.hostType + "." + this.hostBaseDomain + ":" + this.port + "/api/" + this.version + "/";
+            _baseUrl: function () {
+                if (this.isLocal) {                   
+                    return "//" + window.location.host + "/";                   
+                }
+                else {
+                    return (this.ssl ? "https" : "http") + "://" + this.hostType + "." + this.hostBaseDomain + ":" + this.port + "/api/" + this.version + "/";
+                }               
             },
 
             call: function (name, params, data, callback) {
-                if (!this.consumerToken) {
-                    this.consumerToken = this.$.p4mTokenCookie.readCookie();
-                }
 
-                this.$.apiAjax.headers = { 'Authorization': 'Bearer ' + this.consumerToken };
                 var endPoint = this._endPoints[this.version][name]
                 if (!endPoint) {
                     console.error("Invalid endpoint:", name);
@@ -177,16 +234,36 @@
                         "data": data,
                         "params": params
                     }
-                    this._prepareApiCall(apiRequest, callback);
-                    this.$.apiAjax.generateRequest();
+                    if (typeof (callback) == "undefined") {
+                        callback = function () { };
+                    }
+                    this._performApiCall(apiRequest, callback);
                 }
 
             },
 
-            _prepareApiCall: function (apiRequest, callback) {
+            _processNextRequest: function () {
+
+                var request = this._queue.pop();
+                if (request) {
+                    this._performApiCall(request.apiRequest, request.callback);
+                }
+                else {
+                    console.log("Finished queue");
+                }
+         
+            },
+
+            _performApiCall: function (apiRequest, callback) {
+
                 if (this._validateApiRequest(apiRequest)) {
+
+                    var httpRequest = new XMLHttpRequest();
+                    var queryParams = {};
                     var url = this._baseUrl() + apiRequest.endPoint.stub;
-                    this.$.apiAjax.params = {};
+                    var queryParamCount = 0;
+
+                    //=== Make URL
                     if (apiRequest.params)
                     {
                         //Swap in parameters if specified in the URL, otherwise add as query params
@@ -200,20 +277,37 @@
                             }
                             else {
                                 //Query params
-                                this.$.apiAjax.params[paramName] = paramValue;                             
+                                if (queryParamCount === 0) {
+                                    url += "?";
+                                }
+                                else if (queryParamCount > 0) {
+                                    url += "&";
+                                }
+                                url += paramName + "=" + paramValue;    
+                                queryParamCount ++;
                             }
                         };
                     }
-                    this.$.apiAjax.url = url;
-                    this.$.apiAjax.method = apiRequest.endPoint.method;
-                    if (apiRequest.endPoint.method === "POST") {
-                        this.$.apiAjax.body = apiRequest.data;
+                    httpRequest.open(apiRequest.endPoint.method, url, true);
+
+                    var intermediateCallback = this._handleResponse.bind(this, apiRequest, callback);
+
+                    if (!this.consumerToken) {
+                        this.consumerToken = this.$.p4mTokenCookie.readCookie();
                     }
-                    if (this._callback) {
-                        console.warn("Making new API call before previous call has completed");
+                    httpRequest.setRequestHeader('Authorization', 'Bearer ' + this.consumerToken);
+                    httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    httpRequest.onreadystatechange = (function () {
+                        if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                            intermediateCallback(JSON.parse(httpRequest.responseText));
+                        }
+                    });
+                    if (apiRequest.data) {
+                        httpRequest.send(JSON.stringify(apiRequest.data));
                     }
-                    this._callback = callback;
-                    this._currentCall = apiRequest.endPoint.stub;
+                    else {
+                        httpRequest.send();
+                    }  
                 }
             },
 
@@ -239,13 +333,9 @@
                 return !((missingParams.length || missingFields.length));
             },
 
-            _handleResponse: function(e) {
-                if (this._callback) {
-                    this._callback(e.detail.response);
-                }
-                this._callback = null;
-                this.fire("p4m_" + this._currentCall, e.detail.response, true);
-                this._currentCall = null;
+            _handleResponse: function (apiRequest, finalCallback, responseData) {
+                this.fire("p4m_" + apiRequest.endPoint.stub, responseData, true);
+                finalCallback(responseData);           
             }
 
         });
