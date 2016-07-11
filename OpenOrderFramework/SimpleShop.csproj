@@ -655,6 +655,9 @@
     <Content Include="Scripts\widgets\p4m-address\p4m-address.html" />
     <Content Include="Scripts\widgets\p4m-api\local-api.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
+    <Content Include="Scripts\widgets\p4m-card-list\p4m-card-list.html" />
+    <Content Include="Scripts\widgets\p4m-card\p4m-new-card.html" />
+    <Content Include="Scripts\widgets\p4m-card\p4m-card.html" />
     <Content Include="Scripts\widgets\p4m-cart-card\p4m-cart-card.html" />
     <Content Include="Scripts\widgets\p4m-cart\p4m-cart.html" />
     <Content Include="Scripts\widgets\p4m-checkout\p4m-checkout.html" />

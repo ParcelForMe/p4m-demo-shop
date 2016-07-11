@@ -1,0 +1,109 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+<dom-module id="p4m-new-card">
+
+    <template>
+        <div id="container">
+
+            <p>Your card details are stored securely by our fully PCI compliant payment service. <a href="#">Read more</a></p>
+            <iframe name="realexIFrame"></iframe>
+            <form id="realexForm" method="POST" action="https://hpp.sandbox.realexpayments.com/pay" target="realexIFrame">
+                <input type="text" name="TIMESTAMP" value="{{cardTimestamp}}">
+                <input type="text" name="MERCHANT_ID" value="{{cardMerchantId}}">
+                <input type="text" name="ACCOUNT" value="internet">
+                <input type="text" name="ORDER_ID" value="{{newCardId}}">
+                <!--<input type="hidden" name="AMOUNT" value="1001">-->
+                <input type="text" name="CURRENCY" value="{{currency}}">
+                <input type="text" name="SHA1HASH" value="{{cardHash}}">
+                <input type="text" name="AUTO_SETTLE_FLAG" value="1">
+                <input type="text" name="HPP_VERSION" value="2">
+                <!-- Card Storage Fields -->
+                <input type="text" name="CARD_STORAGE_ENABLE" value="1">
+                <input type="text" name="OFFER_SAVE_CARD" value="0">
+                <input type="text" name="PAYER_EXIST" value="{{payerExist}}">
+                <input type="text" name="PAYER_REF" value="{{ConsumerData.Id}}">
+                <input type="text" name="PMT_REF" value="{{newCardId}}">
+                <input type="text" name="VALIDATE_CARD_ONLY" value="1">
+                <!-- End Card Storage Fields -->
+                <input type="text" name="MERCHANT_RESPONSE_URL" value="{{responseUrl}}">
+                <input type="text" name="PAYER_LOCALE" value="{{ConsumerData.Locale}}">
+                <input type="text" name="CARD_PAYMENT_BUTTON" value="Use Card">
+            </form>
+
+        </div>
+
+    </template>
+
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-actions a {
+            color: black;
+        }
+    </style>
+
+    <script>
+
+        Polymer({
+            is: "p4m-new-card",
+
+            properties: {
+                responseUrl: {
+                    type: String,
+                    value: "https://dev.parcelfor.me:44321/api/v2/cardTokenResponse"
+                },
+                cardHash: {
+                    type: String,
+                    notify: true
+                },
+                cardTimestamp: {
+                    type: String,
+                    notify: true
+                },
+                cardMerchantId: {
+                    type: String,
+                    notify: true
+                },
+                currency: {
+                    type: String,
+                    notify: true,
+                    value: "GBP"
+                },
+                payerExist: {
+                    type: Object,
+                    notify: true,
+                    value: false
+                },
+                newCardId: {
+                    type: String,
+                    value: true
+                }
+            },
+
+            observers: [
+                "onCardHash(cardHash)"
+            ],
+
+            ready: function()
+            {
+               
+            },
+
+            onCardHash: function () {
+                //We have received the hash data, now fill in the form and post  
+                debugger;
+                console.log("Received card hash. Posting form...");
+                this.$.realexForm.submit();
+            }
+
+        });
+    </script>
+</dom-module>

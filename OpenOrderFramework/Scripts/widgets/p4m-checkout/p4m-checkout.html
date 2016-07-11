@@ -15,8 +15,8 @@
 <dom-module id="p4m-checkout">
 
     <template>
-        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
-        <local-api id="localApi"></local-api>
+        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
+        <p4m-api id="localApi" is-local="true"></p4m-api>
         <div id="container">
             <div id="topPanel" class="topPanel"><h2>Review My Order</h2><p4m-profile mode="basic"></p4m-profile></div>
             <div id="panelContainer">
@@ -35,10 +35,10 @@
                             Delivery options here
                         </iron-page>
                         <iron-page>
-                            <p4m-card-list consumer-data="{{consumerData}}"></p4m-card-list>
+                            <p4m-card-list consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
                         </iron-page>
                         <iron-page>
-                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}"></p4m-address-list>
+                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
                 </div>
@@ -142,6 +142,19 @@
                     type: Number,
                     value: 0
                 },
+                currency: {
+                    type: String,
+                    value: "AUD"
+                },
+                cardMerchantId: {
+                    type: String
+                },
+                cardHash: {
+                    type: String
+                },
+                cardTimestamp: {
+                    type: String
+                },
                 _changeTimer: {
                     //Timer object to allow sending of changes once user has finished interaction
                     type: Object
@@ -159,8 +172,20 @@
                 if (this.sessionId) {
                     this.getLocalCart();
                 }
-                window.addEventListener('p4m_consumer', this.onConsumerData.bind(this));
-                this.$.api.call('consumer');
+                this.$.api.call('consumer', null, null, this.onConsumerData.bind(this));
+
+                //TODO: child should signal for this when user adds a new card
+                //TODO: make proper GUID function
+                this.newCardId = Math.floor(Math.random() * 9999999) + "-" + Math.floor(Math.random() * 9999999);
+                var d = new Date();
+                var timeStampStr = d.getFullYear().toString() + '-' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1).toString() + '-' + d.getDate().toString() + "T" + (d.getHours() + 1 < 10 ? '0' : '') + d.getHours().toString() + ':' + (d.getMinutes() + 1 < 10 ? '0' : '') + d.getMinutes().toString() + ':' + (d.getSeconds() + 1 < 10 ? '0' : '') + d.getSeconds().toString();
+                this.$.api.call('cardTokenHash',
+                    {
+                        timestamp: timeStampStr,
+                        orderId: this.newCardId,
+                        currency: this.currency,
+                        payMethodId: this.newCardId
+                    }, null, this.onCardHashData.bind(this));
                 
             },
 
@@ -169,13 +194,14 @@
             },
 
             getLocalCart: function () {
+                console.log("Get local cart");
                 this.$.localApi.call('getP4MCart',null, null, this.onCartData.bind(this) );
             },
 
             getP4mCart: function () {
-                this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onCartData.bind(this));
+                console.log("Get remote cart");
+                this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
             },
-
 
             sendCartChanges: function () {
 
@@ -203,8 +229,8 @@
 
             },
 
-            onConsumerData: function(e) {
-                this.consumerData = e.detail.Consumer;
+            onConsumerData: function(data) {
+                this.consumerData = data.Consumer;
             },
 
             onConsumerDataChange: function(newVal, oldVal) {
@@ -212,7 +238,7 @@
             },
 
             updateP4mCart: function () {
-                
+                console.log("Updating remote cart");
                 this.$.orderSummary.showAsLoading();
 
                 //Send changes to P4M
@@ -225,11 +251,16 @@
                     "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
                     "Cart": this.cartData
                 };
-                this.$.api.call('postCart', null, cartMessage, this.onCartData.bind(this));
+                this.$.api.call('postCart', null, cartMessage, this.onRemoteCartData.bind(this));
+            },
+
+            onRemoteCartData: function(data) {
+                console.log("Received remote cart data", data);
+                this.onCartData(data);
             },
 
             onCartData: function (data) {
-               // console.log("Received new cart data");
+                console.log("Received new cart data");
                 this.$.orderSummary.showAsLoaded();
                 if (data.Success) {
                     this.cartData = data.Cart;
@@ -253,7 +284,30 @@
                     if (this._changeTimer) window.clearTimeout(this._changeTimer);
                     this._changeTimer = window.setTimeout(this.sendCartChanges.bind(this), 2000);
                 }
+            },
+
+            onAddAddress: function(addressElement) {
+                onUpdateAddress(addressElement);
+            },
+
+            onUpdateAddress: function(addressElement) {
+                var postData =
+                {
+                    "Address": addressElement.addressData,
+                    "isPrefDeliveryAddr": addressElement.isDelivery,
+                    "isBillingAddr": addressElement.isBilling
+                };
+                api.call("postAddress", null, postData, function (result) {
+                    addressElement.mode = "view";
+                });
+            },
+
+            onCardHashData: function (data) {
+                this.cardHash = data.Hash;
+                this.cardTimestamp = data.TimeStamp || data.Timestamp; //TODO: Which?
+                this.cardMerchantId = data.MerchantId;
             }
+
 
         });
     </script>
