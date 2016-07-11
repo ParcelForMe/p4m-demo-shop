@@ -56,7 +56,7 @@
                                 <input is="iron-input" type="text" id="address-postcode" bind-value="{{addressData.PostCode}}" placeholder="Postal code" />
                             </div>
                             <div class="address-actions">
-                                <a class="p4m-button" href="#" on-tap="save">Save</a>
+                                <a class="p4m-button p4m-primary-button" href="#" on-tap="save">Save</a>
                                 <a class="p4m-button" href="#" on-tap="cancel">Cancel</a>
                             </div>
                         </div>
@@ -95,9 +95,12 @@
         .address-actions {
             display: flex;
             flex-direction: row;
+
         }
         .address-actions a {
             color: black;
+            margin: 4px;
+            
         }
 
         .toggle-button {
@@ -153,6 +156,13 @@
             background-color: #808080;
             color: #000000;
             border-radius: 4px;
+        }
+
+        
+        .p4m-button.p4m-primary-button {
+            background-color: rgba(13, 165, 83, 0.8);
+            color: #000000;
+
         }
 
         .address-form {
