@@ -16,6 +16,11 @@ namespace OpenOrderFramework.Controllers
         // GET: /ShoppingCart/
         public ActionResult Index()
         {
+            // ***** P4M *****
+            if (!string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
+                return RedirectToAction("p4mCheckout", "checkout");
+            // ***** P4M *****
+
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
             // Set up our ViewModel

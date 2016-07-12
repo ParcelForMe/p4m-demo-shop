@@ -123,7 +123,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("applyDiscountCode")]
-        public DiscountMessage ApplyDiscountCode(string discountCode)
+        public JsonResult ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
             try
@@ -144,12 +144,12 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return result;
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         [Route("itemQtyChanged")]
-        public async Task<CartUpdateMessage> ItemQtyChanged(List<ChangedItem> items)
+        public async Task<JsonResult> ItemQtyChanged(List<ChangedItem> items)
         {
             var result = new CartUpdateMessage();
             try
@@ -170,7 +170,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return result;
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         public async Task<Order> CreateLocalOrderAsync()
