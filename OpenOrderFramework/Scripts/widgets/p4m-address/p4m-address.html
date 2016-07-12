@@ -51,7 +51,7 @@
                             <div class="address-form">
                                 <input is="iron-input" type="text" id="address-label" bind-value="{{addressData.Label}}" placeholder="Label, e.g. 'Home'" />
                                 <input is="iron-input" type="text" id="address-street-1" bind-value="{{addressData.Street1}}" placeholder="Street address" />
-                                <input is="iron-input" type="text" id="address-street-2" bind-value="{{addressData.Street2}}" placeholder="" />
+                                <input is="iron-input" type="text" id="address-street-2" bind-value="{{addressData.Street2}}" placeholder="Street address" />
                                 <input is="iron-input" type="text" id="address-city" bind-value="{{addressData.City}}" placeholder="City" />
                                 <input is="iron-input" type="text" id="address-postcode" bind-value="{{addressData.PostCode}}" placeholder="Postal code" />
                             </div>
@@ -173,14 +173,9 @@
 
         .address-form input {
             margin: 4px;
-            width: 50%;
+            width: 100%;
             max-width: 100%;
         }
-
-        .address-form input#address-label {
-            width: 100%;
-        }
-
 
         #actions {
         }
