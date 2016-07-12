@@ -6,7 +6,7 @@
 <dom-module id="p4m-purchase">
 
     <template>
-        <div id="p4m-purchase-container" class$="{{_topClass}}">
+        <div id="p4mPurchaseContainer" class$="{{_topClass}}">
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
@@ -57,6 +57,7 @@
             },
 
             buyNow: function () {
+                this.showAsBuying();
                 this.$.api.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
             },
 
@@ -64,21 +65,38 @@
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
-                this.enable();
+                this.checkEnabled();
             },
 
             onCartDataChange: function (e) {
-                this.enable();
+                this.checkEnabled();
             },
 
             onPurchase: function (e) {
+                this.showAsCompleted();
                 alert("Purchased");
-                this.enable();
+                this.checkEnabled(true);
             },
 
-            enable: function () {
-                this.$.p4mBuyNowBtn.disabled = !this._loggedIn || !this.cartData;
+            checkEnabled: function (disable) {
+                this.$.p4mBuyNowBtn.disabled = disable || !this._loggedIn || !this.cartData;
             },
+
+            showAsCompleted: function () {
+                this.$.p4mBuyNowBtn.firstChild.data = "Purchase complete";
+                this.$.spinner.active = false;
+                this.$.spinner.classList.add('hidden');
+                this.$.p4mPurchaseContainer.classList.remove('loading');
+            },
+
+            showAsBuying: function () {
+                this.$.p4mBuyNowBtn.firstChild.data = "Please wait...";
+                this.checkEnabled(true);
+                this.$.spinner.active = true;
+                this.$.spinner.classList.remove('hidden');
+                this.$.p4mPurchaseContainer.classList.add('loading');
+            }
+
         });
     </script>
 </dom-module>
