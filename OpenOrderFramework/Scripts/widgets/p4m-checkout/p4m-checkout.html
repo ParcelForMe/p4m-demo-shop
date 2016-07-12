@@ -207,12 +207,12 @@
                     changes.push({ItemCode: sku, Qty: this.$.cart.changes[sku]});
                 }
                 if (changes.length > 0) {
-                    this.$.localApi.call('itemQtyChanged', {}, changes, function () {
+                    this.$.localApi.call('itemQtyChanged', {}, changes, function (newCartTotals) {
                         //console.log("Called local api itemQtyChanged");
-                        self.$.cart.clearChanges();
+                        self.$.cart.clearChanges(); 
+                        self.cartData.Tax = newCartTotals.Tax;
+                        self.cartData.ShippingAmt = newCartTotals.Shipping;
                         self.updateP4mCart();
-
-
                     });
                 }
                 else {
