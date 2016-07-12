@@ -69,7 +69,7 @@
 
             addNewAddress: function () {
                
-                if (this.addressListData) { // && !this._addedNewAddress) {
+                if (this.addressListData && !this._addedNewAddress) {
                     this._addedNewAddress = true;
                     //Add empty object to handle adding a new address
                     this.push('addressListData', this.newAddress);
