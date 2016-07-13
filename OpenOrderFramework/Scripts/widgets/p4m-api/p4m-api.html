@@ -10,61 +10,6 @@
 
     <script>
         var apiEndpoints = {};
-        apiEndpoints.v1 = {
-            "getConsumerDetails": {
-                "stub": "getConsumerDetails",
-                "method": "GET"
-            },
-            "newConsumerCart": {
-                "stub": "newConsumerCart",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "updConsumerCart": {
-                "stub": "updConsumerCart",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "confirmCartPurchase": {
-                "stub": "confirmCartPurchase",
-                "method": "POST",
-                "fields": [
-                    {
-                        "name": "Cart",
-                        "required": true
-                    },
-                    { "name": "NewAddress" },
-                    { "name": "AddressIsDelivery" },
-                    { "name": "AddressIsBilling" }
-                ]
-            },
-            "cartReachedCheckout": {
-                "stub": "cartReachedCheckout",
-                "method": "GET",
-                "params": [
-                    {
-                        "name": "cartId",
-                        "required": true
-                    }
-                ]
-            }
-        };
         apiEndpoints.v2 = {
             "consumer": {
                 "stub": "consumer",
@@ -126,20 +71,6 @@
                 ],
                 "method": "GET"
             },
-            "purchase": {
-                "stub": "purchase/{cartId}/{cvv}",
-                "method": "GET",
-                "params": [
-                    {
-                        "name": "cartId",
-                        "required": true
-                    },
-                    {
-                        "name": "cvv",
-                        "required": true
-                    },
-                ]
-            }
         };
         apiEndpoints.local = {
             "localLogin": {
@@ -173,6 +104,20 @@
                 "method": "POST",
                 "params": []
             },
+            "purchase": {
+                "stub": "purchase/{cartId}/{cvv}",
+                "method": "GET",
+                "params": [
+                    {
+                        "name": "cartId",
+                        "required": true
+                    },
+                    {
+                        "name": "cvv",
+                        "required": true
+                    },
+                ]
+            }
         };
 
 
@@ -270,9 +215,9 @@
             },
 
             _performApiCall: function (apiRequest, callback) {
-
+                
                 if (this._validateApiRequest(apiRequest)) {
-
+                    
                     var httpRequest = new XMLHttpRequest();
                     var queryParams = {};
                     var url = this._baseUrl() + apiRequest.endPoint.stub;
@@ -283,7 +228,7 @@
                     {
                         //Swap in parameters if specified in the URL, otherwise add as query params
                         for (var paramName in apiRequest.params) {
-                           
+                            
                             //If this parameter is present in the URL
                             var paramValue = apiRequest.params[paramName];
                             var subKey = "{" + paramName + "}";

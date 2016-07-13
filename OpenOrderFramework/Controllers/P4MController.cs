@@ -228,20 +228,31 @@ namespace OpenOrderFramework.Controllers
             return order;
         }
 
-        async Task PostOrderToP4MAsync(string token, string session, Order order)
+        [HttpGet]
+        [Route("purchase/{cartId}/{cvv}")]
+        public async Task<JsonResult> Purchase(string cartId, string cvv)
         {
-            // get the consumer's details from P4M. 
-            var client = new HttpClient();
-            client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var cart = GetP4MCartFromOrder(session, order);
-            var cartMessage = new PostCartMessage { Cart = cart, ClearItems = true, Currency = "GBP", PaymentType = "DB", SessionId = session };
-            var content = new System.Net.Http.ObjectContent<PostCartMessage>(cartMessage, new JsonMediaTypeFormatter());
-            var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cart", content);
-            var messageString = await result.Content.ReadAsStringAsync();
-            var message = JsonConvert.DeserializeObject<PostCartMessage>(messageString);
-            if (!message.Success)
-                throw new Exception(message.Error);
+            var result = new PaymentMessage();
+            try
+            {
+                var token = this.Request.Cookies["p4mToken"].Value;
+                var client = new HttpClient();
+                client.SetBearerToken(token);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var purchaseResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}",P4MConstants.BaseApiAddress, cartId, cvv));
+                var messageString = await purchaseResult.Content.ReadAsStringAsync();
+                var message = JsonConvert.DeserializeObject<PaymentMessage>(messageString);
+                if (!message.Success)
+                    throw new Exception(message.Error);
+                result.AuthCode = message.AuthCode;
+                result.Id = message.Id;
+                result.TransactionTypeCode = message.TransactionTypeCode;
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         P4MCart GetP4MCartFromOrder(string session, Order order)
