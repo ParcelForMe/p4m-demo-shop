@@ -11,6 +11,7 @@
 <link rel="import" href="../p4m-address-list/p4m-address-list.html" />
 <link rel="import" href="../p4m-purchase/p4m-purchase.html" />
 <link rel="import" href="../p4m-card-list/p4m-card-list.html" />
+<link rel="import" href="../p4m-delivery/p4m-delivery.html" />
 
 <dom-module id="p4m-checkout">
 
@@ -33,6 +34,7 @@
                         </iron-page>
                         <iron-page>
                             Delivery options here
+                            <p4m-delivery></p4m-delivery>
                         </iron-page>
                         <iron-page>
                             <p4m-card-list consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
@@ -194,6 +196,13 @@
             getP4mCart: function () {
                 console.log("Get remote cart");
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
+            },
+
+            updateShipping: function(service,shipping,expDeliveryDate,collectPoint) {
+                this.cartData.ShippingAmt = shipping;
+                this.cartData.ServiceLevel = service;
+                this.cartData.ExpDeliveryDate = expDeliveryDate;
+                this.updateP4mCart();
             },
 
             sendCartChanges: function () {

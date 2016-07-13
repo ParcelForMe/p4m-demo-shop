@@ -62,8 +62,9 @@ namespace OpenOrderFramework.Controllers
             var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cart", content);
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<PostCartMessage>(messageString);
-            if (!message.Success)
+            if (!message.Success) {
                 throw new Exception(message.Error);
+            }             
         }
 
         P4MCart GetP4MCartFromLocalCart()
@@ -118,12 +119,12 @@ namespace OpenOrderFramework.Controllers
         public async Task<ActionResult> ShippingSelector()
         {
             // Return the view
-            return View("Delivery");
+            return View("P4MDelivery");
         }
 
         [HttpGet]
         [Route("applyDiscountCode")]
-        public JsonResult ApplyDiscountCode(string discountCode)
+        public DiscountMessage ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
             try
@@ -144,12 +145,12 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return Json(result, JsonRequestBehavior.AllowGet);
+            return result;
         }
 
         [HttpPost]
         [Route("itemQtyChanged")]
-        public async Task<JsonResult> ItemQtyChanged(List<ChangedItem> items)
+        public async Task<CartUpdateMessage> ItemQtyChanged(List<ChangedItem> items)
         {
             var result = new CartUpdateMessage();
             try
@@ -170,7 +171,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return Json(result, JsonRequestBehavior.AllowGet);
+            return result;
         }
 
         [HttpGet]

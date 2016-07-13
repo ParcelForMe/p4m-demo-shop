@@ -164,7 +164,7 @@
                         <ul>
                             <template is="dom-repeat" items="{{item.rates}}">
                                 <li class="gfsStd">
-                                    <input name="shipping_method" type="radio" checked="{{item.selected}}" value="{{item.code}}" id="{{item.code}}" class="radio" />
+                                    <input name="shipping_method" type="radio" on-click="onClickMethod" checked="{{item.selected}}" value="{{item.id}}" id="{{item.id}}" class="radio" />
                                     <label for$="{{item.code}}">
                                         <span class="methodname">{{item.methodTitle}}</span>
                                         <span class="price">{{item.localizedPrice}}</span>
@@ -197,9 +197,10 @@
                                             <li>
                                                 <input
                                                     type="radio"
+                                                    on-click="onClickMethod"
                                                     name="shipping_method"
-                                                    value="{{item.code}}"
-                                                    id="{{item.code}}"
+                                                    value="{{item.id}}"
+                                                    id="{{item.id}}"
                                                     class="radio"
                                                 />
                                                 <label for$="s2_method_{{item.code}}">
@@ -217,47 +218,49 @@
 
             </template>
 
-
-            <div class="header">
-                <input name="deliveryTypePanel" id="dropPointDeliveriesOption" on-click="_toggleDropPointPanelCollapse" type="radio"/><label for="dropPointDeliveriesOption"><h2>{{dropPointTitle}}</h2></label>
-            </div>
-            <iron-collapse id="dropPointPanel">
-
-                <div id="toggleDropPointsViewControls">
-                    <div class="toggle-label">List&nbsp;<i class="fa fa-ellipsis-v"></i></div>
-                    <paper-toggle-button id="toggleDropPointsView" class="gfs-toggle" on-change="_showDropPointsView"></paper-toggle-button>
-                    <div class="toggle-label"><i class="fa fa-map-marker"></i>&nbsp;Map</div>
+            <dom-if if="{{useDropPoints}}">
+                <div class="header">
+                    <input name="deliveryTypePanel" id="dropPointDeliveriesOption" on-click="_toggleDropPointPanelCollapse" type="radio" /><label for="dropPointDeliveriesOption"><h2>{{dropPointTitle}}</h2></label>
                 </div>
+                <iron-collapse id="dropPointPanel">
 
-                <div class="gfsDropPoint" id="mapContainer">
-
-                    <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
-                        <div id="droppoint_overlay" style="height: {{mapHeight}}px; display: block">
-                            <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
-                                <local-image img-src="assets/x.png" local-folder="gfs-checkout-widget" alt="close"></local-image>
-                            </div>
-                            <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" show-opening-hours="true"></gfs-droppoint>
-                        </div>
+                    <div id="toggleDropPointsViewControls">
+                        <div class="toggle-label">List&nbsp;<i class="fa fa-ellipsis-v"></i></div>
+                        <paper-toggle-button id="toggleDropPointsView" class="gfs-toggle" on-change="_showDropPointsView"></paper-toggle-button>
+                        <div class="toggle-label"><i class="fa fa-map-marker"></i>&nbsp;Map</div>
                     </div>
-                    <template is="dom-if" if="{{_selectedDropPoint}}">
-                        <div id="droppoint_info" on-click="_showDropPointDetails">
+
+                    <div class="gfsDropPoint" id="mapContainer">
+
+                        <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
+                            <div id="droppoint_overlay" style="height: {{mapHeight}}px; display: block">
+                                <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
+                                    <local-image img-src="assets/x.png" local-folder="gfs-checkout-widget" alt="close"></local-image>
+                                </div>
+                                <gfs-droppoint id="overlay-droppoint" on-choose="onSelectDropPoint" droppoint-data="{{_selectedDropPoint}}" show-opening-hours="true"></gfs-droppoint>
+                            </div>
+                        </div>
+                        <template is="dom-if" if="{{_selectedDropPoint}}">
+                            <div id="droppoint_info" on-click="_showDropPointDetails">
                                 <gfs-droppoint id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" button-type="tick"></gfs-droppoint>
                                 <div id="droppoint_detail_link"> <a class="droppoint_info"> View Opening Times </a></div>
-                        </div>
-                    </template>
-                    <img id='locateme' on-click="_locateMe" src='assets/locateme.png' />
-                    <div id="gfsMapCanvas"></div>
-                </div>
-                <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
-                <div id="dropPointListContainer">
-                    <h2>Drop Points</h2>
-                    <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}">
-                        <gfs-droppoint show-opening-hours="false" button-type="tick" droppoint-data="{{item}}"></gfs-droppoint>
+                            </div>
+                        </template>
+                        <img id='locateme' on-click="_locateMe" src='assets/locateme.png' />
+                        <div id="gfsMapCanvas"></div>
+                    </div>
+                    <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
+                    <div id="dropPointListContainer">
+                        <h2>Drop Points</h2>
+                        <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}">
+                            <gfs-droppoint show-opening-hours="false" button-type="tick" droppoint-data="{{item}}"></gfs-droppoint>
 
-                    </template>
+                        </template>
 
-                </div>
-            </iron-collapse>
+                    </div>
+                </iron-collapse>
+            </dom-if>
+
     </div>
 
 
@@ -297,7 +300,7 @@
 
             useDropPoints: {
                 type: Object,
-                value: true
+                value: false
             },
 
             useStandard: {
@@ -325,6 +328,16 @@
                 value: true
             },
 
+            result: {
+                type: Object,
+                value: {
+                    service: null,
+                    shipping: null,
+                    expDeliveryDate: null,
+                    collectPoint: null
+                }
+            },
+
             // ATTRIBUTES
             //
             // These properties represent text used for labels, titles and prompts throughout the widget.
@@ -334,13 +347,13 @@
             // <gfs-checkout drop-point-title="Your text goes here" ...
 
             initialAddress: {
-              type: String,
-              value: 'SE6 1EJ'
+                type: String,
+                value: 'SE6 1EJ'
             },
 
             dropPointTitle: {
                 type: String,
-                value: 'Would you prefer to collect your order?'
+                value: 'Collection Points'
             },
 
             calendarDeliveryTitle: {
@@ -1053,6 +1066,20 @@
             }
         },
 
+        _getDeliveryRateById: function(id) {
+            var combinedRateGroups = this._data.dayDefinite.concat(this._data.nonDayDefinite);
+            var rates = [];
+            combinedRateGroups.forEach(function(group) {
+                rates = rates.concat(group.rates);
+            });
+            var resultList = rates.filter(function (rate) { return rate.id == id });
+            if (resultList.length) {
+                return resultList[0];
+            }
+            else return null;
+
+        },
+
         _calendarMonthChanged: function(e)
         {
             this._markDeliveryDays();
@@ -1081,8 +1108,37 @@
             this._toggleCollapse('dropPointPanel');
         },
 
+
         _toggleStandardDeliveryPanelCollapse: function(e) {
             this._toggleCollapse('standardDeliveryPanel');
+        },
+
+        onSelectDropPoint: function(e) {
+            console.log("Selected drop point", e.target);
+        },
+
+        onClickMethod: function (e) {
+            if (e.target.checked) {
+                console.log("Selected standard method", e.target);
+                var method = this._getDeliveryRateById(e.target.id);
+                this.result.service = method.methodTitle;
+                this.result.shipping = method.price;
+                this.result.expDeliveryDate = method.deliveryTimeTo;
+                console.log('result', this.result);
+
+                var p4mCheckout = parent.document.getElementsByTagName("p4m-checkout")[0];
+                if (p4mCheckout) {
+                    p4mCheckout.updateShipping(
+                      this.result.service, this.result.shipping, this.result.expDeliveryDate, this.result.collectPoint
+                    );
+                }
+
+            }
+            
+        },
+
+        getChosenOptions: function () {
+
         }
 
     });

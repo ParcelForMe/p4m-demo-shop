@@ -230,6 +230,7 @@
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\Catagorie.cs" />
     <Compile Include="Models\Discount.cs" />
+    <Compile Include="Models\GFSModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Item.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -661,6 +662,7 @@
     <Content Include="Scripts\widgets\p4m-cart-card\p4m-cart-card.html" />
     <Content Include="Scripts\widgets\p4m-cart\p4m-cart.html" />
     <Content Include="Scripts\widgets\p4m-checkout\p4m-checkout.html" />
+    <Content Include="Scripts\widgets\p4m-delivery\p4m-delivery.html" />
     <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
     <Content Include="Scripts\widgets\p4m-order-summary\p4m-order-summary.html" />
     <Content Include="Scripts\widgets\p4m-profile\p4m-profile.html" />
@@ -778,6 +780,7 @@
     <Content Include="Scripts\Lib\promise-polyfill\README.md" />
     <Content Include="Views\P4MToken\ReturnToken.cshtml" />
     <Content Include="Views\P4M\P4MCheckout.cshtml" />
+    <Content Include="Views\P4M\P4MDelivery.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

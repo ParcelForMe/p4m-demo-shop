@@ -1,0 +1,48 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+
+<dom-module id="p4m-delivery">
+
+    <template>
+        <div id="container">
+            <iframe id="shippingSelectorFrame" src="/shippingSelector" on-load="onLoad"></iframe>
+
+        </div>
+
+    </template>
+
+    <style>
+        #shippingSelectorFrame {
+            width: 100%;
+            height: 250px;  
+            overflow-x: hidden;
+        }
+
+        
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-delivery",
+
+            properties: {
+                sourceUrl: String,
+                value: "/shippingSelector"
+            },
+
+            observers: [
+               
+            ],
+
+            ready: function()
+            {
+            },
+
+            onLoad: function () {
+                console.log("iframe loaded");
+            }
+
+        });
+    </script>
+</dom-module>

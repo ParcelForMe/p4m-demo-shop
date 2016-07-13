@@ -8,6 +8,12 @@ gfs-checkout brick-calendar {
 	border: none;
 }
 
+gfs-checkout brick-calendar .calendar {
+	height: auto!important;
+}
+
+
+
 gfs-checkout brick-calendar .calendar .month {
 	width:100%;
 }
@@ -39,6 +45,7 @@ gfs-checkout brick-calendar .calendar .month .weekday-label
 	margin-right:1px!important;
 
 }
+
 
 gfs-checkout brick-calendar .calendar .month .month-label
 {
