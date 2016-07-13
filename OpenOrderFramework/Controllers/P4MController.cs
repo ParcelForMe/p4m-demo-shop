@@ -173,80 +173,29 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<Order> CreateLocalOrderAsync()
-        {
-            Order order = null;
-            if (this.Request.Cookies[ShoppingCart.OrderSessionKey] == null)
-            {
-                // get the current user details for creating the order
-                var localId = User.Identity.GetUserId();
-                var user = await UserManager.FindByIdAsync(localId);
-                if (user == null)
-                    throw new Exception("No logged in user");
-                // create and save the order, then store the id in a cookie
-                var cart = ShoppingCart.GetCart(this.HttpContext);
-                order = new Order()
-                {
-                    Username = User.Identity.Name,
-                    Email = User.Identity.Name,
-                    OrderDate = DateTime.Now,
-                    Experation = DateTime.Now.AddYears(10),
-                    Address = user.Address,
-                    City = user.City,
-                    PostalCode = user.PostalCode,
-                    State = user.State,
-                    Country = user.Country,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Phone = user.Phone
-                };
-                //Save Order
-                storeDB.Orders.Add(order);
-                try
-                {
-                    // get the new order Id
-                    await storeDB.SaveChangesAsync();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    throw e;
-                }
-                // add cart details
-                order = cart.CreateOrder(order);
-                // Send tempCartId back to client as a cookie
-                this.Response.Cookies[ShoppingCart.OrderSessionKey].Value = order.OrderId.ToString();
-                //this.Response.Cookies[ShoppingCart.OrderSessionKey].Expires = DateTime.UtcNow.AddYears(1); - we want this to expire when the browser closes
-                //this.HttpContext.Session[ShoppingCart.OrderSessionKey] = order.OrderId.ToString();
-            }
-            else
-            {
-                var id = Convert.ToInt32(this.Request.Cookies[ShoppingCart.OrderSessionKey].Value);
-                order = storeDB.Orders.SingleOrDefault(o => o.OrderId == id);
-                order.OrderDetails = storeDB.OrderDetails.Where(od => od.OrderId == id).ToList();
-            }
-            return order;
-        }
-
         [HttpGet]
         [Route("purchase/{cartId}/{cvv}")]
         public async Task<JsonResult> Purchase(string cartId, string cvv)
         {
-            var result = new PaymentMessage();
+            var result = new P4MBaseMessage();
             try
             {
-                var token = this.Request.Cookies["p4mToken"].Value;
+                var token = Request.Cookies["p4mToken"].Value;
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 var purchaseResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}",P4MConstants.BaseApiAddress, cartId, cvv));
+                purchaseResult.EnsureSuccessStatusCode();
                 var messageString = await purchaseResult.Content.ReadAsStringAsync();
-                var message = JsonConvert.DeserializeObject<PaymentMessage>(messageString);
+                var message = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
                 if (!message.Success)
                     throw new Exception(message.Error);
-                result.AuthCode = message.AuthCode;
-                result.Id = message.Id;
-                result.TransactionTypeCode = message.TransactionTypeCode;
+#pragma warning disable 4014
+                // we've waited enough - don't wait for the order to be saved as well!
+                await CreateLocalOrderAsync(message);
+#pragma warning restore 4014
+                ShoppingCart.GetCart(this).EmptyCart();
+                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
             }
             catch (Exception e)
             {
@@ -255,42 +204,46 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        P4MCart GetP4MCartFromOrder(string session, Order order)
+        public async Task CreateLocalOrderAsync(PurchaseMessage purchase)
         {
-            var cart = new P4MCart
+            Order order = null;
+            // get the current user details for creating the order
+            var localId = User.Identity.GetUserId();
+            var user = await UserManager.FindByIdAsync(localId);
+            if (user == null)
+                throw new Exception("No logged in user");
+            // create and save the order, then store the id in a cookie
+            order = new Order()
             {
-                Reference = session,
-                SessionId = session,
-                Date = DateTime.UtcNow,
-                Currency = "GBP",
-                ShippingAmt = 10,
-                Tax = 0,
-                Items = new List<P4MCartItem>()
+                Username = User.Identity.Name,
+                Email = User.Identity.Name,
+                OrderDate = (DateTime)purchase.Cart.Date,
+                Experation = DateTime.Now.AddYears(10),
+                Address = purchase.DeliverTo.Street1,
+                City = purchase.DeliverTo.City,
+                PostalCode = purchase.DeliverTo.PostCode,
+                State = purchase.DeliverTo.State,
+                Country = purchase.DeliverTo.Country,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone = user.Phone
             };
-
-            foreach (var ordItem in order.OrderDetails)
+            //Save Order
+            storeDB.Orders.Add(order);
+            // get the new order Id
+            storeDB.SaveChanges();
+            // add the items
+            foreach (var item in purchase.Cart.Items)
             {
-                var item = storeDB.Items.Single(i => i.ID == ordItem.ItemId);
-                cart.Items.Add(new P4MCartItem
-                {
-                    Make = item.Name,
-                    Sku = item.ID.ToString(),
-                    Desc = item.Name,
-                    Qty = ordItem.Quantity,
-                    Price = (double)item.Price,
-                    LinkToImage = item.ItemPictureUrl,
-                });
+                var ordItem = new OrderDetail {
+                    ItemId = Convert.ToInt32(item.Sku),
+                    OrderId = order.OrderId,
+                    Quantity = (int)item.Qty,
+                    UnitPrice = (decimal)item.Price
+                };
+                storeDB.OrderDetails.Add(ordItem);
             }
-            return cart;
-        }
-
-        void CalcTaxFromOrder(Order order, Discount discount = null)
-        {
-            var itemsTotal = order.OrderDetails.Sum(d => d.Quantity * d.UnitPrice);
-            if (discount != null)
-                order.Discount = (itemsTotal + order.Shipping) * (discount.Percentage / 100);
-            order.Tax = (itemsTotal + order.Shipping - order.Discount) * _taxPercent;
-            order.Total = itemsTotal + order.Shipping + order.Tax - order.Discount;
+            storeDB.SaveChanges();
         }
     }
 }

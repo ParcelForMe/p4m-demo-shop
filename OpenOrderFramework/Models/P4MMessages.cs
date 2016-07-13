@@ -40,11 +40,14 @@ namespace OpenOrderFramework.Models
         public decimal Shipping { get; set; }
     }
 
-    public class PaymentMessage : P4MBaseMessage
+    public class PurchaseMessage : P4MBaseMessage
     {
         public string Id { get; set; }
         public string TransactionTypeCode { get; set; }
         public string AuthCode { get; set; }
+        public P4MCart Cart { get; set; }
+        public P4MAddress DeliverTo { get; set; }
+        public P4MAddress BillTo { get; set; }
     }
 
     public class PostCartMessage : P4MBaseMessage
