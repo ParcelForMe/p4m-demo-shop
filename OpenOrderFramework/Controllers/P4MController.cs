@@ -44,7 +44,7 @@ namespace OpenOrderFramework.Controllers
             if (localCart == null || cart == null || cart.Items.Count == 0)
                 return Redirect("/home");
             // update P4M with the current cart details
-            await AddItemsToP4MCartAsync();
+            //await AddItemsToP4MCartAsync();
             // Return the view
             return View("P4MCheckout");
         }
@@ -124,7 +124,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("applyDiscountCode")]
-        public DiscountMessage ApplyDiscountCode(string discountCode)
+        public JsonResult ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
             try
@@ -145,12 +145,12 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return result;
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         [Route("itemQtyChanged")]
-        public async Task<CartUpdateMessage> ItemQtyChanged(List<ChangedItem> items)
+        public async Task<JsonResult> ItemQtyChanged(List<ChangedItem> items)
         {
             var result = new CartUpdateMessage();
             try
@@ -171,7 +171,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            return result;
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -191,12 +191,12 @@ namespace OpenOrderFramework.Controllers
                 var message = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
                 if (!message.Success)
                     throw new Exception(message.Error);
-#pragma warning disable 4014
-                // we've waited enough - don't wait for the order to be saved as well!
-                await CreateLocalOrderAsync(message);
-#pragma warning restore 4014
                 ShoppingCart.GetCart(this).EmptyCart();
                 HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+#pragma warning disable 4014
+                // we've waited enough - don't wait for the order to be saved as well!
+                CreateLocalOrderAsync(message);
+#pragma warning restore 4014
             }
             catch (Exception e)
             {
