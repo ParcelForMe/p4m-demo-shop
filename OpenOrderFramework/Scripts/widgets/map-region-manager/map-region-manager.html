@@ -97,7 +97,7 @@
                 }
               }
 
-                    return result;
+              return result;
             }
             else {
               return {}
@@ -147,7 +147,7 @@
                 }
             },
             ready: function() {
-
+                this.recurseDepth = 0;
             },
 
             addRegion: function(geoBox) {
@@ -158,8 +158,9 @@
                 var result = [];
                 var coveringCount = 0;
                 var newViewPort, remnant, newViewPortParams, remnantParams;
-                //For each covered rectangle,
+                this.recurseDepth ++;
 
+                //For each covered rectangle,
                 //If this is not a Rectangle, assume that they are the parameters for creating one
                 if (viewPort.constructor !== Rectangle) {
                     viewPort = new Rectangle(viewPort);
@@ -305,12 +306,16 @@
                             }
                             if (newViewPortParams && (newViewPortParams.height > 0) && (newViewPortParams.width > 0)) {
                                 newViewPort = new Rectangle(newViewPortParams);
-                                result = result.concat(this.getUncoveredRectangles(newViewPort));
+                                if (!newViewPort.equals(viewPort)) {
+                                    result = result.concat(this.getUncoveredRectangles(newViewPort));
+                                }                                                              
                             }
 
                             if (remnantParams && (remnantParams.width > 0) && (remnantParams.height > 0)){
                                 remnant = new Rectangle(remnantParams);
-                                result = result.concat(this.getUncoveredRectangles(remnant));
+                                if (!remnant.equals(viewPort)) {
+                                    result = result.concat(this.getUncoveredRectangles(remnant));
+                                }                            
                             }
 
                             break;
@@ -325,6 +330,7 @@
                 if (coveringCount == 0) {
                     result = [viewPort];
                 }
+                this.recurseDepth--;
                 return result;
             }
         });
