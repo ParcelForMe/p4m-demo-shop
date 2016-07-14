@@ -1,6 +1,8 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="import" href="../p4m-overlay/p4m-overlay.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-purchase">
@@ -12,10 +14,12 @@
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <p4m-api id="localApi" is-local="true"></p4m-api>
             <paper-spinner id="spinner"></paper-spinner>
-            <div id="p4mBuyNowBtn" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div> 
-            <a href="#" on-click="showOverlay">Show overlay</a>       
+
+            <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
+            <p class="p4m-error">{{errorMsg}}</p> 
+      
         </div>
-        <div id="overlay" class="p4m-overlay overlay">Hello</div>
+        <p4m-overlay id="overlay" with-backdrop></p4m-overlay>
     </template>
 
     <style>
@@ -31,35 +35,24 @@
         .hidden {
             display: none;
         }
-
-        .overlay {
-	        position: fixed;
-	        width: 100%;
-	        height: 100%;
-	        top: 0;
-	        left: 0;
-	        background: rgba(76,102,25,0.9);
+        --iron-overlay-backdrop-opacity {
+            opacity: 0.9;
+        }
+        .p4m-error {
+            color: red;
+            font-weight: 500;
         }
 
-        .p4m-overlay {
-	        opacity: 0;
-	        visibility: hidden;
-	        transition: opacity 0.5s, visibility 0s 0.5s;
-        }
-
-        .p4m-overlay.open {
-	        opacity: 1;
-	        visibility: visible;
-	        transition: opacity 0.5s;
-        }
-
-        .p4m-overlay nav {
-	        perspective: 1200px;
-        }
 
     </style>
 
     <script>
+        var States = {
+            NOT_PURCHASED: 0,
+            PURCHASING: 1,
+            FAILED_PURCHASE: 2,
+            PURCHASED: 3
+        }
     //
         Polymer({
             is: "p4m-purchase",
@@ -70,87 +63,166 @@
                     notify: true,
                     observer: "onCartDataChange"
                 },
-                buttonText: {
+                btnMsgNotPurchased: {
                     type: String,
                     value: "Buy now"
+                },
+                btnMsgBuying: {
+                    type: String,
+                    value: "Please wait"
+                },
+                btnMsgComplete: {
+                    type: String,
+                    value: "Purchase complete"
+                },
+                btnMsgNotValid: {
+                    type: String,
+                    value: "Cart empty"
+                },
+                btnMsgFailed: {
+                    type: String,
+                    value: "Try again"
+                },
+                msgFailedPayment: {
+                    type: String,
+                    value: "Something went wrong. Please try again."
+                },
+                errorMsg: {
+                    type: String
                 },
                 _topClass: {
                     type: String,
                     value: "active"
+                },
+                _state: {
+                    type: String,
+                    notify: true
                 }
             },
             observers: [
-                "onCartDataChange(cartData.*)"
+                "onCartDataChange(cartData.*)",
+                "onStateChange(_state)"
             ],
 
-            ready: function()
+            ready: function ()
             {
                 this.load();
             },
 
+            onStateChange: function () {
+                this.updateUi();
+            },
+
+            onCartDataChange: function () {
+                this.updateUi();
+            },
+
             buyNow: function () {
-                this.showAsBuying();
-                this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
+                if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
+                    this._state = States.PURCHASING;
+                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
+                }
             },
 
             load: function () {
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
-                this.updateUi();
-            },
-
-            onCartDataChange: function (e) {
-                this.updateUi();
+                this._state = States.NOT_PURCHASED;
             },
 
             onPurchase: function (e) {
-                this.showAsCompleted();
+                console.log('onPurchase', e);
+                if (e.Success == false) {
+                    this.errorMsg = this.msgFailedPayment;
+                    this._state = States.FAILED_PURCHASE;
+                }
+                else {                  
+                    if (e.RedirectUrl) {
+                        window.location.href = e.RedirectUrl;
+                    }
+                    else {
+                        this._state = States.PURCHASED;
+                    }
+                }
             },
 
-            updateUi: function (disable) {
+            updateUi: function () {
                 //Disable if truthy value passed, or not logged in, or no cart
-                this.$.p4mBuyNowBtn.disabled = disable || !this._loggedIn || !this.cartData;
+                if (!this._loggedIn || !this.cartData) {                    
+                    this.showAsNotValid();
+                }
+                else if (this._state === States.NOT_PURCHASED) {
+                    this.showAsNotPurchased();
+                }
+                else if (this._state == States.PURCHASING) {
+                    this.showAsBuying();
+                }
+                else if (this._state == States.PURCHASED) {
+                    this.showAsCompleted();
+                }
+                else if (this._state == States.FAILED_PURCHASE) {
+                    this.showAsFailed();
+                }
             },
 
             setLoadingState: function(loading) {
                 if (loading) {
-                    this.$.spinner.active = true;
-                    this.$.spinner.classList.remove('hidden');
-                    this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                    this.showOverlay();                  
                     this._topClass = "loading";
                 }
                 else {
-                    this.$.spinner.active = false;
-                    this.$.spinner.classList.add('hidden');
-                    this.$.p4mBuyNowButton.classList.add('p4m-button-active');
+                    this.hideOverlay();
                     this._topClass = "active";
                 }
             },
 
-            showAsCompleted: function () {
-                this.buttonText = "Purchase complete";
+            showAsNotPurchased: function() {
+                this.buttonText = this.btnMsgNotPurchased;
+                this.$.p4mBuyNowButton.classList.add('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.remove('disabled');
                 this.setLoadingState(false);
-                this.updateUi();
+                this.topClass = "active";
+            },
+
+            showAsNotValid: function () {
+                this.buttonText = this.btnMsgNotValid; //"Cart empty";
+                this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.add('disabled');
+                this.setLoadingState(false);
+                this.topClass = "invalid";
             },
 
             showAsBuying: function () {
-                this.buttonText = "Please wait...";
+                this.buttonText = this.btnMsgBuying;//"Please wait...";
+                this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.add('disabled');
                 this.setLoadingState(true);
-                this.updateUi(true);
+                this.topClass = "buying";
+            },
+
+            showAsCompleted: function () {
+                this.buttonText = this.btnMsgComplete; //"Purchase complete";
+                this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.add('disabled');
+                this.setLoadingState(false);
+                this.topClass = "complete";
+            },
+
+            showAsFailed: function () {
+                this.buttonText = this.btnMsgFailed;
+                this.$.p4mBuyNowButton.classList.add('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.remove('disabled');
+                this.setLoadingState(false);
+                this.topClass = "failed";
             },
 
             showOverlay: function() {
-                this.toggleOverlay(true);
+                this.$.overlay.open();
             },
 
-            toggleOverlay: function (show) {
-                if (show) {
-                    this.$.overlay.classList.add('open');
-                }
-                else {
-                    this.$.overlay.classList.remove('open');
-                }
+            hideOverlay: function () {
+                this.$.overlay.close();
             }
         });
     </script>

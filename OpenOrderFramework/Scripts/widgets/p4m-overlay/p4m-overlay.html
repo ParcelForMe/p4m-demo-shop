@@ -1,0 +1,37 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-overlay-behavior/iron-overlay-behavior.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
+<dom-module id="p4m-overlay">
+    <style>
+        paper-spinner {
+            width: 200px;
+            height: 200px;
+        }
+        iron-overlay-backdrop.opened {
+            opacity: 0.9;
+            background-color: green;
+        }
+    </style>
+
+    <template>
+       <content><paper-spinner active="true"></paper-spinner></content> 
+       
+    </template>
+
+    <script>
+
+        Polymer({
+            is: "p4m-overlay",
+            behaviors: [Polymer.IronOverlayBehavior],
+
+            properties: {
+            },
+
+            ready: function()
+            {
+                this.positionTarget = document.body;
+            }
+        });
+    </script>
+</dom-module>

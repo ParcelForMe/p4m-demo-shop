@@ -1,10 +1,13 @@
 ﻿
         .p4m-button {
+            margin: 10px;
             padding: 10px;
             background-color: rgba(255, 255, 255, 1.0);
             color: #000000;
             border-radius: 4px;
             text-align: center;
+            border: solid 1px #E0E0E0;
+            cursor: pointer; 
         }
         .p4m-button.p4m-button-active {
 
@@ -17,5 +20,8 @@
             background-color: rgba(68, 144, 68, 1.0);
             color: #FFFFFF;
             transition-duration: 0.5s;
+        }
 
+        .p4m-button.disabled {
+            background-color: rgba(100, 100, 100, 1.0);
         }
