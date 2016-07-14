@@ -1,7 +1,7 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
-
+<link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-purchase">
 
@@ -11,9 +11,11 @@
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <p4m-api id="localApi" is-local="true"></p4m-api>
-            <paper-spinner id="spinner"></paper-spinner>         
-            <button id="p4mBuyNowBtn" on-tap="buyNow">Buy Now</button>
+            <paper-spinner id="spinner"></paper-spinner>
+            <div id="p4mBuyNowBtn" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div> 
+            <a href="#" on-click="showOverlay">Show overlay</a>       
         </div>
+        <div id="overlay" class="p4m-overlay overlay">Hello</div>
     </template>
 
     <style>
@@ -29,6 +31,32 @@
         .hidden {
             display: none;
         }
+
+        .overlay {
+	        position: fixed;
+	        width: 100%;
+	        height: 100%;
+	        top: 0;
+	        left: 0;
+	        background: rgba(76,102,25,0.9);
+        }
+
+        .p4m-overlay {
+	        opacity: 0;
+	        visibility: hidden;
+	        transition: opacity 0.5s, visibility 0s 0.5s;
+        }
+
+        .p4m-overlay.open {
+	        opacity: 1;
+	        visibility: visible;
+	        transition: opacity 0.5s;
+        }
+
+        .p4m-overlay nav {
+	        perspective: 1200px;
+        }
+
     </style>
 
     <script>
@@ -42,9 +70,13 @@
                     notify: true,
                     observer: "onCartDataChange"
                 },
-                changes: {
-                    type: Object,
-                    value: {}
+                buttonText: {
+                    type: String,
+                    value: "Buy now"
+                },
+                _topClass: {
+                    type: String,
+                    value: "active"
                 }
             },
             observers: [
@@ -65,38 +97,61 @@
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
-                this.checkEnabled();
+                this.updateUi();
             },
 
             onCartDataChange: function (e) {
-                this.checkEnabled();
+                this.updateUi();
             },
 
             onPurchase: function (e) {
                 this.showAsCompleted();
-                alert("Purchased");
-                this.checkEnabled(true);
             },
 
-            checkEnabled: function (disable) {
+            updateUi: function (disable) {
+                //Disable if truthy value passed, or not logged in, or no cart
                 this.$.p4mBuyNowBtn.disabled = disable || !this._loggedIn || !this.cartData;
             },
 
+            setLoadingState: function(loading) {
+                if (loading) {
+                    this.$.spinner.active = true;
+                    this.$.spinner.classList.remove('hidden');
+                    this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                    this._topClass = "loading";
+                }
+                else {
+                    this.$.spinner.active = false;
+                    this.$.spinner.classList.add('hidden');
+                    this.$.p4mBuyNowButton.classList.add('p4m-button-active');
+                    this._topClass = "active";
+                }
+            },
+
             showAsCompleted: function () {
-                this.$.p4mBuyNowBtn.firstChild.data = "Purchase complete";
-                this.$.spinner.active = false;
-                this.$.spinner.classList.add('hidden');
-                this.$.p4mPurchaseContainer.classList.remove('loading');
+                this.buttonText = "Purchase complete";
+                this.setLoadingState(false);
+                this.updateUi();
             },
 
             showAsBuying: function () {
-                this.$.p4mBuyNowBtn.firstChild.data = "Please wait...";
-                this.checkEnabled(true);
-                this.$.spinner.active = true;
-                this.$.spinner.classList.remove('hidden');
-                this.$.p4mPurchaseContainer.classList.add('loading');
-            }
+                this.buttonText = "Please wait...";
+                this.setLoadingState(true);
+                this.updateUi(true);
+            },
 
+            showOverlay: function() {
+                this.toggleOverlay(true);
+            },
+
+            toggleOverlay: function (show) {
+                if (show) {
+                    this.$.overlay.classList.add('open');
+                }
+                else {
+                    this.$.overlay.classList.remove('open');
+                }
+            }
         });
     </script>
 </dom-module>

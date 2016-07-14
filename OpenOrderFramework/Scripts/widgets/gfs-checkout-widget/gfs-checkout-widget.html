@@ -1121,6 +1121,7 @@
             if (e.target.checked) {
                 console.log("Selected standard method", e.target);
                 var method = this._getDeliveryRateById(e.target.id);
+                this.result.serviceId = e.target.id;
                 this.result.service = method.methodTitle;
                 this.result.shipping = method.price;
                 this.result.expDeliveryDate = method.deliveryTimeTo;
