@@ -172,8 +172,12 @@ namespace OpenOrderFramework.Controllers
             // If not try to match on Email. If found then store local ID for consumer and login.
             // If not local ID or Email then create a new user and store the new local ID
             var consumer = await GetConsumerAsync(token);
+
             this.Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
             this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
+            this.Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
+            this.Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
+            
             var localId = string.Empty;
             if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
                 localId = consumer.Extras["LocalId"];
@@ -316,6 +320,8 @@ namespace OpenOrderFramework.Controllers
             response.Cookies["p4mToken"].Expires = DateTime.UtcNow;
             response.Cookies["p4mAvatarUrl"].Value = string.Empty;
             response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mGivenName"].Value = string.Empty;
+            response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow;
         }
 
         void GetTempState(out string state, out string nonce)

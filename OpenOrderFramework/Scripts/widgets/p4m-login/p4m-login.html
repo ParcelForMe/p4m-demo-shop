@@ -2,16 +2,16 @@
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
-<link rel="import" href="../p4m-api/local-api.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
 
 <dom-module id="p4m-login">
 
     <template>  
-        <p4m-profile on-click="launchPopup"></p4m-profile>
+        <p4m-profile id="p4mProfile" on-click="launchPopup"></p4m-profile>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
-        <local-api id="localApi"></local-api>
+        <p4m-api id="localApi" is-local="true"></p4m-api>
     </template>
 
     <script>
@@ -67,15 +67,21 @@
                     //Make AuthUrl
                     this._makeState();
                     this._makeAuthUrl();
-                    window.open(this._authUrl);
+                    this.popupCenter(this._authUrl, "Login", 450, 500);
                     this._waitForAuthCompletion();
                 }
                 else {
-                    window.open(this.logoutUrl);
+                    this.popupCenter(this.logoutUrl, "Logout", 450, 500);
                     if (this.logoutForm && this.logoutForm != '') {
                         document.getElementById(this.logoutForm).submit();
                     }
                 }
+            },
+
+            popupCenter: function(url, title, w, h) {
+                var left = (screen.width/2)-(w/2);
+                var top = (screen.height/2)-(h/2);
+                return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=yes, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
             },
 
             _makeState: function() {
@@ -117,11 +123,13 @@
 
             _onAuthCompletion: function () {
                 var currentPage = { "currentPage": window.location.href };
+                this.$.p4mProfile.showSpinner();
                 this.$.localApi.call('localLogin', currentPage, null, this._onLocalLogin.bind(this));
             },
 
             _onLocalLogin: function (data) {
                 console.log(JSON.stringify(data));
+                this.$.p4mProfile.hideSpinner();
                 if (data.RedirectUrl)
                     window.location.href = data.RedirectUrl;
                 else

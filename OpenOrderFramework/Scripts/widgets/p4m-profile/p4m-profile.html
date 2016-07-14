@@ -1,7 +1,5 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
-<link rel="import" href="../p4m-api/p4m-api.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
-
 
 <dom-module id="p4m-profile">
 
@@ -10,7 +8,6 @@
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
-            <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
             <div id="profileName">{{_profileName}}</div>
             <img id="profileImage" src$="{{_profilePicUrl}}" />  
             <paper-spinner id="spinner"></paper-spinner>         
@@ -117,16 +114,7 @@
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
          
-                //If profile data not present in cookies, and user is logged in, retrieve data from API instead
-                if ((!this._profilePicUrl) && this._loggedIn) {
-                    //Display the avatar after the API request returns
-                    this.showSpinner();
-                    this.$.api.call('consumer'); //callback to this.onProfileData(), which will call this.show()
-                }
-                else {
-                    //Display the avatar immediately
-                    this.show();
-                }
+                this.show();
             },
 
             show: function () {
