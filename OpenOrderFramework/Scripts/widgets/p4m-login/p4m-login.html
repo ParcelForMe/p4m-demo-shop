@@ -11,6 +11,7 @@
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
+        <polymer-cookie id="p4mLocalLoginCookie" name="p4mLocalLogin"></polymer-cookie>
         <p4m-api id="localApi" is-local="true"></p4m-api>
     </template>
 
@@ -59,6 +60,17 @@
 
             ready: function () {
                 this._getTokenCookie();
+                if (this.p4mToken) 
+                {
+                    // if the P4M Consumer is logged in, then check if they are logged in locally
+                    var localLogin = this.$.p4mLocalLoginCookie.readCookie(); 
+                    if (!localLogin || localLogin === "")
+                        // state is unknown so check first
+                        this.$.localApi.call('isLocallyLoggedIn', null, null, this._onCheckLocalLogin.bind(this));
+                    else if (localLogin === "false")
+                        // definitely not logged in so do it now
+                        this._onAuthCompletion();
+                }
             },
 
             launchPopup: function()
@@ -134,6 +146,12 @@
                     window.location.href = data.RedirectUrl;
                 else
                     window.location.reload(true);
+            },
+
+            _onCheckLocalLogin: function (data) {
+                console.log(JSON.stringify(data));
+                if (!data.Success)
+                    this._onAuthCompletion();
             },
 
             _onConsumerDetails: function(data) {

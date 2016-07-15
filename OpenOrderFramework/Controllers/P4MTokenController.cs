@@ -147,9 +147,22 @@ namespace OpenOrderFramework.Controllers
         //}
 
         [HttpGet]
+        [Route("isLocallyLoggedIn")]
+        public JsonResult IsLocallyLoggedIn()
+        {
+            var result = new P4MBaseMessage();
+            var authUser = AuthenticationManager.User;
+            if (authUser == null || !authUser.Identity.IsAuthenticated)
+                result.Error = "Not logged in";
+            this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         [Route("localLogin")]
         public async Task<JsonResult> LocalLogin(string currentPage)
         {
+            this.Response.Cookies["p4mLocalLogin"].Value = "false";
             var result = new LoginMessage();
             try
             {
@@ -177,42 +190,91 @@ namespace OpenOrderFramework.Controllers
             this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
             this.Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
             this.Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
-            
-            var localId = string.Empty;
-            if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
-                localId = consumer.Extras["LocalId"];
-            var address = consumer.PrefDeliveryAddress;
-            // update the local user details with the current P4M details
-            ApplicationUser user = await UserManager.FindByEmailAsync(consumer.Email);
-            if (user == null)
-                user = new ApplicationUser();
-            user.UserName = consumer.Email;
-            user.Email = consumer.Email;
-            user.EmailConfirmed = true;
-            user.FirstName = consumer.GivenName;
-            user.LastName = consumer.FamilyName;
-            user.Address = address.Street1 ?? address.Street2;
-            user.City = address.City;
-            user.State = address.State;
-            user.PostalCode = address.PostCode;
-            user.Country = address.Country;
-            user.LockoutEnabled = false;
-            user.Phone = consumer.MobilePhone;
-            user.PhoneNumber = consumer.MobilePhone;
-            if (await LocalLoginAsync(token, localId, consumer.Email))
+
+            // is there a logged in user already?
+            string authUserId = null;
+            var alreadyLoggedIn = false;
+            var authUser = AuthenticationManager.User;
+            if (authUser != null && authUser.Identity.IsAuthenticated)
             {
-                await UserManager.UpdateAsync(user);
+                authUserId = authUser.Identity.GetUserId();
+                alreadyLoggedIn = true;
+            }
+            // get the local Id from P4M if possible
+            string p4mLocalId = null;
+            if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
+            {
+                p4mLocalId = consumer.Extras["LocalId"];
+                if (alreadyLoggedIn && p4mLocalId != authUserId)
+                {
+                    // switching local users here
+                    AuthenticationManager.SignOut();
+                    authUserId = null;
+                    authUser = null;
+                    alreadyLoggedIn = false;
+                }
+            }
+            
+            // if P4M already has a localId we use that, otherwise we use the Id of the logged in user (if any)
+            // update the local user details with the current P4M details - this will create a new user if required
+            ApplicationUser appUser = await GetAppUserAsync(consumer, p4mLocalId ?? authUserId);
+            
+            // if this is a new local user then appUser.PasswordHash will be null
+            if (alreadyLoggedIn || appUser.PasswordHash != null)
+            {
+                if (!alreadyLoggedIn)
+                    await LocalLoginAsync(appUser);
+                this.Response.Cookies["p4mLocalLogin"].Value = "true";
+#pragma warning disable 4014
+                // save any possible changes to the local user 
+                UserManager.UpdateAsync(appUser);
+                // store the local Id if not already stored
+                if (p4mLocalId == null)
+                    // NB. we're only saving the local Id the first time the user visits the site
+                    SaveLocalIdAsync(token, appUser.Id);
+#pragma warning restore 4014
                 return;
             }
-            // local user has not been found for the P4M consumer so we need to create one and log them in
-            var idResult = await UserManager.CreateAsync(user);
+            // local user has NOT been found for the P4M consumer so we need to create one and log them in
+            var idResult = await UserManager.CreateAsync(appUser);
             if (idResult.Succeeded)
             {
-                user = await UserManager.FindByEmailAsync(consumer.Email);
+                appUser = await UserManager.FindByEmailAsync(consumer.Email);
                 var password = GeneratePassword();
-                await UserManager.AddPasswordAsync(user.Id, password);
-                await SaveLocalIdAsync(token, user.Id);
+                await UserManager.AddPasswordAsync(appUser.Id, password);
+                await LocalLoginAsync(appUser);
+                this.Response.Cookies["p4mLocalLogin"].Value = "true";
+#pragma warning disable 4014
+                // NB. we're only saving the local Id the first time the user visits the site
+                SaveLocalIdAsync(token, appUser.Id);
+#pragma warning restore 4014
             }
+        }
+
+        async Task<ApplicationUser> GetAppUserAsync(Consumer consumer, string localId)
+        {
+            var address = consumer.PrefDeliveryAddress;
+            ApplicationUser appUser = null;
+            if (localId != null)
+                appUser = await UserManager.FindByIdAsync(localId);
+            if (appUser == null)
+                appUser = await UserManager.FindByEmailAsync(consumer.Email);
+            if (appUser == null)
+                appUser = new ApplicationUser();
+            appUser.UserName = consumer.Email;
+            appUser.Email = consumer.Email;
+            appUser.EmailConfirmed = true;
+            appUser.FirstName = consumer.GivenName;
+            appUser.LastName = consumer.FamilyName;
+            appUser.Address = address.Street1 ?? address.Street2;
+            appUser.City = address.City;
+            appUser.State = address.State;
+            appUser.PostalCode = address.PostCode;
+            appUser.Country = address.Country;
+            appUser.LockoutEnabled = false;
+            appUser.Phone = consumer.MobilePhone;
+            appUser.PhoneNumber = consumer.MobilePhone;
+            return appUser;
         }
 
         const int passLength = 20;
@@ -220,6 +282,7 @@ namespace OpenOrderFramework.Controllers
         Random random = new Random();
         string GeneratePassword()
         {
+            return "Password1";
             StringBuilder strB = new StringBuilder(100);
             int i = 0;
             while (i++ < passLength)
@@ -229,19 +292,11 @@ namespace OpenOrderFramework.Controllers
             return strB.ToString();
         }
 
-        async Task<bool> LocalLoginAsync(string token, string localId, string email)
+        async Task LocalLoginAsync(ApplicationUser user)
         {
-            ApplicationUser user = await UserManager.FindByIdAsync(localId);
-            if (user == null)
-            {
-                user = await UserManager.FindByEmailAsync(email);
-                if (user == null)
-                    return false;
-                await SaveLocalIdAsync(token, user.Id);
-            }
             var identity = await UserManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
-            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, new ClaimsIdentity(identity));
-            return true;
+            // allow cookie to expire at the end of the browser session
+            AuthenticationManager.SignIn(new AuthenticationProperties (), new ClaimsIdentity(identity));
         }
 
         async Task<Consumer> GetConsumerAsync(string token)
@@ -250,7 +305,7 @@ namespace OpenOrderFramework.Controllers
             var client = new HttpClient();
             client.SetBearerToken(token);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var result = await client.GetAsync(P4MConstants.BaseApiAddress + "consumer");
+            var result = await client.GetAsync(P4MConstants.BaseApiAddress + "consumer?checkHasOpenCart=true");
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
             if (message.Consumer == null || !message.Success)
@@ -322,6 +377,8 @@ namespace OpenOrderFramework.Controllers
             response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow;
             response.Cookies["p4mGivenName"].Value = string.Empty;
             response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mLocalLogin"].Value = string.Empty;
+            response.Cookies["p4mLocalLogin"].Expires = DateTime.UtcNow;
         }
 
         void GetTempState(out string state, out string nonce)

@@ -29,7 +29,7 @@ namespace OpenOrderFramework.Models
         public List<string> PreferredCarriers { get; set; }
 
         public string PrefDeliveryAddressId { get; set; }
-        public Address PrefDeliveryAddress {
+        public P4MAddress PrefDeliveryAddress {
             get {
                 if (this.Addresses != null && PrefDeliveryAddressId != null)
                     return Addresses.FirstOrDefault(a => a.Id == PrefDeliveryAddressId);
@@ -43,33 +43,11 @@ namespace OpenOrderFramework.Models
 
         public string ProfilePicUrl { get; set; }
 
-        public List<Address> Addresses { get; set; }
+        public List<P4MAddress> Addresses { get; set; }
 
         public List<PaymentMethod> PaymentMethods { get; set; }
 
         public Dictionary<string, string> Extras { get; set; }
-    }
-
-    public class Address 
-    {
-        public string Id { get; set; } // guid
-        public string AddressType { get; set; }
-        public string Label { get; set; }
-        public string CompanyName { get; set; }
-        public string Street1 { get; set; }
-        public string Street2 { get; set; }
-        public string City { get; set; }
-        public string PostCode { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-        public string CountryCode { get; set; }
-        public string Contact { get; set; } // name of the person to contact at the address
-        public string Phone { get; set; }   // phone number of the contact or landline at the address
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-        public int DropPointProviderId { get; set; }
-        public string DropPointId { get; set; }
-        public int CollectPrefOrder { get; set; }
     }
 
     public class PaymentMethod
