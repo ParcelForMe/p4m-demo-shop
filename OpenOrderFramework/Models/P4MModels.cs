@@ -90,7 +90,7 @@ namespace OpenOrderFramework.Models
         public string PayMethodToken { get; set; }
         public string PaymentId { get; set; }
         public List<P4MCartItem> Items { get; set; }
-        public List<Discount> Discounts { get; set; }
+        public List<P4MDiscount> Discounts { get; set; }
     }
 
     public class P4MCartItem
@@ -132,6 +132,13 @@ namespace OpenOrderFramework.Models
         public int DropPointProviderId { get; set; }
         public string DropPointId { get; set; }
         public int CollectPrefOrder { get; set; }
+    }
+
+    public class P4MDiscount
+    {
+        public string Code { get; set; }
+        public string Description { get; set; }
+        public double Amount { get; set; }
     }
 
     public class ChangedItem

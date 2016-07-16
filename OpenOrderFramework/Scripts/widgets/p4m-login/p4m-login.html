@@ -12,6 +12,7 @@
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
         <polymer-cookie id="p4mLocalLoginCookie" name="p4mLocalLogin"></polymer-cookie>
+        <polymer-cookie id="p4mOfferCartRestoreCookie" name="p4mOfferCartRestore"></polymer-cookie>
         <p4m-api id="localApi" is-local="true"></p4m-api>
     </template>
 
@@ -67,9 +68,20 @@
                     if (!localLogin || localLogin === "")
                         // state is unknown so check first
                         this.$.localApi.call('isLocallyLoggedIn', null, null, this._onCheckLocalLogin.bind(this));
-                    else if (localLogin === "false")
+                    else if (localLogin === "false") {
+                        alert("AuthComp: "+localLogin);
                         // definitely not logged in so do it now
                         this._onAuthCompletion();
+                    }
+                    else {
+                        var offerRestore = this.$.p4mOfferCartRestoreCookie.readCookie();
+                        if (offerRestore === "true")
+                        {
+                            alert("Do you want to restore your last cart?");
+                            // state is unknown so check first
+                            this.$.localApi.call('restoreLastCart', null, null, this._onLocalLogin.bind(this));
+                        }
+                    }
                 }
             },
 

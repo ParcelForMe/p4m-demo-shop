@@ -37,35 +37,33 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("checkout/p4mCheckout")]
-        public async Task<ActionResult> P4MCheckout()
+        public ActionResult P4MCheckout()
         {
             var localCart = ShoppingCart.GetCart(this.HttpContext);
             var cart = GetP4MCartFromLocalCart();
             if (localCart == null || cart == null || cart.Items.Count == 0)
                 return Redirect("/home");
-            // update P4M with the current cart details
-            //await AddItemsToP4MCartAsync();
             // Return the view
             return View("P4MCheckout");
         }
         
-        async Task AddItemsToP4MCartAsync()
-        {
-            // get the consumer's details from P4M. 
-            var client = new HttpClient();
-            var token = Request.Cookies["p4mToken"].Value;
-            client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var cart = GetP4MCartFromLocalCart();
-            var cartMessage = new PostCartMessage { Cart = cart, ClearItems = true, Currency = "GBP", PaymentType = "DB", SessionId = cart.SessionId };
-            var content = new System.Net.Http.ObjectContent<PostCartMessage>(cartMessage, new JsonMediaTypeFormatter());
-            var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cart", content);
-            var messageString = await result.Content.ReadAsStringAsync();
-            var message = JsonConvert.DeserializeObject<PostCartMessage>(messageString);
-            if (!message.Success) {
-                throw new Exception(message.Error);
-            }             
-        }
+        //async Task AddItemsToP4MCartAsync()
+        //{
+        //    // update P4M with the current cart details
+        //    var client = new HttpClient();
+        //    var token = Request.Cookies["p4mToken"].Value;
+        //    client.SetBearerToken(token);
+        //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //    var cart = GetP4MCartFromLocalCart();
+        //    var cartMessage = new PostCartMessage { Cart = cart, ClearItems = true, Currency = "GBP", PaymentType = "DB", SessionId = cart.SessionId };
+        //    var content = new System.Net.Http.ObjectContent<PostCartMessage>(cartMessage, new JsonMediaTypeFormatter());
+        //    var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cart", content);
+        //    var messageString = await result.Content.ReadAsStringAsync();
+        //    var message = JsonConvert.DeserializeObject<PostCartMessage>(messageString);
+        //    if (!message.Success) {
+        //        throw new Exception(message.Error);
+        //    }             
+        //}
 
         P4MCart GetP4MCartFromLocalCart()
         {
@@ -115,8 +113,58 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
+        [Route("restoreLastCart")]
+        public async Task<JsonResult> RestoreLastCart()
+        {
+            var result = new P4MBaseMessage();
+            try
+            {
+                var cart = await GetOpenCartFromP4M();
+                await CreateLocalCartFromP4MCart(cart);
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            Response.Cookies["p4mOfferCartRestore"].Value = null;
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        async Task<P4MCart> GetOpenCartFromP4M()
+        {
+            // update P4M with the current cart details
+            var client = new HttpClient();
+            var token = Request.Cookies["p4mToken"].Value;
+            client.SetBearerToken(token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var sessionId = HttpContext.Session[ShoppingCart.CartSessionKey].ToString();
+            var result = await client.GetAsync(string.Format("{0}restoreLastCart/{1}", P4MConstants.BaseApiAddress, sessionId));
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<CartMessage>(messageString);
+            if (!message.Success)
+                throw new Exception(message.Error);
+            return message.Cart;
+        }
+
+        async Task CreateLocalCartFromP4MCart(P4MCart p4mCart)
+        {
+            var localCart = ShoppingCart.GetCart(HttpContext);
+            localCart.Shipping = (decimal)p4mCart.ShippingAmt;
+            localCart.Tax = (decimal)p4mCart.Tax;
+            var discount = p4mCart.Discounts.FirstOrDefault();
+            if (discount != null)
+                localCart.Discount = (decimal)discount.Amount;
+            foreach(var item in p4mCart.Items)
+            {
+                var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
+                localCart.AddToCart(localItem);
+            }
+            await storeDB.SaveChangesAsync();
+        }
+
+        [HttpGet]
         [Route("shippingSelector")]
-        public async Task<ActionResult> ShippingSelector()
+        public ActionResult ShippingSelector()
         {
             // Return the view
             return View("P4MDelivery");

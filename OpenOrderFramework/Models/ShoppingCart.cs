@@ -55,7 +55,7 @@ namespace OpenOrderFramework.Models
             CalcTax();
         }
 
-        public int AddToCart(Item item)
+        public int AddToCart(Item item, int count = -1)
         {
             // Get the matching cart and item instances
             var cartItem = storeDB.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId && c.ItemId == item.ID);
@@ -66,7 +66,7 @@ namespace OpenOrderFramework.Models
                 {
                     ItemId = item.ID,
                     CartId = ShoppingCartId,
-                    Count = 1,
+                    Count = count > 0 ? count : 1,
                     DateCreated = DateTime.Now
                 };
                 storeDB.Carts.Add(cartItem);
@@ -75,7 +75,7 @@ namespace OpenOrderFramework.Models
             {
                 // If the item does exist in the cart, 
                 // then add one to the quantity
-                cartItem.Count++;
+                cartItem.Count = count > 0 ? count : cartItem.Count + 1;
             }
             // Save changes
             storeDB.SaveChanges();

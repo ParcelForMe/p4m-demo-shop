@@ -167,7 +167,8 @@ namespace OpenOrderFramework.Controllers
             try
             {
                 var token = this.Request.Cookies["p4mToken"].Value;
-                await LocalConsumerLogin(token);
+                var hasOpenCart = await LocalConsumerLoginAsync(token);
+                this.Response.Cookies["p4mOfferCartRestore"].Value = hasOpenCart ? "true" : "false";
                 if (currentPage.ToLower().Contains("/account/login"))
                     result.RedirectUrl = "/checkout/p4mCheckout";
             }
@@ -178,13 +179,16 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        async Task LocalConsumerLogin(string token)
+        async Task<bool> LocalConsumerLoginAsync(string token)
         {
             // get the consumer's details from P4M. 
             // Check if there is a local ID and login. 
             // If not try to match on Email. If found then store local ID for consumer and login.
             // If not local ID or Email then create a new user and store the new local ID
-            var consumer = await GetConsumerAsync(token);
+            var consumerResult = await GetConsumerAsync(token);
+            if (consumerResult == null || !consumerResult.Success)
+                throw new Exception(consumerResult.Error);
+            var consumer = consumerResult.Consumer;
 
             this.Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
             this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
@@ -233,7 +237,7 @@ namespace OpenOrderFramework.Controllers
                     // NB. we're only saving the local Id the first time the user visits the site
                     SaveLocalIdAsync(token, appUser.Id);
 #pragma warning restore 4014
-                return;
+                return consumerResult.HasOpenCart;
             }
             // local user has NOT been found for the P4M consumer so we need to create one and log them in
             var idResult = await UserManager.CreateAsync(appUser);
@@ -249,6 +253,7 @@ namespace OpenOrderFramework.Controllers
                 SaveLocalIdAsync(token, appUser.Id);
 #pragma warning restore 4014
             }
+            return consumerResult.HasOpenCart;
         }
 
         async Task<ApplicationUser> GetAppUserAsync(Consumer consumer, string localId)
@@ -299,7 +304,7 @@ namespace OpenOrderFramework.Controllers
             AuthenticationManager.SignIn(new AuthenticationProperties (), new ClaimsIdentity(identity));
         }
 
-        async Task<Consumer> GetConsumerAsync(string token)
+        async Task<ConsumerMessage> GetConsumerAsync(string token)
         {
             // get the consumer's details from P4M. 
             var client = new HttpClient();
@@ -307,10 +312,7 @@ namespace OpenOrderFramework.Controllers
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var result = await client.GetAsync(P4MConstants.BaseApiAddress + "consumer?checkHasOpenCart=true");
             var messageString = await result.Content.ReadAsStringAsync();
-            var message = JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
-            if (message.Consumer == null || !message.Success)
-                throw new Exception(message.Error);
-            return message.Consumer;
+            return JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
         }
 
         async Task SaveLocalIdAsync(string token, string id)
