@@ -87,7 +87,7 @@ namespace OpenOrderFramework.Models
         public string Carrier { get; set; }
         public string ConsignmentId { get; set; }
         public string PaymentType { get; set; }     // "DB" or "PA"
-        public string PayMethodToken { get; set; }
+        public string PayMethodId { get; set; }
         public string PaymentId { get; set; }
         public List<P4MCartItem> Items { get; set; }
         public List<P4MDiscount> Discounts { get; set; }
