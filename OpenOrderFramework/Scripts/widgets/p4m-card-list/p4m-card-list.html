@@ -14,7 +14,7 @@
             </iron-collapse>
             
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}" filter="_cardsOnly">
-                <p4m-card card-data="{{item}}" on-card-selected="onCardSelected" consumer-data="{{consumerData}}"></p4m-card>
+                <p4m-card card-data="{{item}}" on-selected="onCardSelected" selected-card-id="{{selectedCardId}}" consumer-data="{{consumerData}}"></p4m-card>
             </template>
         </div>
 
@@ -53,25 +53,49 @@
                     type: String,
                     value: "parcelforme",
                     notify: true
+                },
+                selectedCardId: {
+                    type: String,
+                    notify: true
                 }
             },
 
             observers: [
-
+                "onConsumerDataChange(consumerData.DefaultPayMethodId)"
             ],
 
             ready: function()
             {
-
             },
 
             onCardSelected(e) {
-                console.log('Selected card', e.detail);
-                this.set("consumerData.DefaultPayMethodToken", e.detail.Id); //This should now trigger the other cards to update their UI
+                this.fire('selected', e.detail);
+                this.set("selectedCardId", e.detail.Id); //This should now trigger the other cards to update their UI
             },
 
             addNewCard: function() {
                 this.$.newCardCollapse.toggle();
+            },
+
+            onConsumerDataChange: function() {
+                if (!this.selectedCardId && this.consumerData) {
+                    console.log("Setting selectedCardId to", this.consumerData.DefaultPayMethodId);
+                    var foundDefaultCard = this.getCardDataById(this.consumerData.DefaultPayMethodId);
+                    if (foundDefaultCard) {
+                        this.set('selectedCardId', this.consumerData.DefaultPayMethodId);
+                        this.fire('selected', foundDefaultCard);
+                    }
+                }
+            },
+
+            getCardDataById: function (id) {
+                var item;
+                for (var i = 0; i < this.consumerData.PaymentMethods.length; i++) {
+                    item = this.consumerData.PaymentMethods[i];
+                    if (item.Id === id) {
+                        return item;
+                    }
+                }
             },
 
             _cardsOnly: function (item) {

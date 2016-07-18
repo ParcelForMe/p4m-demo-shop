@@ -5,26 +5,29 @@
 <dom-module id="p4m-card">
 
     <template>
-        <div id="container">
+        <div id="container" class="show-toggle-btn">
 
             <div class="card-panel">
                  <div class="card-body">
                     <div class$="card-content {{cardData.Issuer}}">
-                        <div class="card-description">{{cardData.Description}}</div>
-                        <div class="card-issuer">{{cardData.Issuer}}</div>
                         <div class="card-logo"></div>
+                        <div class="card-details">
+                            <div class="card-description">{{cardData.Description}}</div>
+                            <div class="card-issuer">{{cardData.Issuer}}</div>
+                            <input is="iron-input" type="text" id="cvv" bind-value="{{cvv}}" placeholder="Verification code" />
+                        </div>                        
                     </div>
                 </div>
 
                 <div class="card-actions">
-                    <div id="selectedToggle" class="toggle-button">
-                        <div href="#" on-tap="select"><iron-icon icon="credit-card" />Select</div>
-                    </div>
-                    <div>
-                        <template is="dom-if" if="{{isSelected}}">
-                            <div class="card-tag">Selected</div>
-                        </template>
-                    </div>
+                        <div id="selectedToggle" class="toggle-button">
+                            <div href="#" on-tap="select"><iron-icon icon="credit-card" />Select</div>
+                        </div>
+                        <div>
+                            <template is="dom-if" if="{{isSelected}}">
+                                <div class="card-tag">Selected</div>
+                            </template>
+                        </div>
                 </div>
             </div>
 
@@ -47,7 +50,20 @@
             color: black;
         }
 
+        .show-toggle-btn .toggle-button {
+            display: block;
+        }
+
+        .show-cvv #cvv {
+            display: block;
+        }
+
+        #cvv {
+            display: none;
+        }
+
         .toggle-button {
+            display: none;
             margin: 4px;
             height: 50px;
             width: 50px;
@@ -69,6 +85,8 @@
             color: white;
         }
 
+
+
         .card-tag {
             color: #D0D0D0;
             letter-spacing: 3px;
@@ -83,6 +101,17 @@
 
         .card-body {
             padding: 4px;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-details {
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-description {
@@ -132,21 +161,49 @@
                     observer: "onDataChange"
                 },
 
+                selectedCardId: {
+                    type: String,
+                    notify: true
+                },
+
+                showToggleBtn: {
+                    type: Object,
+                    value: true
+                },
+
+                showCvv: {
+                    type: Object,
+                    value: false
+                },
+
+                cvv: {
+                    type: String
+                }
+
+
             },
 
             observers: [
-                "onDataChange(consumerData.*)"
+                //"onDataChange(consumerData.*)", //If the list of cards changes
+                "onDataChange(selectedCardId)",  //If the selected card changes
+                "onDataChange(cardData)"  //If the selected card changes
             ],
 
             ready: function()
             {
+                if (!this.showToggleBtn) {
+                    this.$.container.classList.remove('show-toggle-btn');
+                }
+                if (this.showCvv) {
+                    this.$.container.classList.add('show-cvv');
+                }
             },
 
 
-            select: function() {
-                this.set('consumerData.DefaultPayMethodToken', this.cardData.Id);
-                this.isSelected = true;
-                this.fire('cardSelected', this);
+            select: function () {
+                console.log('Firing on-selected');
+                this.selectedCardId = this.cardData.Id;
+                this.fire('selected', this.cardData);
             },
 
             edit: function() {
@@ -159,12 +216,13 @@
 
 
             onDataChange: function (e) {
+  
                 this.updateUi();
             },
 
             updateUi: function()
             {
-                this.isSelected = (this.cardData && this.consumerData && (this.consumerData.DefaultPayMethodToken === this.cardData.Id));
+                this.isSelected = (this.cardData && this.consumerData && (this.selectedCardId === this.cardData.Id));
                 if (this.isSelected) {
                     this.$.selectedToggle.classList.add('chosen');
                 }
