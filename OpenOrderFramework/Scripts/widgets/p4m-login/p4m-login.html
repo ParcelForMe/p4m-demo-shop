@@ -95,10 +95,14 @@
                     this._waitForAuthCompletion();
                 }
                 else {
-                    this.popupCenter(this.logoutUrl, "Logout", 450, 500);
-                    if (this.logoutForm && this.logoutForm != '') {
-                        document.getElementById(this.logoutForm).submit();
-                    }
+                    this.logout();
+                }
+            },
+
+            logout: function () {
+                this.popupCenter(this.logoutUrl, "Logout", 450, 500);
+                if (this.logoutForm && this.logoutForm != '') {
+                    document.getElementById(this.logoutForm).submit();
                 }
             },
 
