@@ -154,7 +154,9 @@
             _onLocalLogin: function (data) {
                 console.log(JSON.stringify(data));
                 this.$.p4mProfile.hideSpinner();
-                if (data.RedirectUrl)
+                if (data.Error)
+                    alert("A login error occurred: "+data.Error);
+                else if (data.RedirectUrl)
                     window.location.href = data.RedirectUrl;
                 else
                     window.location.reload(true);
