@@ -1,7 +1,6 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
 <link rel="import" href="../p4m-overlay/p4m-overlay.html" />
-<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
@@ -9,12 +8,12 @@
 
     <template>
         <div id="p4mPurchaseContainer" class$="{{_topClass}}">
+            <p>In the box below enter the <a href="#">Check Digits</a> on the reverse of your payment card and click Buy.</p>
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <p4m-api id="localApi" is-local="true"></p4m-api>
-            <paper-spinner id="spinner"></paper-spinner>
-
+            <p4m-card selected-card-id={{selectedCard.Id}} show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
             <p class="p4m-error">{{errorMsg}}</p> 
       
@@ -27,10 +26,6 @@
         #p4m-purchase-container {
             display: flex;
             flex-direction: row;
-        }
-        #spinner {
-            width: 50px;
-            height: 50px;
         }
         .hidden {
             display: none;
@@ -62,6 +57,10 @@
                     type: Object,
                     notify: true,
                     observer: "onCartDataChange"
+                },
+                selectedCard: {
+                    type: Object,
+                    notify: true
                 },
                 btnMsgNotPurchased: {
                     type: String,
@@ -101,7 +100,8 @@
             },
             observers: [
                 "onCartDataChange(cartData.*)",
-                "onStateChange(_state)"
+                "onStateChange(_state)",
+                "onCardSelected(selectedCard)"
             ],
 
             ready: function ()
@@ -120,7 +120,7 @@
             buyNow: function () {
                 if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
                     this._state = States.PURCHASING;
-                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: '123' }, null, this.onPurchase.bind(this));
+                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.cvv }, null, this.onPurchase.bind(this));
                 }
             },
 
@@ -145,6 +145,11 @@
                         this._state = States.PURCHASED;
                     }
                 }
+            },
+
+            onCardSelected: function (e) {
+                this.cartData.PayMethodId = this.selectedCard.Id;
+                this.updateUi();
             },
 
             updateUi: function () {

@@ -39,7 +39,7 @@
                             <p4m-delivery></p4m-delivery>
                         </iron-page>
                         <iron-page>
-                            <p4m-card-list consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
+                            <p4m-card-list consumer-data="{{consumerData}}" on-selected="onSelectPaymentMethod" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
                         </iron-page>
                         <iron-page>
                             <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
@@ -47,9 +47,8 @@
                     </iron-pages>                 
                 </div>
                 <div id="summaryPanel" class="p4m-panel">
-                    <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
-                    <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary> 
-                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}"></p4m-purchase>
+                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" selected-card="{{selectedCard}}"></p4m-purchase>
+                    <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>                    
                 </div>
 
             </div>
@@ -139,6 +138,9 @@
                     type: String,
                     value: "GBP"
                 },
+                selectedCard: {
+                    type: Object
+                },
                 newCardId: {
                     type: String,
                     notify: true
@@ -161,7 +163,10 @@
                 }
                 
             },
-            observers: ["onCartDataChange(cartData.Items.*)"],
+            observers: [
+                "onCartDataChange(cartData.Items.*)"
+            ],
+
 
             ready: function()
             {
@@ -307,6 +312,12 @@
                 api.call("postAddress", null, postData, function (result) {
                     addressElement.mode = "view";
                 });
+            },
+
+            onSelectPaymentMethod: function (e) {
+                console.log("Selected payment method", e.detail);
+                this.set('cartData.PayMethodId', e.detail.Id);
+                this.selectedCard = e.detail;
             },
 
             onCardHashData: function (data) {

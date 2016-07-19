@@ -1,5 +1,7 @@
-﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+﻿<link rel="import" href="../p4m-card/p4m-card.html" />
+<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+
 
 <dom-module id="p4m-order-summary">
 
@@ -72,7 +74,6 @@
             overflow: hidden;
         }
 
-
         #spinner {
             width: 50px;
             height: 50px;
@@ -127,7 +128,10 @@
                     value: 0
                 }
             },
-            observers: [ "onCartDataModified(cartData.Items.*)"],
+            observers: [
+                "onCartDataModified(cartData.Items.*)"
+
+            ],
             ready: function()
             {
                 this.update.bind(this)();
