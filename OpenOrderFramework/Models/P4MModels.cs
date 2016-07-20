@@ -55,19 +55,20 @@ namespace OpenOrderFramework.Models
         public string Id { get; set; }
         public string AccountType { get; set; }
         public string Issuer { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
         public string MoreDetail { get; set; }
     }
 
-    public class PaymentCard
-    {
-        public string Id { get; set; } // guid set on app/web
-        public string NameOnCard { get; set; }    // name on card 
-        public string BrandId { get; set; }   // payment company e.g. VISA, etc
-        public string Last4Digits { get; set; }
-        public int ExpiryMonth { get; set; }
-        public int ExpiryYear { get; set; }
-    }
+    //public class PaymentCard
+    //{
+    //    public string Id { get; set; } // guid set on app/web
+    //    public string NameOnCard { get; set; }    // name on card 
+    //    public string BrandId { get; set; }   // payment company e.g. VISA, etc
+    //    public string Last4Digits { get; set; }
+    //    public int ExpiryMonth { get; set; }
+    //    public int ExpiryYear { get; set; }
+    //}
 
     public class P4MCart
     {
