@@ -302,16 +302,23 @@
             },
 
             _handleResponse: function (apiRequest, finalCallback, responseData) {
+
                 if (!responseData.Success) {
-                    if (responseData.Error.startsWith("Access denied")) {
+                    var err = responseData.Error || responseData.Message;
+                    if (err.indexOf("denied") > -1) {
                         var loginWidget = document.getElementsByTagName("p4m-login")[0];
                         loginWidget.logout();
                         return;
                     }
+                    else {
+                        console.error(responseData);
+                        return;
+                    }
                 }
-                    
-                this.fire("p4m_" + apiRequest.endPoint.stub, responseData, true);
-                finalCallback(responseData);           
+                else {
+                    this.fire("p4m_" + apiRequest.endPoint.stub, responseData, true);
+                    finalCallback(responseData);
+                }                           
             }
 
         });
