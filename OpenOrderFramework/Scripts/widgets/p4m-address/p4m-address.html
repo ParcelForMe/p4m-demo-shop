@@ -198,7 +198,7 @@
                     notify: true,
                     observer: "onDataChange"
                 },
-                consumerData: {
+                cartData: {
                     type: Object,
                     notify: true,
                     observer: "onDataChange"
@@ -237,7 +237,7 @@
             },
 
             observers: [
-                "onDataChange(addressData.*)"
+                "onDataChange(cartData.*)"
             ],
 
             ready: function()
@@ -246,12 +246,12 @@
 
            
             markAsBilling: function () { 
-                this.set('consumerData.BillingAddressId', this.addressData.Id);       
+                this.set('cartData.BillingAddressId', this.addressData.Id);       
                 this.isBilling = true;
             },
 
             markAsDelivery: function() {
-                this.set('consumerData.PrefDeliveryAddressId', this.addressData.Id);
+                this.set('cartData.AddressId', this.addressData.Id);
                 this.isDelivery = true;
             },
 
@@ -279,7 +279,7 @@
 
             updateUi: function()
             {
-                this.isBilling = (this.addressData && this.consumerData && (this.consumerData.BillingAddressId === this.addressData.Id));
+                this.isBilling = (this.addressData && this.cartData && (this.cartData.BillingAddressId === this.addressData.Id));
                 if (this.isBilling) {
                     this.$.billingToggle.classList.add('chosen');
                 }
@@ -287,7 +287,7 @@
                     this.$.billingToggle.classList.remove('chosen');
                 }
 
-                this.isDelivery = (this.addressData && this.consumerData && (this.consumerData.PrefDeliveryAddressId === this.addressData.Id));
+                this.isDelivery = (this.addressData && this.cartData && (this.cartData.AddressId === this.addressData.Id));
                 if (this.isDelivery) {
                     this.$.deliveryToggle.classList.add('chosen');
                 }

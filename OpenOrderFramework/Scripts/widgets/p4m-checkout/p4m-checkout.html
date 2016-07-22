@@ -42,7 +42,7 @@
                             <p4m-card-list consumer-data="{{consumerData}}" on-selected="onSelectPaymentMethod" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
                         </iron-page>
                         <iron-page>
-                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" consumer-data="{{consumerData}}" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
+                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
                 </div>
@@ -194,18 +194,24 @@
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
             },
 
-            updateShipping: function(service,shipping,expDeliveryDate,collectPoint) {
+            updateShipping: function (service, shipping, expDeliveryDate, collectPoint) {
+                var self = this;
                 this.cartData.ShippingAmt = shipping;
-                this.cartData.ServiceLevel = service;
+                this.cartData.ServiceName = service;
                 this.cartData.ExpDeliveryDate = expDeliveryDate;
-                this.updateP4mCart();
+                if (collectPoint) {
+                    this.selectCollectPoint(collectPoint, function () {
+                        self.updateP4mCart();
+                    });
+                }                  
+                else {
+                    this.updateP4mCart();
+                }
             },
 
-            sendCartChanges: function () {
-
-                //console.log("Sending changes");
-                var self = this;
+            sendCartChanges: function () {          
                 //Send changes to local API, then to P4m
+                var self = this;
                 var changes = [];
 
                 for (var sku in this.$.cart.changes) {
@@ -306,11 +312,34 @@
                 var postData =
                 {
                     "Address": addressElement.addressData,
-                    "isPrefDeliveryAddr": addressElement.isDelivery,
+                    "isPrefDeliveryAddr": false, //addressElement.isDelivery,
                     "isBillingAddr": addressElement.isBilling
                 };
                 api.call("postAddress", null, postData, function (result) {
                     addressElement.mode = "view";
+                });
+            },
+
+            selectCollectPoint: function (collectPointData, callback) {
+                //Make API call to add invisible address 
+                var postData =
+                {
+                    "Address": {
+                        "AddressType": "Collect",
+                        "Street1": collectPointData.geoLocation.addressLines[0],
+                        "Street2": collectPointData.geoLocation.addressLines[1],
+                        "City": collectPointData.geoLocation.town,
+                        "PostCode": collectPointData.geoLocation.postCode
+                    },
+                    "isPrefDeliveryAddr": false,
+                    "isBillingAddr": false
+                };
+                var self = this;
+                api.call("postAddress", null, postData, function (result) {
+                    console.log("Added address. Result:", result);
+                    self.cartData.AddressId = result.Address.Id;
+                    //self.cartData.ServiceName = "Collection point";
+                    callback(result);
                 });
             },
 
