@@ -127,6 +127,7 @@ namespace OpenOrderFramework.Controllers
                 result.Error = e.Message;
             }
             Response.Cookies["p4mOfferCartRestore"].Value = null;
+            Response.Cookies["p4mOfferCartRestore"].Expires = DateTime.UtcNow;
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
