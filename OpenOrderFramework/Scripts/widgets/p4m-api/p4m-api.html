@@ -67,6 +67,10 @@
                     {
                         "name": "payMethodId",
                         "required": true
+                    },
+                    {
+                        "name": "amount",
+                        "required": true
                     }
                 ],
                 "method": "GET"
@@ -271,7 +275,8 @@
                                 intermediateCallback(JSON.parse(httpRequest.responseText));
                             }
                             catch (e) {
-                                console.error("JSON response error: "+httpRequest.responseText);
+                                console.error("JSON response error: " + httpRequest.responseText);
+                                intermediateCallback(JSON.parse(httpRequest.responseText));
                             }
                         }
                     });
@@ -313,11 +318,11 @@
                     if (err.indexOf("denied") > -1) {
                         var loginWidget = document.getElementsByTagName("p4m-login")[0];
                         loginWidget.logout();
-                        return;
+                        finalCallback(responseData);
                     }
                     else {
                         console.error(responseData);
-                        return;
+                        finalCallback(responseData);                     
                     }
                 }
                 else {

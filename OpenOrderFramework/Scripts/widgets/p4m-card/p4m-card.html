@@ -186,7 +186,8 @@
             observers: [
                 //"onDataChange(consumerData.*)", //If the list of cards changes
                 "onDataChange(selectedCardId)",  //If the selected card changes
-                "onDataChange(cardData)"  //If the selected card changes
+                "onDataChange(cardData)",  //If the selected card changes
+                "onCvv(cvv)"
             ],
 
             ready: function()
@@ -203,6 +204,7 @@
             select: function () {
                 console.log('Firing on-selected');
                 this.selectedCardId = this.cardData.Id;
+                this.cardData.cvv = this.cvv;
                 this.fire('selected', this.cardData);
             },
 
@@ -218,6 +220,13 @@
             onDataChange: function (e) {
   
                 this.updateUi();
+            },
+
+            onCvv: function (e) {
+                if (this.cardData) {
+                    this.cardData.cvv = this.cvv;
+                    this.fire('cvv', this.cardData);
+                }
             },
 
             updateUi: function()

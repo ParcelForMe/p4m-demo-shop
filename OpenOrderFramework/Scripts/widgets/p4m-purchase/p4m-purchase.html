@@ -15,7 +15,7 @@
             <p4m-api id="localApi" is-local="true"></p4m-api>
             <p4m-card selected-card-id={{selectedCard.Id}} show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
-            <p class="p4m-error">{{errorMsg}}</p> 
+            <p class="p4m-error">{{errorMsg}}</p>   
       
         </div>
         <p4m-overlay id="overlay" with-backdrop></p4m-overlay>
@@ -62,6 +62,7 @@
                     type: Object,
                     notify: true
                 },
+
                 btnMsgNotPurchased: {
                     type: String,
                     value: "Buy now"
@@ -120,7 +121,7 @@
             buyNow: function () {
                 if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
                     this._state = States.PURCHASING;
-                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.cvv }, null, this.onPurchase.bind(this));
+                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.selectedCard.cvv }, null, this.onPurchase.bind(this));
                 }
             },
 
