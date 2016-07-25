@@ -1,13 +1,23 @@
 <link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
-<link rel="import" href="../p4m-profile/p4m-profile.html" />
+<link rel="import" href="../../Lib/paper-dialog/paper-dialog.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
+<link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
 
 <dom-module id="p4m-login">
 
     <template>  
         <p4m-profile id="p4mProfile" on-click="launchPopup"></p4m-profile>
+        <paper-dialog id="lastCartDlg" modal="true" entry-animation="scale-up-animation"
+                      exit-animation="fade-out-animation">
+            <h2>Restore your last cart?</h2>
+            <div>There is a shopping cart available from your previous visit. Would you like to use it?</div>
+            <div class="buttons">
+                <div class="p4m-button" on-click="_useLastCart">Yes</div>
+                <div class="p4m-button" on-click="_useNewCart">No</div>
+            </div>
+        </paper-dialog>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
         <polymer-cookie id="p4mStateCookie" name="p4mState" value="{{_state}}"></polymer-cookie>
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
@@ -77,9 +87,10 @@
                         var offerRestore = this.$.p4mOfferCartRestoreCookie.readCookie();
                         if (offerRestore === "true")
                         {
-                            alert("Do you want to restore your last cart?");
+                            this.$.lastCartDlg.open();
+                            //alert("Do you want to restore your last cart?");
                             // state is unknown so check first
-                            this.$.localApi.call('restoreLastCart', null, null, this._onLocalLogin.bind(this));
+                            
                         }
                     }
                 }
@@ -174,7 +185,17 @@
 
             _onConsumerDetails: function(data) {
                 console.log(JSON.stringify(data));
+            },
+
+            _useLastCart: function () {
+                this.$.localApi.call('restoreLastCart', null, null, this._onLocalLogin.bind(this));
+            },
+
+            _useNewCart: function () {
+
             }
+
+
         });
     </script>
 </dom-module>
