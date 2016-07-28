@@ -90,6 +90,9 @@
                 errorMsg: {
                     type: String
                 },
+                redirectUrl: {
+                    type: String
+                },
                 _topClass: {
                     type: String,
                     value: "active"
@@ -141,6 +144,9 @@
                 else {                  
                     if (e.RedirectUrl) {
                         window.location.href = e.RedirectUrl;
+                    }
+                    else if (this.redirectUrl) {
+                        window.location.href = this.redirectUrl;
                     }
                     else {
                         this._state = States.PURCHASED;
