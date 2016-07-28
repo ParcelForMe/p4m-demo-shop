@@ -1,0 +1,13 @@
+﻿@model OpenOrderFramework.Models.P4MRedirect
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        window.opener.location.href = "@Model.RedirectUrl";
+        window.close();
+    </script>
+</body>
+</html>

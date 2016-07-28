@@ -144,15 +144,8 @@ namespace OpenOrderFramework.Models
 
         public decimal GetTotal()
         {
-            // Multiply item price by count of that item to get 
-            // the current price for each of those items in the cart
-            // sum all item price totals to get the cart total
-            decimal? total = (from cartItems in storeDB.Carts
-                              where cartItems.CartId == ShoppingCartId
-                              select (int?)cartItems.Count *
-                              cartItems.Item.Price).Sum();
-
-            return total ?? decimal.Zero;
+            CalcTax();
+            return Total;
         }
 
         public Order CreateOrder(Order order)

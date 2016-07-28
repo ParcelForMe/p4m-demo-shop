@@ -121,7 +121,7 @@
             buyNow: function () {
                 if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
                     this._state = States.PURCHASING;
-                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.selectedCard.cvv }, null, this.onPurchase.bind(this));
+                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.selectedCard.cvv, cartTotal: this.cartData.Total }, null, this.onPurchase.bind(this));
                 }
             },
 
@@ -138,14 +138,55 @@
                     this.errorMsg = this.msgFailedPayment;
                     this._state = States.FAILED_PURCHASE;
                 }
-                else {                  
-                    if (e.RedirectUrl) {
+                else {
+                    // check we need to launch the 3D Secure popup
+                    if (e.ACSUrl !== '') {
+                        this.launch3DSecure(e.ACSUrl, e.PAReq, e.ACSResponseUrl, e.P4MData);
+                    }
+                    else if (e.RedirectUrl) {
                         window.location.href = e.RedirectUrl;
                     }
                     else {
                         this._state = States.PURCHASED;
                     }
                 }
+            },
+
+            launch3DSecure: function (ACSUrl, PaReq, redirectUrl, p4mData) {
+                // create a form that will post the values to the ACS and show the result in a popup
+                var form = document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", ACSUrl);
+                form.setAttribute("target", "p4m3DSecurePopup");
+
+                var PaReqField = document.createElement("input");
+                PaReqField.setAttribute("type", "hidden");
+                PaReqField.setAttribute("name", "PaReq");
+                PaReqField.setAttribute("value", PaReq);
+                form.appendChild(PaReqField);
+
+                var TermUrlField = document.createElement("input");
+                TermUrlField.setAttribute("type", "hidden");
+                TermUrlField.setAttribute("name", "TermUrl");
+                TermUrlField.setAttribute("value", redirectUrl);
+                form.appendChild(TermUrlField);
+
+                var MDField = document.createElement("input");
+                MDField.setAttribute("type", "hidden");
+                MDField.setAttribute("name", "MD");
+                MDField.setAttribute("value", p4mData);
+                form.appendChild(MDField);
+                // add the form to THIS window
+                document.body.appendChild(form);
+                // open the popup
+                var w = 650, h = 750;
+                var left = (screen.width / 2) - (w / 2);
+                var top = (screen.height / 2) - (h / 2);
+                window.open('', 'p4m3DSecurePopup', 'toolbar=no, location=no, directories=no, status=no, menubar=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+                // submit the form from this window into the popup
+                form.submit();
+                // remove the form from this window
+                form.remove();
             },
 
             onCardSelected: function (e) {

@@ -172,7 +172,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("applyDiscountCode")]
+        [Route("applyDiscountCode/{discountCode}")]
         public JsonResult ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
@@ -186,6 +186,7 @@ namespace OpenOrderFramework.Controllers
                     result.Description = discount.Description;
                     var localCart = ShoppingCart.GetCart(this.HttpContext);
                     localCart.CalcTax(discount);
+                    result.Code = discountCode;
                     result.Amount = localCart.Discount;
                     result.Tax = localCart.Tax;
                 }
@@ -224,28 +225,48 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("purchase/{cartId}/{cvv}")]
-        public async Task<JsonResult> Purchase(string cartId, string cvv)
+        [Route("purchase/{cartId}/{cvv}/{cartTotal}")]
+        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal)
         {
-            var result = new P4MBaseMessage();
+            var result = new PurchaseMessage();
             try
             {
+                // validate that the cart total from the widget is correct to prevent cart tampering in the browser
+                var localCart = ShoppingCart.GetCart(HttpContext);
+                if (cartTotal != localCart.Total)
+                {
+                    localCart.EmptyCart();
+                    HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                    throw new Exception("Your cart is invalid and has been cleared. We're sorry for any inconvenience. Please keep shopping");
+                }
+
                 var token = Request.Cookies["p4mToken"].Value;
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var purchaseResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}",P4MConstants.BaseApiAddress, cartId, cvv));
+                var purchaseResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
+                //var purchaseResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
                 purchaseResult.EnsureSuccessStatusCode();
                 var messageString = await purchaseResult.Content.ReadAsStringAsync();
                 var message = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
                 if (!message.Success)
                     throw new Exception(message.Error);
-                ShoppingCart.GetCart(this).EmptyCart();
-                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                if (message.ACSUrl == null)
+                {
+                    ShoppingCart.GetCart(this).EmptyCart();
+                    HttpContext.Session[ShoppingCart.CartSessionKey] = null;
 #pragma warning disable 4014
-                // we've waited enough - don't wait for the order to be saved as well!
-                CreateLocalOrderAsync(message);
+                    // we've waited enough - don't wait for the order to be saved as well!
+                    CreateLocalOrderAsync(message);
 #pragma warning restore 4014
+                }
+                else
+                {
+                    result.ACSUrl = message.ACSUrl;
+                    result.PaReq = message.PaReq;
+                    result.ACSResponseUrl = message.ACSResponseUrl;
+                    result.P4MData = message.P4MData;
+                }
             }
             catch (Exception e)
             {

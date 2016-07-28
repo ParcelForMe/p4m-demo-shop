@@ -30,6 +30,7 @@ namespace OpenOrderFramework.Models
 
     public class DiscountMessage : P4MBaseMessage
     {
+        public string Code { get; set; }
         public decimal Tax { get; set; }
         public string Description { get; set; }
         public decimal Amount { get; set; }
@@ -49,6 +50,11 @@ namespace OpenOrderFramework.Models
         public P4MCart Cart { get; set; }
         public P4MAddress DeliverTo { get; set; }
         public P4MAddress BillTo { get; set; }
+        // 3D Secure fields
+        public string ACSUrl { get; set; }
+        public string PaReq { get; set; }
+        public string ACSResponseUrl { get; set; }
+        public string P4MData { get; set; }
     }
 
     public class PostCartMessage : P4MBaseMessage
