@@ -8,6 +8,7 @@
             text-align: center;
             border: solid 1px #E0E0E0;
             cursor: pointer; 
+            min-width: 100px;
         }
         .p4m-button.p4m-button-active {
 
@@ -20,6 +21,10 @@
             background-color: rgba(68, 144, 68, 1.0);
             color: #FFFFFF;
             transition-duration: 0.5s;
+        }
+
+        .p4m-button.p4m-button-active.no {
+            background-color: rgba(144, 68, 68, 1.0);
         }
 
         .p4m-button.disabled {
