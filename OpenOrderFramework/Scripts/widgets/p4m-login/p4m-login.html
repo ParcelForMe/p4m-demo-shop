@@ -2,20 +2,26 @@
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../Lib/paper-dialog/paper-dialog.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
+<link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-login">
 
     <template>  
         <p4m-profile id="p4mProfile" on-click="launchPopup"></p4m-profile>
-        <paper-dialog id="lastCartDlg" modal="true" entry-animation="scale-up-animation"
-                      exit-animation="fade-out-animation">
+        
+        <paper-dialog id="lastCartDlg" modal="true">
             <h2>Restore your last cart?</h2>
-            <div>There is a shopping cart available from your previous visit. Would you like to use it?</div>
+            <div class="restoreCartMessage">{{_restoreCartMessage}}</div>
+            <p class="restoreCartStatusMessage"><paper-spinner id="dlgSpinner"></paper-spinner>{{_restoreCartStatusMessage}}</p>
+            
+            <p4m-api id="localApi" is-local="true"></p4m-api>
             <div class="buttons">
-                <div class="p4m-button" on-click="_useLastCart">Yes</div>
-                <div class="p4m-button" on-click="_useNewCart">No</div>
+                <div class="p4m-button p4m-button-active no" on-click="_useNewCart">No</div>
+                <div class="p4m-button p4m-button-active" on-click="_useLastCart">Yes</div>
+
             </div>
         </paper-dialog>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
@@ -23,8 +29,23 @@
         <polymer-cookie id="p4mNonceCookie" name="p4mNonce" value="{{_nonce}}"></polymer-cookie>
         <polymer-cookie id="p4mLocalLoginCookie" name="p4mLocalLogin"></polymer-cookie>
         <polymer-cookie id="p4mOfferCartRestoreCookie" name="p4mOfferCartRestore"></polymer-cookie>
-        <p4m-api id="localApi" is-local="true"></p4m-api>
+          
+        
     </template>
+
+    <style>
+        #dlgSpinner {
+            width: 50px;
+            height: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+        .restoreCartMessage {
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
 
     <script>
         Polymer({
@@ -54,6 +75,13 @@
                 p4mToken: {
                     type: String
                 },
+                _restoreCartMessage: {
+                    type: String,
+                    value: "There is a shopping cart available from your previous visit. Would you like to use it?"
+                },
+                _restoreCartStatusMessage: {
+                    type: String
+                },
 
                 _state: {
                     type: String
@@ -75,11 +103,12 @@
                 {
                     // if the P4M Consumer is logged in, then check if they are logged in locally
                     var localLogin = this.$.p4mLocalLoginCookie.readCookie(); 
-                    if (!localLogin || localLogin === "")
+                    if (!localLogin || localLogin === "") {
                         // state is unknown so check first
                         this.$.localApi.call('isLocallyLoggedIn', null, null, this._onCheckLocalLogin.bind(this));
+                    }
                     else if (localLogin === "false") {
-                        alert("AuthComp: "+localLogin);
+                        //alert("AuthComp: "+localLogin);
                         // definitely not logged in so do it now
                         this._onAuthCompletion();
                     }
@@ -169,10 +198,13 @@
             _onLocalLogin: function (data) {
                 console.log(JSON.stringify(data));
                 this.$.p4mProfile.hideSpinner();
-                if (data.Error)
-                    alert("A login error occurred: "+data.Error);
-                else if (data.RedirectUrl)
+                if (data.Error) {
+                    console.error("A login error occurred:", data.Error);
+                }               
+                else if (data.RedirectUrl) {
                     window.location.href = data.RedirectUrl;
+                }
+                  
                 else
                     window.location.reload(true);
             },
@@ -188,14 +220,31 @@
             },
 
             _useLastCart: function () {
-                this.$.localApi.call('restoreLastCart', null, null, this._onLocalLogin.bind(this));
+                this.showDlgSpinner();
+                this._restoreCartStatusMessage = "Restoring cart...";
+                this.$.localApi.call('restoreLastCart', null, null, this._onRestoreLastCart.bind(this));// this._onLocalLogin.bind(this));
             },
 
             _useNewCart: function () {
+                this.$.lastCartDlg.close();
+            },
 
+            _onRestoreLastCart: function () {
+                //Turn off dialog spinner
+                this.hideDlgSpinner();
+                this._restoreCartStatusMessage = "Restored cart";
+                this.$.lastCartDlg.close();
+            },
+
+            hideDlgSpinner: function () {
+                this.$.dlgSpinner.active = false;
+                //this.$.dlgSpinner.classList.add('hidden');
+            },
+
+            showDlgSpinner: function () {
+                this.$.dlgSpinner.active = true;
+                //this.$.dlgSpinner.classList.remove('hidden');
             }
-
-
         });
     </script>
 </dom-module>
