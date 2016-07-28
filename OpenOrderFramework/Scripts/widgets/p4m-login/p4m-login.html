@@ -12,8 +12,7 @@
     <template>  
         <p4m-profile id="p4mProfile" on-click="launchPopup"></p4m-profile>
         
-        <paper-dialog id="lastCartDlg" modal="true" entry-animation="scale-up-animation"
-                      exit-animation="fade-out-animation">
+        <paper-dialog id="lastCartDlg" modal="true">
             <h2>Restore your last cart?</h2>
             <div class="restoreCartMessage">{{_restoreCartMessage}}</div>
             <p class="restoreCartStatusMessage"><paper-spinner id="dlgSpinner"></paper-spinner>{{_restoreCartStatusMessage}}</p>
@@ -109,7 +108,7 @@
                         this.$.localApi.call('isLocallyLoggedIn', null, null, this._onCheckLocalLogin.bind(this));
                     }
                     else if (localLogin === "false") {
-                        alert("AuthComp: "+localLogin);
+                        //alert("AuthComp: "+localLogin);
                         // definitely not logged in so do it now
                         this._onAuthCompletion();
                     }
@@ -199,10 +198,13 @@
             _onLocalLogin: function (data) {
                 console.log(JSON.stringify(data));
                 this.$.p4mProfile.hideSpinner();
-                if (data.Error)
-                    alert("A login error occurred: "+data.Error);
-                else if (data.RedirectUrl)
+                if (data.Error) {
+                    console.error("A login error occurred:", data.Error);
+                }               
+                else if (data.RedirectUrl) {
                     window.location.href = data.RedirectUrl;
+                }
+                  
                 else
                     window.location.reload(true);
             },
