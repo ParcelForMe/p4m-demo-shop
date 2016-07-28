@@ -252,6 +252,8 @@
     <Content Include="Content\card.css" />
     <Content Include="Content\datepicker.css" />
     <Content Include="Content\PagedList1.css" />
+    <Content Include="Content\test.css" />
+    <Content Include="Content\test.html" />
     <Content Include="Content\TestShop.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -654,6 +656,7 @@
     <Content Include="Scripts\widgets\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\widgets\p4m-address-list\p4m-address-list.html" />
     <Content Include="Scripts\widgets\p4m-address\p4m-address.html" />
+    <Content Include="Scripts\widgets\p4m-ajax-block\p4m-ajax-block.html" />
     <Content Include="Scripts\widgets\p4m-api\local-api.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
     <Content Include="Scripts\widgets\p4m-card-list\p4m-card-list.html" />
