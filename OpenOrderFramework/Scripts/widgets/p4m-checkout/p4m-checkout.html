@@ -14,6 +14,7 @@
 <link rel="import" href="../p4m-delivery/p4m-delivery.html" />
 <link rel="import" href="../p4m-wall-of-text/p4m-wall-of-text.html" />
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
+<link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
@@ -53,7 +54,10 @@
                     <hr />
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" selected-card="{{selectedCard}}"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
-                    <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>                  
+                    <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>  
+                    <hr />    
+                    <p4m-discount-list cart-data="{{cartData}}" on-discountdelete="onDiscountDelete"></p4m-discount-list>         
+                    <hr />        
                 </div>
 
             </div>
@@ -365,13 +369,30 @@
             onDiscount: function (e) {
                 console.log('discount received');
                 this.set('cartData.Tax', Number(e.detail.Tax));
-                this.push('cartData.Discounts',
-                {
-                    Description: e.detail.Description,
-                    Amount: e.detail.Amount,
-                    Code: e.detail.Code
-                });
-                this.updateP4mCart();
+
+                if (this.cartData.Discounts.find((element, index, arr)=> element.Code === e.detail.Code)) {
+                    console.log("Added existing discount")
+                }
+                else {
+                    this.push('cartData.Discounts',
+                    {
+                        Description: e.detail.Description,
+                        Amount: e.detail.Amount,
+                        Code: e.detail.Code
+                    });
+                    this.updateP4mCart();
+                }
+            },
+
+            onDiscountDelete: function (e, code) {
+                console.log('discount delete received');
+
+                var item = this.cartData.Discounts.find((element, index, arr) => element.Code === code);
+                if (item) {
+                    item.Amount = 0;
+                    item.Description = "Deleted";
+                    this.updateP4mCart();
+                }                  
             }
         });
     </script>
