@@ -40,6 +40,7 @@ namespace OpenOrderFramework.Models
     {
         public decimal Tax { get; set; }
         public decimal Shipping { get; set; }
+        public decimal Discount { get; set; }
     }
 
     public class PurchaseMessage : P4MBaseMessage

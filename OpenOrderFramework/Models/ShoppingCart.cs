@@ -38,7 +38,13 @@ namespace OpenOrderFramework.Models
         {
             var itemsTotal = Items.Sum(d => d.Count * d.Item.Price);
             if (discount != null)
-                this.Discount = Math.Round((itemsTotal + this.Shipping) * (discount.Percentage / 100), 2);
+                this.DiscountCode = discount.Code;
+            if (this.DiscountCode != null)
+            {
+                discount = storeDB.Discounts.Where(d => d.Code == this.DiscountCode).FirstOrDefault();
+                if (discount != null)
+                    this.Discount = Math.Round((itemsTotal + this.Shipping) * (discount.Percentage / 100), 2);
+            }
             this.Tax = Math.Round((itemsTotal + this.Shipping - this.Discount) * (taxPercent / 100), 2);
             this.Total = itemsTotal + this.Shipping + this.Tax - this.Discount;
             storeDB.SaveChanges();
