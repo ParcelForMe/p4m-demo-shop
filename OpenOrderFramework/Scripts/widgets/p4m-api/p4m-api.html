@@ -117,7 +117,7 @@
                 "params": []
             },
             "purchase": {
-                "stub": "purchase/{cartId}/{cvv}",
+                "stub": "purchase/{cartId}/{cvv}/{cartTotal}",
                 "method": "GET",
                 "params": [
                     {
@@ -126,6 +126,10 @@
                     },
                     {
                         "name": "cvv",
+                        "required": true
+                    },
+                    {
+                        "name": "cartTotal",
                         "required": true
                     },
                 ]

@@ -147,4 +147,9 @@ namespace OpenOrderFramework.Models
         public string ItemCode { get; set; }
         public decimal Qty { get; set; }
     }
+
+    public class P4MRedirect
+    {
+        public string RedirectUrl { get; set; }
+    }
 }

@@ -788,6 +788,7 @@
     <Content Include="Views\P4MToken\ReturnToken.cshtml" />
     <Content Include="Views\P4M\P4MCheckout.cshtml" />
     <Content Include="Views\P4M\P4MDelivery.cshtml" />
+    <Content Include="Views\P4M\P4MRedirect.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
