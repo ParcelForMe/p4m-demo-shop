@@ -19,6 +19,7 @@ namespace OpenOrderFramework.Models
         public string ShoppingCartId { get; set; }
         public decimal Tax { get; set; }
         public decimal Shipping { get; set; }
+        public string DiscountCode { get; set; }
         public decimal Discount { get; set; }
         public decimal Total { get; set; }
     }
