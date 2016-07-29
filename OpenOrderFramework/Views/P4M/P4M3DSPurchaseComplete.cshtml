@@ -1,0 +1,7 @@
+﻿@model OpenOrderFramework.Models.PurchaseMessage
+    <div> 
+        <p>Cart Id: @Model.Cart.Id</p>
+        <p>Error: @Model.Error</p>
+        <button onclick="closePopup();" value="OK">OK</button>
+        <script>function closePopup() { window.opener.location.href = "/home"; window.close(); }</script>
+    </div>

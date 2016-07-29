@@ -11,6 +11,7 @@ using Microsoft.AspNet.Identity.Owin;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -46,7 +47,7 @@ namespace OpenOrderFramework.Controllers
             // Return the view
             return View("P4MCheckout");
         }
-        
+
         //async Task AddItemsToP4MCartAsync()
         //{
         //    // update P4M with the current cart details
@@ -160,7 +161,7 @@ namespace OpenOrderFramework.Controllers
                 localCart.DiscountCode = discount.Code;
                 localCart.Discount = (decimal)discount.Amount;
             }
-            foreach(var item in p4mCart.Items)
+            foreach (var item in p4mCart.Items)
             {
                 var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
                 localCart.AddToCart(localItem);
@@ -316,7 +317,8 @@ namespace OpenOrderFramework.Controllers
             // add the items
             foreach (var item in purchase.Cart.Items)
             {
-                var ordItem = new OrderDetail {
+                var ordItem = new OrderDetail
+                {
                     ItemId = Convert.ToInt32(item.Sku),
                     OrderId = order.OrderId,
                     Quantity = (int)item.Qty,
@@ -325,6 +327,28 @@ namespace OpenOrderFramework.Controllers
                 storeDB.OrderDetails.Add(ordItem);
             }
             storeDB.SaveChanges();
+        }
+
+        [HttpPost]
+        [Route("p4m/3dsPurchaseComplete/{purchaseResult}")]
+        public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
+        {
+            // purchaseResult is a purchase message JSON string, base64 encoded
+            var decoded = Base64Decode(purchaseResult);
+            var result = JsonConvert.DeserializeObject<PurchaseMessage>(decoded);
+            return View("P4M3DSPurchaseComplete", result);
+        }
+
+        public string Base64Encode(string plainText)
+        {
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(plainTextBytes);
+        }
+
+        public string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return Encoding.UTF8.GetString(base64EncodedBytes);
         }
     }
 }

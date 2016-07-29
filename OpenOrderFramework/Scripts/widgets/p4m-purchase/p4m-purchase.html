@@ -146,14 +146,14 @@
                     if (e.ACSUrl !== '') {
                         this.launch3DSecure(e.ACSUrl, e.PAReq, e.ACSResponseUrl, e.P4MData);
                     }
-                    else if (e.RedirectUrl) {
-                        window.location.href = e.RedirectUrl;
-                    }
-                    else if (this.redirectUrl) {
-                        window.location.href = this.redirectUrl;
-                    }
                     else {
                         this._state = States.PURCHASED;
+                        if (e.RedirectUrl) {
+                            window.location.href = e.RedirectUrl;
+                        }
+                        else if (this.redirectUrl) {
+                            window.location.href = this.redirectUrl;
+                        }
                     }
                 }
             },
