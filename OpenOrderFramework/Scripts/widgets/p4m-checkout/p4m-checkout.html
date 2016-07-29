@@ -13,6 +13,7 @@
 <link rel="import" href="../p4m-card-list/p4m-card-list.html" />
 <link rel="import" href="../p4m-delivery/p4m-delivery.html" />
 <link rel="import" href="../p4m-wall-of-text/p4m-wall-of-text.html" />
+<link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
@@ -51,7 +52,8 @@
                     <p4m-wall-of-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-wall-of-text>
                     <hr />
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" selected-card="{{selectedCard}}"></p4m-purchase>
-                    <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>                    
+                    <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
+                    <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>                  
                 </div>
 
             </div>
@@ -167,7 +169,8 @@
                 
             },
             observers: [
-                "onCartDataChange(cartData.Items.*)"
+                "onCartItemsChange(cartData.Items.*)"
+                //"onCartDiscountChange(cartData.Discounts.*)"
             ],
 
 
@@ -212,7 +215,7 @@
                 }
             },
 
-            sendCartChanges: function () {          
+            sendCartItemChanges: function () {          
                 //Send changes to local API, then to P4m
                 var self = this;
                 var changes = [];
@@ -235,7 +238,6 @@
 
 
             },
-
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
 
@@ -297,14 +299,14 @@
                 }                
             },
 
-            onCartDataChange: function (e) {
-                //console.log('p4m-checkout: onCartDataChange()', JSON.stringify(e));
+            onCartItemsChange: function (e) {
+                //console.log('p4m-checkout: onCartItemsChange()', JSON.stringify(e));
                 //If this is a valid change record,
                 if (e.path) {
                     //Start timer, then send changes.
                     //If more changes are detected while the timer is active, reset the timer.
                     if (this._changeTimer) window.clearTimeout(this._changeTimer);
-                    this._changeTimer = window.setTimeout(this.sendCartChanges.bind(this), 2000);
+                    this._changeTimer = window.setTimeout(this.sendCartItemChanges.bind(this), 2000);
                 }
             },
 
@@ -358,9 +360,19 @@
                 this.set('cardMerchantId', data.MerchantId);
                 this.set('cardHash', data.Hash);
                
+            },
+
+            onDiscount: function (e) {
+                console.log('discount received');
+                this.set('cartData.Tax', Number(e.detail.Tax));
+                this.push('cartData.Discounts',
+                {
+                    Description: e.detail.Description,
+                    Amount: e.detail.Amount,
+                    Code: e.detail.Code
+                });
+                this.updateP4mCart();
             }
-
-
         });
     </script>
 </dom-module>

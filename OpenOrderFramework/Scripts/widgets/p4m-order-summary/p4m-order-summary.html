@@ -21,7 +21,7 @@
                 </div>
                 <div class="p4m-row">
                     <div class="p4m-cell header-col">Discount</div>
-                    <div class="p4m-cell detail-col">None</div>
+                    <div class="p4m-cell detail-col">{{_discountDescription}}</div>
                     <div class="p4m-cell cost-col">{{currencySymbol}}{{_discount}}</div>
                 </div>
                 <div class="p4m-row">
@@ -141,7 +141,9 @@
                 if (this.cartData) {
                     this._updateItemCount();
                     this._updateCartDescription();
+                    this._updateDiscount();
                     this._updateCurrencyAmounts();
+                    
                 }               
             },
 
@@ -168,10 +170,19 @@
                 });
             },
 
+            _updateDiscount: function () {
+                if (this.cartData.Discounts) {
+                    this._discount = this.cartData.Discounts.reduce(((total, item) => total + item.Amount), 0)
+                    this._discountDescription = this.cartData.Discounts.length ? this.cartData.Discounts[0].Description : "None";
+                }
+
+            },
+
             _updateCurrencyAmounts: function () {
                 this._tax = this.cartData.Tax.toFixed(2);
                 this._discount = Number(this._discount).toFixed(2);
                 this._shipping = Number(this.cartData.ShippingAmt).toFixed(2);
+
                 this._total = Number(this.cartData.Total).toFixed(2);
             },
 
