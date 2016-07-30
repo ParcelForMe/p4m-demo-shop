@@ -100,7 +100,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("getP4MCart")]
+        [Route("p4m/getP4MCart")]
         public JsonResult GetCartWithItems()
         {
             var result = new CartMessage();
@@ -116,7 +116,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("restoreLastCart")]
+        [Route("p4m/restoreLastCart")]
         public async Task<JsonResult> RestoreLastCart()
         {
             var result = new P4MBaseMessage();
@@ -170,7 +170,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("shippingSelector")]
+        [Route("p4m/shippingSelector")]
         public ActionResult ShippingSelector()
         {
             // Return the view
@@ -178,7 +178,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("applyDiscountCode/{discountCode}")]
+        [Route("p4m/applyDiscountCode/{discountCode}")]
         public JsonResult ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
@@ -205,7 +205,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpPost]
-        [Route("itemQtyChanged")]
+        [Route("p4m/itemQtyChanged")]
         public async Task<JsonResult> ItemQtyChanged(List<ChangedItem> items)
         {
             var result = new CartUpdateMessage();
@@ -232,7 +232,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("purchase/{cartId}/{cvv}/{cartTotal}")]
+        [Route("p4m/purchase")]
         public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal)
         {
             var result = new PurchaseMessage();
@@ -240,6 +240,7 @@ namespace OpenOrderFramework.Controllers
             {
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
                 var localCart = ShoppingCart.GetCart(HttpContext);
+                //decimal cartTot = Convert.ToDecimal(cartTotal);
                 if (cartTotal != localCart.Total)
                 {
                     localCart.EmptyCart();
@@ -330,12 +331,23 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpPost]
-        [Route("p4m/3dsPurchaseComplete/{purchaseResult}")]
+        [Route("p4m/3dsPurchaseComplete")]
         public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
         {
             // purchaseResult is a purchase message JSON string, base64 encoded
             var decoded = Base64Decode(purchaseResult);
             var result = JsonConvert.DeserializeObject<PurchaseMessage>(decoded);
+            if (result.Success)
+            {
+                // purchaseResult includes the transaction Id, auth code and cart 
+                // so the retailer can store whatever is required at this point
+                ShoppingCart.GetCart(this).EmptyCart();
+                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+#pragma warning disable 4014
+                // we've waited enough - don't wait for the order to be saved as well!
+                CreateLocalOrderAsync(result);
+#pragma warning restore 4014
+            }
             return View("P4M3DSPurchaseComplete", result);
         }
 

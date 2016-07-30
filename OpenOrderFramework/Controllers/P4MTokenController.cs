@@ -31,7 +31,7 @@ namespace OpenOrderFramework.Controllers
         public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
         //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
         //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
-        public const string LocalCallbackUrl = "http://localhost:3000/getP4MAccessToken";
+        public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
         public const string LogoutEndpoint = BaseAddress + "/connect/endsession";
@@ -87,7 +87,7 @@ namespace OpenOrderFramework.Controllers
         }
         
         [HttpGet]
-        [Route("getP4MAccessToken")]
+        [Route("p4m/getP4MAccessToken")]
         public async Task<ActionResult> GetToken(string code, string state)
         {
             // state should be validated here - get from cookie
@@ -110,44 +110,8 @@ namespace OpenOrderFramework.Controllers
             return View("error");
         }
 
-        const string cardTokenResponseXml = @"<response timestamp='20160707104609'>
-    <merchantid>realexsandbox</merchantid>
-    <account>internet</account>
-    <orderid>AiCibJ5UR7utURy_slxhJw</orderid>
-    <authcode>12345</authcode>
-    <result>00</result>
-    <cvnresult>M</cvnresult>
-    <avspostcoderesponse>M</avspostcoderesponse>
-    <avsaddressresponse>M</avsaddressresponse>
-    <batchid>319440</batchid>
-    <message>[ test system ] AUTHORISED</message>
-    <pasref>14609996408372413</pasref>
-    <timetaken>2</timetaken>
-    <authtimetaken>1</authtimetaken>
-    <cardissuer>
-        <bank>AIB BANK</bank>
-        <country>IRELAND</country>
-        <countrycode>IE</countrycode>
-        <region>EUR</region>
-    </cardissuer>
-    <sha1hash>c0e029768f5f0039fc1917baca1230f77b0ce94d</sha1hash>
-</response>";
-
-        //public async Task PostXMLData()
-        //{
-        //    var client = new HttpClient();
-        //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
-        //    client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("utf-8"));
-        //    byte[] bytes;
-        //    bytes = System.Text.Encoding.UTF8.GetBytes(cardTokenResponseXml);
-        //    var content = new System.Net.Http.ByteArrayContent(bytes);
-        //    var result = await client.PostAsync(P4MConstants.BaseApiAddress + "cardTokenResponse", content);
-        //    var messageString = await result.Content.ReadAsStringAsync();
-        //    Console.Write(messageString);
-        //}
-
         [HttpGet]
-        [Route("isLocallyLoggedIn")]
+        [Route("p4m/isLocallyLoggedIn")]
         public JsonResult IsLocallyLoggedIn()
         {
             var result = new P4MBaseMessage();
@@ -159,7 +123,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("localLogin")]
+        [Route("p4m/localLogin")]
         public async Task<JsonResult> LocalLogin(string currentPage)
         {
             this.Response.Cookies["p4mLocalLogin"].Value = "false";
@@ -175,6 +139,7 @@ namespace OpenOrderFramework.Controllers
             catch (Exception e)
             {
                 result.Error = e.Message;
+                Logoff(Response);
             }
             return Json(result, JsonRequestBehavior.AllowGet);
         }

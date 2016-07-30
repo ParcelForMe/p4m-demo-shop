@@ -77,7 +77,7 @@
                 this.$.newCardCollapse.toggle();
             },
 
-            onConsumerDataChange: function() {
+            onConsumerDataChange: function () {
                 if (!this.selectedCardId && this.consumerData) {
                     console.log("Setting selectedCardId to", this.consumerData.DefaultPayMethodId);
                     var foundDefaultCard = this.getCardDataById(this.consumerData.DefaultPayMethodId);
@@ -99,7 +99,7 @@
             },
 
             _cardsOnly: function (item) {
-                return (item && item.AccountType && item.AccountType === "Card");
+                return true;// (item && item.AccountType && item.AccountType === "Card");
             }
 
 

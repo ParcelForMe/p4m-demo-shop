@@ -143,8 +143,8 @@
                 }
                 else {
                     // check we need to launch the 3D Secure popup
-                    if (e.ACSUrl !== '') {
-                        this.launch3DSecure(e.ACSUrl, e.PAReq, e.ACSResponseUrl, e.P4MData);
+                    if (e.ACSUrl && e.ACSUrl !== '') {
+                        this.launch3DSecure(e.ACSUrl, e.PaReq, e.ACSResponseUrl, e.P4MData);
                     }
                     else {
                         this._state = States.PURCHASED;
@@ -182,8 +182,10 @@
                 MDField.setAttribute("name", "MD");
                 MDField.setAttribute("value", p4mData);
                 form.appendChild(MDField);
+
                 // add the form to THIS window
                 document.body.appendChild(form);
+
                 // open the popup
                 var w = 650, h = 750;
                 var left = (screen.width / 2) - (w / 2);

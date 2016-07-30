@@ -117,7 +117,7 @@
                 "params": []
             },
             "purchase": {
-                "stub": "purchase/{cartId}/{cvv}/{cartTotal}",
+                "stub": "purchase",
                 "method": "GET",
                 "params": [
                     {
@@ -190,7 +190,7 @@
 
             _baseUrl: function () {
                 if (this.isLocal) {                   
-                    return "//" + window.location.host + "/";                   
+                    return "//" + window.location.host + "/p4m/";                   
                 }
                 else {
                     return (this.ssl ? "https" : "http") + "://" + this.hostType + "." + this.hostBaseDomain + ":" + this.port + "/api/" + this.version + "/";

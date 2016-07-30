@@ -62,7 +62,7 @@
                 },
                 redirectUrl: {
                     type: String,
-                    value: "http://localhost:3000/getP4MAccessToken"
+                    value: "http://localhost:3000/p4m/getP4MAccessToken"
                 },
                 logoutForm: {
                     type: String,
@@ -116,6 +116,7 @@
                         var offerRestore = this.$.p4mOfferCartRestoreCookie.readCookie();
                         if (offerRestore === "true")
                         {
+                            this.$.p4mOfferCartRestoreCookie.eraseCookie();
                             this.$.lastCartDlg.open();
                             //alert("Do you want to restore your last cart?");
                             // state is unknown so check first
@@ -141,9 +142,22 @@
 
             logout: function () {
                 this.popupCenter(this.logoutUrl, "Logout", 450, 500);
+                this.clearCookies();
                 if (this.logoutForm && this.logoutForm != '') {
                     document.getElementById(this.logoutForm).submit();
                 }
+                else {
+                    window.location.reload(true);
+                }
+            },
+
+            clearCookies: function() {
+                // clear the local P4M cookies
+                this.$.p4mTokenCookie.eraseCookie();
+                this.$.p4mStateCookie.eraseCookie();
+                this.$.p4mNonceCookie.eraseCookie();
+                this.$.p4mLocalLoginCookie.eraseCookie();
+                this.$.p4mOfferCartRestoreCookie.eraseCookie();
             },
 
             popupCenter: function(url, title, w, h) {
@@ -198,15 +212,15 @@
             _onLocalLogin: function (data) {
                 console.log(JSON.stringify(data));
                 this.$.p4mProfile.hideSpinner();
-                if (data.Error) {
-                    console.error("A login error occurred:", data.Error);
-                }               
-                else if (data.RedirectUrl) {
+                if (data.RedirectUrl) {
                     window.location.href = data.RedirectUrl;
                 }
-                  
-                else
+                else {
+                    if (data.Error) {
+                        console.error("A login error occurred:", data.Error);
+                    }
                     window.location.reload(true);
+                }
             },
 
             _onCheckLocalLogin: function (data) {
