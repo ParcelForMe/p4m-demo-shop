@@ -26,6 +26,8 @@ namespace OpenOrderFramework.Models
     public class CartMessage : P4MBaseMessage
     {
         public P4MCart Cart { get; set; }
+        public P4MAddress BillTo { get; set; }
+        public P4MAddress DeliverTo { get; set; }
     }
 
     public class DiscountMessage : P4MBaseMessage

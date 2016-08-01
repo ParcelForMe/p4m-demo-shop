@@ -54,9 +54,17 @@ namespace OpenOrderFramework.Models
         {
             var cartItem = storeDB.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId && c.ItemId == itemId);
             if (qty <= 0)
-                storeDB.Carts.Remove(cartItem);
+            {
+                if (cartItem != null)
+                    storeDB.Carts.Remove(cartItem);
+            }
             else
-                cartItem.Count = qty;
+            {
+                if (cartItem == null)
+                    storeDB.Carts.Add(new Cart { CartId = ShoppingCartId, ItemId = itemId, Count = qty, DateCreated = DateTime.Now });
+                else
+                    cartItem.Count = qty;
+            }
             await storeDB.SaveChangesAsync();
             CalcTax();
         }

@@ -184,7 +184,8 @@ namespace OpenOrderFramework.Controllers
             var result = new DiscountMessage();
             try
             {
-                var discount = storeDB.Discounts.SingleOrDefault(d => d.Code == discountCode);
+                discountCode = discountCode.ToUpper();
+                var discount = storeDB.Discounts.SingleOrDefault(d => d.Code.ToUpper() == discountCode);
                 if (discount == null)
                     result.Error = string.Format("Discount code {0} does not exist", discountCode);
                 else
@@ -287,7 +288,7 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task CreateLocalOrderAsync(PurchaseMessage purchase)
+        public async Task<int> CreateLocalOrderAsync(PurchaseMessage purchase)
         {
             Order order = null;
             // get the current user details for creating the order
@@ -328,27 +329,57 @@ namespace OpenOrderFramework.Controllers
                 storeDB.OrderDetails.Add(ordItem);
             }
             storeDB.SaveChanges();
+            return order.OrderId;
         }
 
-        [HttpPost]
-        [Route("p4m/3dsPurchaseComplete")]
-        public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
+        [HttpGet]
+        [Route("p4m/3dsPurchaseComplete/{cartId}")]
+        public async Task<ActionResult> ThreeDSPurchaseComplete(string cartId)
         {
-            // purchaseResult is a purchase message JSON string, base64 encoded
-            var decoded = Base64Decode(purchaseResult);
-            var result = JsonConvert.DeserializeObject<PurchaseMessage>(decoded);
-            if (result.Success)
+            var cartMessage = await GetCartFromP4MAsync(cartId);
+            var purchase = new PurchaseMessage
             {
-                // purchaseResult includes the transaction Id, auth code and cart 
-                // so the retailer can store whatever is required at this point
-                ShoppingCart.GetCart(this).EmptyCart();
-                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
-#pragma warning disable 4014
-                // we've waited enough - don't wait for the order to be saved as well!
-                CreateLocalOrderAsync(result);
-#pragma warning restore 4014
-            }
-            return View("P4M3DSPurchaseComplete", result);
+                Cart = cartMessage.Cart,
+                BillTo = cartMessage.BillTo,
+                DeliverTo = cartMessage.DeliverTo
+            };
+            var orderId = await CreateLocalOrderAsync(purchase);
+            ShoppingCart.GetCart(this).EmptyCart();
+            HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+            return RedirectToAction("Complete", "Checkout", new { id = orderId });
+        }
+        //        public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
+        //        {
+        //            // purchaseResult is a purchase message JSON string, base64 encoded
+        //            var decoded = Base64Decode(purchaseResult);
+        //            var result = JsonConvert.DeserializeObject<PurchaseMessage>(decoded);
+        //            if (result.Success)
+        //            {
+        //                // purchaseResult includes the transaction Id, auth code and cart 
+        //                // so the retailer can store whatever is required at this point
+        //                ShoppingCart.GetCart(this).EmptyCart();
+        //                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+        //#pragma warning disable 4014
+        //                // we've waited enough - don't wait for the order to be saved as well!
+        //                CreateLocalOrderAsync(result);
+        //#pragma warning restore 4014
+        //            }
+        //            return View("P4M3DSPurchaseComplete", result);
+        //        }
+
+        async Task<CartMessage> GetCartFromP4MAsync(string cartId)
+        {
+            // update P4M with the current cart details
+            var client = new HttpClient();
+            var token = Request.Cookies["p4mToken"].Value;
+            client.SetBearerToken(token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var apiResult = await client.GetAsync(string.Format("{0}cart/{1}?wantAddresses=true", P4MConstants.BaseApiAddress, cartId));
+            var messageString = await apiResult.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<CartMessage>(messageString);
+            if (!result.Success)
+                throw new Exception(result.Error);
+            return result;
         }
 
         public string Base64Encode(string plainText)
