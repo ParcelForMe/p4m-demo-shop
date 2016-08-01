@@ -95,7 +95,7 @@ namespace OpenOrderFramework.Controllers
                 });
             }
             if (localCart.DiscountCode != null)
-                p4mCart.Discounts.Add(new P4MDiscount { Code = localCart.DiscountCode, Amount = (double)localCart.Discount });
+                p4mCart.Discounts = new List<P4MDiscount> { new P4MDiscount { Code = localCart.DiscountCode, Amount = (double)localCart.Discount } };
             return p4mCart;
         }
 
