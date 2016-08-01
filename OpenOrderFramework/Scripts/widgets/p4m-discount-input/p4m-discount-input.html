@@ -2,15 +2,27 @@
 <link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-input/iron-input.html" />
 
+
 <dom-module id="p4m-discount-input">
 
     <template>
         <div id="content">
             <input is="iron-input" type="text" id="discountCode" bind-value="{{discountCode}}" placeholder="Discount code" />
             <button on-click="sendCode">Apply</button>
+            <div id="p4mDiscountInputError" class="hidden">{{errorMsg}}</div>
         </div>
         <p4m-api id="localApi" is-local="true"></p4m-api>
     </template>
+
+    <style>
+        #p4mDiscountInputError {
+            padding: 4px;
+            color: red;
+        }
+        #content {
+            margin: 4px;
+        }
+    </style>
 
     <script>
 
@@ -23,6 +35,9 @@
                 },
                 cartData: {
                     type: Object
+                },
+                errorMsg: {
+                    type: String
                 }
             },
             listeners: {
@@ -36,10 +51,11 @@
                 this.$.localApi.call('applyDiscountCode', { discountCode: this.discountCode }, null, this.onResponse.bind(this));
             },
             onResponse: function (e) {
-                if (e.success == false) {
-                    this.showError("Invalid discount code");
+                if (e.Success == false) {
+                    this.showError(e.Error);
                 }
                 else {
+                    this.showError(null);
                     /*
                     this.set('cartData.Tax', Number(e.tax));
                     this.push('cartData.Discounts',
@@ -51,6 +67,15 @@
                      */
                     this.fire('discount', e);
                 }
+            },
+            showError(err) {
+                if (err) {
+                    this.$.p4mDiscountInputError.classList.remove('hidden')
+                }
+                else {
+                    this.$.p4mDiscountInputError.classList.add('hidden')
+                }
+               this.errorMsg = err;
             }
 
         });
