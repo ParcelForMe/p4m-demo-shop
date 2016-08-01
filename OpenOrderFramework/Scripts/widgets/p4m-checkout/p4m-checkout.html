@@ -392,7 +392,8 @@
                     item.Amount = 0;
                     item.Description = "Deleted";
                     this.updateP4mCart();
-                }                  
+                    this.$.localApi.call('removeDiscountCode', {"discountCode": code}, null, null);
+                }
             }
         });
     </script>

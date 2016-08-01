@@ -95,7 +95,11 @@ namespace OpenOrderFramework.Controllers
                 });
             }
             if (localCart.DiscountCode != null)
-                p4mCart.Discounts = new List<P4MDiscount> { new P4MDiscount { Code = localCart.DiscountCode, Amount = (double)localCart.Discount } };
+            {
+                var discount = storeDB.Discounts.FirstOrDefault();
+                var discDesc = discount == null ? "Discount description" : discount.Description;
+                p4mCart.Discounts = new List<P4MDiscount> { new P4MDiscount { Code = localCart.DiscountCode, Description = discDesc, Amount = (double)localCart.Discount } };
+            }
             return p4mCart;
         }
 
@@ -197,6 +201,29 @@ namespace OpenOrderFramework.Controllers
                     result.Amount = localCart.Discount;
                     result.Tax = localCart.Tax;
                 }
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        [Route("p4m/removeDiscountCode/{discountCode}")]
+        public JsonResult RemoveDiscountCode(string discountCode)
+        {
+            // because SimpleShop only supports one discount we just remove whatever is there
+            var result = new DiscountMessage();
+            try
+            {
+                var localCart = ShoppingCart.GetCart(this.HttpContext);
+                localCart.DiscountCode = null;
+                localCart.Discount = 0;
+                localCart.CalcTax();
+                result.Code = discountCode;
+                result.Amount = 0;
+                result.Tax = localCart.Tax;
             }
             catch (Exception e)
             {
