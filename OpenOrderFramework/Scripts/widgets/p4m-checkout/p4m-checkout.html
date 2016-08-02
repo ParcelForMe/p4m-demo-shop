@@ -322,15 +322,15 @@
                 onUpdateAddress(addressElement);
             },
 
-            onUpdateAddress: function(addressElement) {
+            onUpdateAddress: function (addressElement) {
                 var postData =
                 {
-                    "Address": addressElement.addressData,
-                    "isPrefDeliveryAddr": false, //addressElement.isDelivery,
-                    "isBillingAddr": addressElement.isBilling
+                    "Address": addressElement.detail.addressData,
+                    "isPrefDeliveryAddr": false, //addressElement.detail.isDelivery,
+                    "isBillingAddr": addressElement.detail.isBilling
                 };
-                api.call("postAddress", null, postData, function (result) {
-                    addressElement.mode = "view";
+                this.$.api.call("postAddress", null, postData, function (result) {
+                    //addressElement.detail.mode = "view";
                 });
             },
 
@@ -349,7 +349,7 @@
                     "isBillingAddr": false
                 };
                 var self = this;
-                api.call("postAddress", null, postData, function (result) {
+                this.$.api.call("postAddress", null, postData, function (result) {
                     console.log("Added address. Result:", result);
                     self.cartData.AddressId = result.Address.Id;
                     //self.cartData.ServiceName = "Collection point";
