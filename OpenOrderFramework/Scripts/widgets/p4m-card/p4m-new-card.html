@@ -31,8 +31,6 @@
                 <input type="hidden" name="PAYER_LOCALE" value="{{consumerData.Locale}}" />
                 <input type="hidden" name="CARD_PAYMENT_BUTTON" value="Store Card" />
             </form>
-            
-
         </div>
 
     </template>
@@ -82,7 +80,7 @@
             properties: {
                 responseUrl: {
                     type: String,
-                    value: "https://dev.parcelfor.me:44321/api/v2/cardTokenResponse"
+                    value: "https://dev.parcelfor.me:443/realex/v2/cardTokenResponse"
                 },
                 cardHash: {
                     type: String,
