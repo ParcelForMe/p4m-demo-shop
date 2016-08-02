@@ -177,7 +177,19 @@ namespace OpenOrderFramework.Controllers
         [Route("p4m/shippingSelector")]
         public ActionResult ShippingSelector()
         {
-            // Return the view
+            // get an access token for GFS checkout
+            var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
+            var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
+                uri,
+                "ambitious_alice",
+                "m@dhatt3r");
+
+            var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
+            ViewBag.AccessToken = Base64Encode(tokenResponse.AccessToken);
+            // set the initial address
+            ViewBag.InitialAddress = "";
+            // define initial post data
+            ViewBag.InitialData = Base64Encode("eyJSZXF1ZXN0Ijp7IkRhdGVSYW5nZSI6eyJEYXRlRnJvbSI6IjIwMTYtMDctMTEiLCJEYXRlVG8iOiIyMDE2LTA3LTI1In0sIk9yZGVyIjp7IlRyYW5zaXQiOnsiUmVjaXBpZW50Ijp7IkxvY2F0aW9uIjp7IkNvdW50cnlDb2RlIjp7IkNvZGUiOiJHQiIsIkVuY29kaW5nIjoiY2NJU09fMzE2Nl8xX0FscGhhMiJ9LCJQb3N0Y29kZSI6IlNPNDAgN0pGIn19fSwiVmFsdWUiOnsiQ3VycmVuY3lDb2RlIjoiR0JQIiwiVmFsdWUiOjQ1Ljk5fX0sIlJlcXVlc3RlZERlbGl2ZXJ5VHlwZXMiOlsiZG1Ecm9wUG9pbnQiLCJkbVN0YW5kYXJkIl0sIlNlc3Npb24iOnsiQVBJS2V5SWQiOiJDTC02OUFFNzA0Ri1ENTkyLTRBNEEtQTU2RC1FQzVFOUYxQzI4QjIifX19");
             return View("P4MDelivery");
         }
 
