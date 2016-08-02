@@ -284,7 +284,10 @@
 
             onRemoteCartData: function(data) {
                 console.log("Received remote cart data", data);
-                this.onCartData(data);
+                if (!data.Cart || !data.Cart.Items || data.Cart.Items.length === 0)
+                    window.location.reload(true);
+                else
+                    this.onCartData(data);
             },
 
             onCartData: function (data) {
