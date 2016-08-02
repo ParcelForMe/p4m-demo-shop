@@ -84,11 +84,11 @@
             },
 
             onAddAddress: function(addressElement) {
-                this.fire('add', addressElement);
+                this.fire('add', addressElement.detail);
             },
 
-            onUpdateAddress: function(addressElement) {
-                this.fire('update', addressElement);
+            onUpdateAddress: function (addressElement) {
+                this.fire('update', addressElement.detail);
             },
 
             onCartAddressDataChange: function (e) {
