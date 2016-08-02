@@ -19,3 +19,18 @@
 <gfs-checkout access-token="@ViewBag.AccessToken" gfs-data="@ViewBag.InitialData"
               initial-address="@ViewBag.InitialAddress" xinitial-address="d, d, SO40 7JF" currency-symbol="&pound;" use-standard="true" use-calendar="true" use-drop-points="true"></gfs-checkout>
 
+<script>
+    window.addEventListener('selectedServiceChanged', function (e) {
+        console.log('selectedServiceChanged', e.detail);
+        sendP4mData(e.detail);
+    });
+    window.addEventListener('droppoint-changed', function (e) {
+        console.log('droppoint-changed', e.detail);
+    });
+
+
+    function sendP4mData(data) {
+        var p4mCheckout = window.parent.document.getElementsByTagName('p4m-checkout')[0];
+        p4mCheckout.updateShipping(data);
+    }
+</script>
