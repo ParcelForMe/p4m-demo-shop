@@ -49,6 +49,22 @@
                 "method": "POST"
             },
 
+            "postWish": {
+                "stub": "wishListItem",
+                "method": "POST"
+            },
+
+            "deleteWish": {
+                "stub": "wishListItem/{sku}",
+                "method": "DELETE",
+                "params": [
+                    {
+                        "name": "sku",
+                        "required": true
+                    }
+                ]
+            },
+
             "cardTokenHash": {
                 "stub": "cardTokenHash",
                 "params": [
