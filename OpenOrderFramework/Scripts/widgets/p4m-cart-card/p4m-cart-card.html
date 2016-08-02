@@ -1,5 +1,7 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-input/iron-input.html" />
+<link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+<link rel="import" href="../p4m-wish/p4m-wish.html" />
 
 <dom-module id="p4m-cart-card">
 
@@ -13,6 +15,7 @@
                 <div id="description">{{cartItemData.Desc}}</div>
                 <div id="price">{{cartItemData.Price}}</div>
             </div>
+
             <div id="quantity" class="card-panel">
                 <label for="qty">Qty</label>
                 <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]" type="text" id="qty" bind-value="{{cartItemData.Qty}}" />
@@ -20,8 +23,7 @@
 
         </div>
         <div id="actions">
-            <a href="#">Move to wishlist</a><span class="divider">|</span>
-            <a href="#" on-tap="remove">Delete</a>
+            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-wish="onWish" on-unwish="onUnwish"></p4m-wish>
         </div>
         
     </template>
@@ -93,8 +95,13 @@
             },
 
             onDataChange: function (e) {
-                //console.log("p4m-cart-card: onDataChange()");
-                //this.fire("cartItemChange", this.cartItemData);
+            },
+
+            onWish: function (e) {
+                //Trigger removal from shopping cart
+                console.log("Received wish", e);          
+                this.remove();
+               
             }
 
         });
