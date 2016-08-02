@@ -12,7 +12,7 @@
 <link rel="import" href="../p4m-purchase/p4m-purchase.html" />
 <link rel="import" href="../p4m-card-list/p4m-card-list.html" />
 <link rel="import" href="../p4m-delivery/p4m-delivery.html" />
-<link rel="import" href="../p4m-wall-of-text/p4m-wall-of-text.html" />
+<link rel="import" href="../p4m-order-text/p4m-order-text.html" />
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 <link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
@@ -50,7 +50,7 @@
                     </iron-pages>                 
                 </div>
                 <div id="summaryPanel" class="p4m-panel">
-                    <p4m-wall-of-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-wall-of-text>
+                    <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
                     <hr />
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" selected-card="{{selectedCard}}"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
