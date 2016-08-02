@@ -1,12 +1,12 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 
-<dom-module id="p4m-wall-of-text">
+<dom-module id="p4m-order-text">
 
     <template>
         <div id="container">
             Thanks for ordering from us {{consumerData.GivenName}}.
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your {{addressTypeStr}} - {{deliveryAddressStr}}{{deliveryDateStr}}. Thank you!
+                We'll deliver your order to your {{addressTypeStr}} - {{deliveryAddressStr}}{{deliveryDateStr}}.
             </template>
         </div>
     </template>
@@ -18,7 +18,7 @@
     <script>
     //
         Polymer({
-            is: "p4m-wall-of-text",
+            is: "p4m-order-text",
 
             properties: {
                 consumerData: {
@@ -73,7 +73,13 @@
             },
 
             _addressToStr: function (address) {
-                return address.Street1 + " " + address.Street2 + " in " + (address.City || address.PostCode);
+                if (address) {
+                    return address.Street1 + " " + address.Street2 + " in " + (address.City || address.PostCode);
+                }
+                else {
+                    return "";
+                }
+                
             },
 
             _addressType: function (address) {
@@ -92,7 +98,7 @@
                     return " by " + dataStr;
                 }
                 else {
-                    return ". Please select a delivery method to continue.";
+                    return ". Please select a delivery method to continue";
                 }
                 
             }

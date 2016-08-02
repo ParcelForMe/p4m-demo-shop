@@ -5,7 +5,7 @@
 
     <template>
         <div id="container">
-            <iframe id="shippingSelectorFrame" src="/p4m/shippingSelector" on-load="onLoad"></iframe>
+            <iframe id="shippingSelectorFrame" frameborder="0" src="/p4m/shippingSelector" on-load="onLoad"></iframe>
 
         </div>
 
@@ -14,14 +14,15 @@
     <style>
         #shippingSelectorFrame {
             width: 100%;
-            height: 250px;  
+            height: 500px; 
+            padding: 4px; 
             overflow-x: hidden;
-        }
-
-        
+        }      
     </style>
 
     <script>
+
+
     //
         Polymer({
             is: "p4m-delivery",
@@ -31,8 +32,7 @@
                 value: "/p4m/shippingSelector"
             },
 
-            observers: [
-               
+            observers: [           
             ],
 
             ready: function()
@@ -40,7 +40,6 @@
             },
 
             onLoad: function () {
-                console.log("iframe loaded");
             }
 
         });

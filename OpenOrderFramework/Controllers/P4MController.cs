@@ -193,12 +193,15 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
             ViewBag.AccessToken = token;
+            //zzzzzz
+
+            var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
 
             // set the initial address
-            ViewBag.InitialAddress = "";
+            // ViewBag.InitialAddress = "";
 
             // define initial post data
-            ViewBag.InitialData = Base64Encode("eyJSZXF1ZXN0Ijp7IkRhdGVSYW5nZSI6eyJEYXRlRnJvbSI6IjIwMTYtMDctMTEiLCJEYXRlVG8iOiIyMDE2LTA3LTI1In0sIk9yZGVyIjp7IlRyYW5zaXQiOnsiUmVjaXBpZW50Ijp7IkxvY2F0aW9uIjp7IkNvdW50cnlDb2RlIjp7IkNvZGUiOiJHQiIsIkVuY29kaW5nIjoiY2NJU09fMzE2Nl8xX0FscGhhMiJ9LCJQb3N0Y29kZSI6IlNPNDAgN0pGIn19fSwiVmFsdWUiOnsiQ3VycmVuY3lDb2RlIjoiR0JQIiwiVmFsdWUiOjQ1Ljk5fX0sIlJlcXVlc3RlZERlbGl2ZXJ5VHlwZXMiOlsiZG1Ecm9wUG9pbnQiLCJkbVN0YW5kYXJkIl0sIlNlc3Npb24iOnsiQVBJS2V5SWQiOiJDTC02OUFFNzA0Ri1ENTkyLTRBNEEtQTU2RC1FQzVFOUYxQzI4QjIifX19");
+            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson.Result);
             return View("P4MDelivery");
         }
 
@@ -380,6 +383,41 @@ namespace OpenOrderFramework.Controllers
             return order.OrderId;
         }
 
+        public async Task<String> GetGfsCheckoutPost()
+        {
+
+            var localCart = ShoppingCart.GetCart(HttpContext);
+            var template =
+            "{" +
+              "\"Request\": {" +
+               " \"DateRange\": {" +
+                  "\"DateFrom\": \"2016-08-01\"," +
+                  "\"DateTo\": \"2016-08-25\"" +
+                "}," +
+                "\"Order\": {" +
+                  "\"Transit\": {" +
+                   " \"Recipient\": {" +
+                      "\"Location\": {" +
+                        "\"CountryCode\": {" +
+                          "\"Code\": \"GB\"," +
+                          "\"Encoding\": \"ccISO_3166_1_Alpha2\"" +
+                        "}," +
+                        "\"Postcode\": \"SO40 7JF\"" +
+                      "}" +
+                    "}" +
+                  "}," +
+                  "\"Value\": {" +
+                    "\"CurrencyCode\": \"GBP\"," +
+                    "\"Value\": 45.99" +
+                  "}" +
+                "}," +
+                "\"RequestedDeliveryTypes\": [ \"dmDropPoint\", \"dmStandard\" ]," +
+                "\"Session\": { \"APIKeyId\": \"CL-69AE704F-D592-4A4A-A56D-EC5E9F1C28B2\" }" +
+              "}" +
+            "}";
+            return template;
+        }
+
         [HttpGet]
         [Route("p4m/3dsPurchaseComplete/{cartId}")]
         public async Task<ActionResult> ThreeDSPurchaseComplete(string cartId)
@@ -441,5 +479,6 @@ namespace OpenOrderFramework.Controllers
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
             return Encoding.UTF8.GetString(base64EncodedBytes);
         }
+
     }
 }

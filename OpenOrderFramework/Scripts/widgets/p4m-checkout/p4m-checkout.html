@@ -187,6 +187,7 @@
                 if (this.sessionId) {
                     this.getLocalCart();
                 }
+
                 this.$.api.call('consumer', null, null, this.onConsumerData.bind(this));
             },
 
@@ -204,13 +205,13 @@
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
             },
 
-            updateShipping: function (service, shipping, expDeliveryDate, collectPoint) {
+            updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
                 var self = this;
-                this.cartData.ShippingAmt = shipping;
-                this.cartData.ServiceName = service;
-                this.cartData.ExpDeliveryDate = expDeliveryDate;
-                if (collectPoint) {
-                    this.selectCollectPoint(collectPoint, function () {
+                this.cartData.ShippingAmt = data.shipping;
+                this.cartData.ServiceName = data.service;
+                this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
+                if (data.collectPoint) {
+                    this.selectCollectPoint(data.collectPoint, function () {
                         self.updateP4mCart();
                     });
                 }                  
