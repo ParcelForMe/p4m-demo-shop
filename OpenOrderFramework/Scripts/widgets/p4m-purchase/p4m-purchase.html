@@ -105,7 +105,7 @@
             observers: [
                 "onCartDataChange(cartData.*)",
                 "onStateChange(_state)",
-                "onCardSelected(selectedCard)"
+                //"onCardSelected(selectedCard)"
             ],
 
             ready: function ()
@@ -198,7 +198,6 @@
             },
 
             onCardSelected: function (e) {
-                this.cartData.PayMethodId = this.selectedCard.Id;
                 this.updateUi();
             },
 

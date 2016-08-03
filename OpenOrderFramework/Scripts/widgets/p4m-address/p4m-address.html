@@ -252,17 +252,27 @@
 
            
             markAsBilling: function () { 
-                this.set('cartData.BillingAddressId', this.addressData.Id);       
-                this.isBilling = true;
+                //this.set('cartData.BillingAddressId', this.addressData.Id);    
+                if (this.cartData.BillingAddressId !== this.addressData.Id) {
+                    this.isBilling = true;
+                    this.fire('select', { 'isBilling': true, 'id': this.addressData.Id });
+                }
             },
 
             markAsDelivery: function() {
-                this.set('cartData.AddressId', this.addressData.Id);
-                this.isDelivery = true;
+                if (this.cartData.AddressId !== this.addressData.Id) {
+                    this.isDelivery = true;
+                    this.fire('select', { 'isDelivery': true, 'id': this.addressData.Id });
+                }
             },
+
+            _origVals: {},
 
             edit: function() {
                 this.mode = "edit";
+                // store a copy of the values in case the user cancels editing
+                this._origVals = {};
+                for (var p in this.addressData) this._origVals[p] = this.addressData[p];
             },
 
             view: function () {
@@ -275,6 +285,11 @@
             },
 
             cancel: function() {
+                if (this._origVals) {
+                    for (var p in this._origVals) {
+                        this.set('addressData.' + p, this._origVals[p]);
+                    }
+                }
                 this.fire("canceledit", this);
                 this.mode = "view";
             },

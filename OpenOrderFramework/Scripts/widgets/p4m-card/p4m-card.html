@@ -149,11 +149,6 @@
                     notify: true,
                     observer: "onDataChange"
                 },
-                consumerData: {
-                    type: Object,
-                    notify: true,
-                    observer: "onDataChange"
-                },
 
                 isSelected: {
                     type: Object,
@@ -181,7 +176,6 @@
                     type: String
                 }
 
-
             },
 
             observers: [
@@ -201,7 +195,6 @@
                 }
             },
 
-
             select: function () {
                 console.log('Firing on-selected');
                 this.selectedCardId = this.cardData.Id;
@@ -217,9 +210,7 @@
                 this.mode = "view";
             },
 
-
             onDataChange: function (e) {
-  
                 this.updateUi();
             },
 
@@ -232,7 +223,7 @@
 
             updateUi: function()
             {
-                this.isSelected = (this.cardData && this.consumerData && (this.selectedCardId === this.cardData.Id));
+                this.isSelected = (this.cardData && (this.selectedCardId === this.cardData.Id));
                 if (this.isSelected) {
                     this.$.selectedToggle.classList.add('chosen');
                 }
@@ -240,7 +231,6 @@
                     this.$.selectedToggle.classList.remove('chosen');
                 }
             },
-
 
         });
     </script>
