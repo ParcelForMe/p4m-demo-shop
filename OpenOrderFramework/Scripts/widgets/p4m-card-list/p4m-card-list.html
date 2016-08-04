@@ -78,7 +78,7 @@
             onCartDataChange: function () {
                 if (!this.selectedCardId && this.cartData && this.cartData.PayMethodId) {
                     console.log("Setting selectedCardId to", this.cartData.PayMethodId);
-                    var foundCard = this.getCardDataById(this.cartData.PayMethodId);
+                    var foundCard = this.getCardDataById(this.cartData.PayMethodId || this.consumerData.PayMethodId);
                     if (foundCard) {
                         this.set('selectedCardId', this.cartData.PayMethodId);
                         this.fire('selected', foundCard);
