@@ -82,28 +82,26 @@
                     type: String,
                     value: "https://dev.parcelfor.me:443/realex/v2/cardTokenResponse"
                 },
+                consumerData: {
+                    type: Object,
+                    notify: true,
+                },
                 cardHash: {
                     type: String,
-                    notify: true,
-                    observer: "onCardHash"
                 },
                 cardTimestamp: {
                     type: String,
-                    notify: true
                 },
                 cardMerchantId: {
                     type: String,
-                    notify: true,
-                    observer: "onCardMerchantId"
+                    value: "parcelforme"
                 },
                 currency: {
                     type: String,
-                    notify: true,
                     value: "GBP"
                 },
                 payerExist: {
                     type: String,
-                    notify: true,
                     value: "0"
                 },
                 newCardId: {
@@ -112,7 +110,7 @@
             },
 
             observers: [
-               // "onCardHash(cardHash)"
+               "onConsumerData(consumerData)"
             ],
 
             ready: function()
@@ -120,9 +118,32 @@
                
             },
 
-            onCardHash: function () {
+            onConsumerData: function(consumer) {
+                console.log("New card got consumer: ", consumer);
+                this.payerExists = consumer.PaymentMethods.length > 0;
+            },
+
+            loadRealexForm: function() {
+                this.newCardId = Math.floor(Math.random() * 9999999) + "-" + Math.floor(Math.random() * 9999999);
+                var d = new Date();
+                var timeStampStr = (d.getFullYear().toString() + '-' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1).toString() + '-' + d.getDate().toString() + "T" + (d.getHours() + 1 < 10 ? '0' : '') + d.getHours().toString() + ':' + (d.getMinutes() + 1 < 10 ? '0' : '') + d.getMinutes().toString() + ':' + (d.getSeconds() + 1 < 10 ? '0' : '') + d.getSeconds().toString());
+
+                this.$.api.call('cardTokenHash',
+                {
+                    timestamp: timeStampStr,
+                    orderId: this.newCardId,
+                    currency: this.currency,
+                    payMethodId: this.newCardId,
+                    amount: 0
+                }, null, this.onCardHash.bind(this));
+
+            },
+
+            onCardHash: function (hashResponse) {
                 //We have received the hash data, now fill in the form and post  
-                console.log("Received card hash. Posting form...");
+                console.log("Received card hash. Posting form...", hashResponse);
+                this.cardHash = hashResponse.CardHash;
+                this.cardTimestamp = hashResponse.Timestamp;
                 this._requestedForm = true;
                 this.$.realexForm.submit();
             },

@@ -10,7 +10,7 @@
             <p><a href="#" on-tap="addNewCard">Add a new card</a></p>
             <br />
             <iron-collapse id="newCardCollapse">
-                <p4m-new-card consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{cardMerchantId}}"></p4m-new-card>
+                <p4m-new-card consumer-data="{{consumerData}}"></p4m-new-card>
             </iron-collapse>
             
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}"><!-- filter="_cardsOnly">-->
@@ -39,23 +39,6 @@
                 },
                 cartData: {
                     type: Object,
-                    notify: true
-                },
-                cardHash: {
-                    type: String,
-                    notify: true
-                },
-                newCardId: {
-                    type: String,
-                    notify: true
-                },
-                cardTimestamp: {
-                    type: String,
-                    notify: true
-                },
-                cardMerchantId: {
-                    type: String,
-                    value: "parcelforme",
                     notify: true
                 },
                 selectedCardId: {

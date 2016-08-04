@@ -42,7 +42,7 @@
                             <p4m-delivery></p4m-delivery>
                         </iron-page>
                         <iron-page>
-                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
+                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod"></p4m-card-list>
                         </iron-page>
                         <iron-page>
                             <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
@@ -149,22 +149,6 @@
                 selectedCard: {
                     type: Object
                 },
-                newCardId: {
-                    type: String,
-                    notify: true
-                },
-                cardMerchantId: {
-                    type: String,
-                    notify: true
-                },
-                cardHash: {
-                    type: String,
-                    notify: true
-                },
-                cardTimestamp: {
-                    type: String,
-                    notify: true
-                },
                 _changeTimer: {
                     //Timer object to allow sending of changes once user has finished interaction
                     type: Object
@@ -230,21 +214,6 @@
 
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
-
-                //TODO: child should signal for this when user adds a new card
-                //TODO: make proper GUID function
-                this.newCardId = Math.floor(Math.random() * 9999999) + "-" + Math.floor(Math.random() * 9999999);
-                var d = new Date();
-                var timeStampStr = (d.getFullYear().toString() + '-' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1).toString() + '-' + d.getDate().toString() + "T" + (d.getHours() + 1 < 10 ? '0' : '') + d.getHours().toString() + ':' + (d.getMinutes() + 1 < 10 ? '0' : '') + d.getMinutes().toString() + ':' + (d.getSeconds() + 1 < 10 ? '0' : '') + d.getSeconds().toString());
-
-                this.$.api.call('cardTokenHash',
-                {
-                    timestamp: timeStampStr,
-                    orderId: this.newCardId,
-                    currency: this.currency,
-                    payMethodId: this.newCardId,
-                    amount: 0
-                }, null, this.onCardHashData.bind(this));
             },
 
             onConsumerDataChange: function(newVal, oldVal) {
@@ -347,6 +316,7 @@
                 var updCart = this.selectedCard !== undefined && this.selectedCard !== null;
                 this.set('cartData.PayMethodId', e.detail.Id);
                 this.selectedCard = e.detail;
+                alert("asd: " + updCart);
                 if (updCart) {
                     this.updateP4mCart();
                 }

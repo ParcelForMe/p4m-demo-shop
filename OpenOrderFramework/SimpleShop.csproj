@@ -668,6 +668,7 @@
     <Content Include="Scripts\widgets\p4m-delivery\p4m-delivery.html" />
     <Content Include="Scripts\widgets\p4m-discount-input\p4m-discount-input.html" />
     <Content Include="Scripts\widgets\p4m-discount-list\p4m-discount-list.html" />
+    <Content Include="Scripts\widgets\p4m-order-text\p4m-order-text.html" />
     <Content Include="Scripts\widgets\p4m-overlay\p4m-overlay.html" />
     <Content Include="Scripts\widgets\p4m-shared\p4m.css" />
     <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
