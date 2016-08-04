@@ -1,4 +1,5 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<script src="../../Lib/moment/min/moment.min.js"></script>
 
 <dom-module id="p4m-order-text">
 
@@ -94,8 +95,8 @@
             },
 
             _expectedDeliveryDateStr: function (dateStr) {
-                if (dateStr) {
-                    return " by " + dateStr;
+                if (dateStr) {                                   
+                    return " by " + moment(new Date(dateStr)).format('dddd Do MMMM YYYY');
                 }
                 else {
                     return ". Please select a delivery method to continue";

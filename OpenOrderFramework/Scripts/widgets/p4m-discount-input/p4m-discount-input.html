@@ -56,15 +56,6 @@
                 }
                 else {
                     this.showError(null);
-                    /*
-                    this.set('cartData.Tax', Number(e.tax));
-                    this.push('cartData.Discounts',
-                     {
-                         Description: e.Description,
-                         Amount: e.Amount,
-                         Code: e.Code
-                     });
-                     */
                     this.fire('discount', e);
                 }
             },
