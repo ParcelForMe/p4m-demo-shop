@@ -316,7 +316,6 @@
                 var updCart = this.selectedCard !== undefined && this.selectedCard !== null;
                 this.set('cartData.PayMethodId', e.detail.Id);
                 this.selectedCard = e.detail;
-                alert("asd: " + updCart);
                 if (updCart) {
                     this.updateP4mCart();
                 }
