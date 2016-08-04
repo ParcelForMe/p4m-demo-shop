@@ -69,4 +69,5 @@ namespace OpenOrderFramework.Models
         public bool ClearItems { get; set; }
         public P4MCart Cart { get; set; }
     }
+
 }
