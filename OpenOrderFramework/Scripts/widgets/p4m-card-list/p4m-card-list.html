@@ -10,7 +10,7 @@
             <p><a href="#" on-tap="addNewCard">Add a new card</a></p>
             <br />
             <iron-collapse id="newCardCollapse">
-                <p4m-new-card consumer-data="{{consumerData}}"></p4m-new-card>
+                <p4m-new-card id="newCard" consumer-data="{{consumerData}}"></p4m-new-card>
             </iron-collapse>
             
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}"><!-- filter="_cardsOnly">-->
@@ -62,6 +62,7 @@
 
             addNewCard: function() {
                 this.$.newCardCollapse.toggle();
+                this.$.newCard.loadRealexForm();
             },
 
             onConsumerDataChange: function () {
