@@ -7,7 +7,7 @@
 
     <template>
         <div id="container">
-            <p><a href="#" on-tap="addNewCard">Add a new card</a></p>
+            <p><a id="addNewCardLink" href="#" on-tap="addNewCard">Add a new card</a></p>
             <br />
             <iron-collapse id="newCardCollapse">
                 <p4m-new-card id="newCard" consumer-data="{{consumerData}}"></p4m-new-card>
@@ -60,9 +60,17 @@
                 this.set("selectedCardId", e.detail.Id); //This should now trigger the other cards to update their UI
             },
 
-            addNewCard: function() {
-                this.$.newCardCollapse.toggle();
-                this.$.newCard.loadRealexForm();
+            addNewCard: function () {
+                var ctrl = this.$.newCardCollapse;
+                var lbl = this.$.addNewCardLink;
+                if (!ctrl.opened) {
+                    this.$.newCard.loadRealexForm();
+                    lbl.innerText = "Cancel";
+                }
+                else {
+                    lbl.innerText = "Add a new card";
+                }
+                ctrl.toggle();
             },
 
             onConsumerDataChange: function () {
