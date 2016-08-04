@@ -7,14 +7,17 @@
         <div id="container">
             Thanks for ordering from us {{consumerData.GivenName}}.
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your {{addressTypeStr}} - {{deliveryAddressStr}}{{deliveryDateStr}}.
+                We'll deliver your order to your {{addressTypeStr}}: {{deliveryAddressStr}}{{deliveryDateStr}}.
             </template>
         </div>
     </template>
 
     <style>
+        div#id {
+            margin: 10px
+        }
 
-    </style>
+    </style>   
 
     <script>
     //
