@@ -542,6 +542,42 @@
     <Content Include="Scripts\Lib\font-awesome\scss\_spinning.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_stacked.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_variables.scss" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\css\custom.css" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\gfs-checkout-widget.html" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\back_button.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\Collect Plus.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\DE\Collect Plus.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\DE\Doddle.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\DE\dpd.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\DE\Hermes.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\DE\Inpost.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\Doddle.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\dot_check.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\dpd.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\dpd2.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\FR\Collect Plus.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\FR\Doddle.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\FR\dpd.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\FR\Hermes.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\FR\Inpost.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\GB\Collect Plus.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\GB\Doddle.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\GB\dpd.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\GB\Hermes.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\GB\Inpost.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\Gfs.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\Hermes.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\home.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\icon_marker_red.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\icon_peli_off.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\icon_peli_on.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\Inpost.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\locateme.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick_on.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\images\x.png" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\local-image-widget\local-image.html" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\Lib\iron-ajax\.bower.json" />
     <Content Include="Scripts\Lib\iron-ajax\.travis.yml" />
     <Content Include="Scripts\Lib\iron-ajax\bower.json" />
@@ -668,6 +704,7 @@
     <Content Include="Scripts\widgets\p4m-delivery\p4m-delivery.html" />
     <Content Include="Scripts\widgets\p4m-discount-input\p4m-discount-input.html" />
     <Content Include="Scripts\widgets\p4m-discount-list\p4m-discount-list.html" />
+    <Content Include="Scripts\widgets\p4m-wish\p4m-wish.html" />
     <Content Include="Scripts\widgets\p4m-overlay\p4m-overlay.html" />
     <Content Include="Scripts\widgets\p4m-shared\p4m.css" />
     <Content Include="Scripts\widgets\p4m-login\p4m-login.html" />
@@ -676,7 +713,7 @@
     <Content Include="Scripts\widgets\p4m-profile\peli-logo-green.png" />
     <Content Include="Scripts\widgets\p4m-profile\peli-logo-grey.png" />
     <Content Include="Scripts\widgets\p4m-purchase\p4m-purchase.html" />
-    <Content Include="Scripts\widgets\p4m-wall-of-text\p4m-wall-of-text.html" />
+    <Content Include="Scripts\widgets\p4m-order-text\p4m-order-text.html" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -791,6 +828,7 @@
     <Content Include="Views\P4M\P4MDelivery.cshtml" />
     <Content Include="Views\P4M\P4MRedirect.cshtml" />
     <Content Include="Views\P4M\P4M3DSPurchaseComplete.cshtml" />
+    <Content Include="Scripts\Lib\gfs-checkout-widget\bower.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
