@@ -9,11 +9,11 @@
             <a href="#" on-tap="addNewAddress">Add a new address</a>
 
             <template is="dom-repeat" items="{{addressListData}}" filter="filterNewOnly">
-                <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" cart-data="{{cartData}}" mode="edit" on-save="onAddAddress"></p4m-address>
+                <p4m-address address-data="{{item}}" on-canceledit="cancelAdd" cart-data="{{cartData}}" mode="edit" on-save="onAddAddress"></p4m-address>
             </template>
 
             <template is="dom-repeat" items="{{addressListData}}" filter="filterOldOnly">
-                <p4m-address address-data="{{item}}" cart-data="{{cartData}}" mode="view" on-save="onUpdateAddress"></p4m-address>
+                <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" cart-data="{{cartData}}" mode="view" on-save="onUpdateAddress" on-select="onSelectAddress"></p4m-address>
             </template>
 
         </div>
@@ -75,25 +75,35 @@
  
             },
 
-            cancelEdit: function(e) {
-                console.log("Cancel edit");
+            cancelAdd: function(e) {
+                console.log("Cancel add address");
                 this._addedNewAddress = false;
                 this.pop('addressListData');
 
                 //this.$.newAddressCollapse.opened = false;
             },
 
-            onAddAddress: function(addressElement) {
-                this.fire('add', addressElement);
+            cancelEdit: function (e) {
+                // revert card to previous values
+                console.log("Cancel edit address");
+                //this.$.newAddressCollapse.opened = false;
             },
 
-            onUpdateAddress: function(addressElement) {
-                this.fire('update', addressElement);
+            onAddAddress: function(addressElement) {
+                this.fire('add', addressElement.detail);
+            },
+
+            onUpdateAddress: function (addressElement) {
+                this.fire('update', addressElement.detail);
+            },
+
+            onSelectAddress: function(e) {
+                //this.fire('select', e.detail);
             },
 
             onCartAddressDataChange: function (e) {
                 var i = 0;
-                console.log("Changed preferred billing address");
+                console.log("Changed delivery or billing address");
                 if (this.addressListData) {
                     this.addressListData.forEach((function (item) {
                         this.notifyPath('addressListData.#' + i + "._update", Math.random());

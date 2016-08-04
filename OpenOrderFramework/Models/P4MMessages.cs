@@ -63,9 +63,6 @@ namespace OpenOrderFramework.Models
     public class PostCartMessage : P4MBaseMessage
     {
         public string  SessionId { get; set; }
-        public string PaymentType { get; set; }
-        public string Currency { get; set; }
-        public string PayMethodToken { get; set; }
         public bool ClearItems { get; set; }
         public P4MCart Cart { get; set; }
     }

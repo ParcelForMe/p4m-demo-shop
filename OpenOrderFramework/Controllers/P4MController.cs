@@ -75,6 +75,7 @@ namespace OpenOrderFramework.Controllers
                 Reference = localCart.ShoppingCartId,
                 SessionId = localCart.ShoppingCartId,
                 Date = DateTime.UtcNow,
+                PaymentType = "DB",
                 Currency = "GBP",
                 ShippingAmt = (double)localCart.Shipping,
                 Tax = (double)localCart.Tax,

@@ -42,10 +42,10 @@
                             <p4m-delivery></p4m-delivery>
                         </iron-page>
                         <iron-page>
-                            <p4m-card-list consumer-data="{{consumerData}}" on-selected="onSelectPaymentMethod" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
+                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{card-merchant-id}}"></p4m-card-list>
                         </iron-page>
                         <iron-page>
-                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
+                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
                 </div>
@@ -132,8 +132,7 @@
                 },              
                 cartData: {
                     type: Object,
-                    notify: true
-                   
+                    notify: true,
                 },
                 deliveryData: {
                     type: Object,
@@ -173,9 +172,9 @@
                 
             },
             observers: [
-                "onCartItemsChange(cartData.Items.*)"
                 //"onCartDiscountChange(cartData.Discounts.*)"
-            ],
+                "onCartItemsChange(cartData.Items.*)"
+        ],
 
 
             ready: function()
@@ -205,21 +204,6 @@
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
             },
 
-            updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
-                var self = this;
-                this.cartData.ShippingAmt = data.shipping;
-                this.cartData.ServiceName = data.service;
-                this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
-                if (data.collectPoint) {
-                    this.selectCollectPoint(data.collectPoint, function () {
-                        self.updateP4mCart();
-                    });
-                }                  
-                else {
-                    this.updateP4mCart();
-                }
-            },
-
             sendCartItemChanges: function () {          
                 //Send changes to local API, then to P4m
                 var self = this;
@@ -243,6 +227,7 @@
 
 
             },
+
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
 
@@ -274,9 +259,6 @@
                 var cartMessage =
                 {
                     "SessionId": this.sessionId,
-                    "PaymentType": "DB",
-                    "Currency": this.cartData.Currency,
-                    "PayMethodToken": "this.consumerData.PayMethodToken",   // TODO: load the consumer
                     "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
                     "Cart": this.cartData
                 };
@@ -285,7 +267,12 @@
 
             onRemoteCartData: function(data) {
                 console.log("Received remote cart data", data);
-                this.onCartData(data);
+                if (!data.Success)
+                    console.log(data.Error);
+                else if (!data.Cart || !data.Cart.Items || data.Cart.Items.length === 0)
+                    window.location.reload(true);
+                else
+                    this.onCartData(data);
             },
 
             onCartData: function (data) {
@@ -315,20 +302,21 @@
                 }
             },
 
-            onAddAddress: function(addressElement) {
-                onUpdateAddress(addressElement);
-            },
+            // the following methods relate to changes at the cart level (not the items):
 
-            onUpdateAddress: function(addressElement) {
-                var postData =
-                {
-                    "Address": addressElement.addressData,
-                    "isPrefDeliveryAddr": false, //addressElement.isDelivery,
-                    "isBillingAddr": addressElement.isBilling
-                };
-                api.call("postAddress", null, postData, function (result) {
-                    addressElement.mode = "view";
-                });
+            updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
+                var self = this;
+                this.cartData.ShippingAmt = data.shipping;
+                this.cartData.ServiceName = data.service;
+                this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
+                if (data.collectPoint) {
+                    this.selectCollectPoint(data.collectPoint, function () {
+                        this.updateP4mCart();
+                    });
+                }
+                else {
+                    this.updateP4mCart();
+                }
             },
 
             selectCollectPoint: function (collectPointData, callback) {
@@ -346,7 +334,7 @@
                     "isBillingAddr": false
                 };
                 var self = this;
-                api.call("postAddress", null, postData, function (result) {
+                this.$.api.call("postAddress", null, postData, function (result) {
                     console.log("Added address. Result:", result);
                     self.cartData.AddressId = result.Address.Id;
                     //self.cartData.ServiceName = "Collection point";
@@ -356,15 +344,18 @@
 
             onSelectPaymentMethod: function (e) {
                 console.log("Selected payment method", e.detail);
+                var updCart = this.selectedCard !== undefined && this.selectedCard !== null;
                 this.set('cartData.PayMethodId', e.detail.Id);
                 this.selectedCard = e.detail;
+                if (updCart) {
+                    this.updateP4mCart();
+                }
             },
 
             onCardHashData: function (data) {
                 this.set('cardTimestamp', data.Timestamp);
                 this.set('cardMerchantId', data.MerchantId);
-                this.set('cardHash', data.Hash);
-               
+                this.set('cardHash', data.Hash);               
             },
 
             onDiscount: function (e) {
@@ -395,7 +386,33 @@
                     this.updateP4mCart();
                     this.$.localApi.call('removeDiscountCode', {"discountCode": code}, null, null);
                 }
-            }
+            },
+
+            onSelectAddress: function (e) {
+                console.log("Selected address", e.detail);
+                if (e.detail.isBilling)
+                    this.set('cartData.BillingAddressId', e.detail.id);
+                else if (e.detail.isDelivery)
+                    this.set('cartData.AddressId', e.detail.id);
+                this.updateP4mCart();
+            },
+
+            onAddAddress: function (addressElement) {
+                onUpdateAddress(addressElement);
+            },
+
+            onUpdateAddress: function (addressElement) {
+                // here we're adding or updating an address only, not setting a default value on the consumer at this stage
+                var postData =
+                {
+                    "Address": addressElement.detail.addressData,
+                    //"isPrefDeliveryAddr": addressElement.detail.isDelivery,
+                    //"isBillingAddr": addressElement.detail.isBilling
+                };
+                this.$.api.call("postAddress", null, postData, function (result) {
+                    //addressElement.detail.mode = "view";
+                });
+            },
         });
     </script>
 </dom-module>

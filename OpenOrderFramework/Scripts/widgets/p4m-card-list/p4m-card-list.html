@@ -13,8 +13,8 @@
                 <p4m-new-card consumer-data="{{consumerData}}" new-card-id="{{newCardId}}" card-hash="{{cardHash}}" card-timestamp="{{cardTimestamp}}" card-merchant-id="{{cardMerchantId}}"></p4m-new-card>
             </iron-collapse>
             
-            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}" filter="_cardsOnly">
-                <p4m-card card-data="{{item}}" on-selected="onCardSelected" selected-card-id="{{selectedCardId}}" consumer-data="{{consumerData}}"></p4m-card>
+            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}"><!-- filter="_cardsOnly">-->
+                <p4m-card card-data="{{item}}" on-selected="onCardSelected" selected-card-id="{{selectedCardId}}"></p4m-card>
             </template>
         </div>
 
@@ -34,6 +34,10 @@
 
             properties: {
                 consumerData: {
+                    type: Object,
+                    notify: true
+                },
+                cartData: {
                     type: Object,
                     notify: true
                 },
@@ -61,7 +65,8 @@
             },
 
             observers: [
-                "onConsumerDataChange(consumerData.DefaultPayMethodId)"
+                "onConsumerDataChange(consumerData.DefaultPayMethodId)",
+                "onCartDataChange(cartData.PayMethodId)"
             ],
 
             ready: function()
@@ -69,7 +74,6 @@
             },
 
             onCardSelected(e) {
-                this.fire('selected', e.detail);
                 this.set("selectedCardId", e.detail.Id); //This should now trigger the other cards to update their UI
             },
 
@@ -78,12 +82,23 @@
             },
 
             onConsumerDataChange: function () {
-                if (!this.selectedCardId && this.consumerData) {
+                if (false && !this.selectedCardId && this.consumerData) {
                     console.log("Setting selectedCardId to", this.consumerData.DefaultPayMethodId);
                     var foundDefaultCard = this.getCardDataById(this.consumerData.DefaultPayMethodId);
                     if (foundDefaultCard) {
                         this.set('selectedCardId', this.consumerData.DefaultPayMethodId);
                         this.fire('selected', foundDefaultCard);
+                    }
+                }
+            },
+
+            onCartDataChange: function () {
+                if (!this.selectedCardId && this.cartData && this.cartData.PayMethodId) {
+                    console.log("Setting selectedCardId to", this.cartData.PayMethodId);
+                    var foundCard = this.getCardDataById(this.cartData.PayMethodId);
+                    if (foundCard) {
+                        this.set('selectedCardId', this.cartData.PayMethodId);
+                        this.fire('selected', foundCard);
                     }
                 }
             },
