@@ -1,11 +1,12 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+<link rel="import" href="../p4m-api/p4m-api.html" />
 
 <dom-module id="p4m-new-card">
 
     <template>
+        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
         <div id="container" class="loading">
-            
             <p>Your card details are stored securely by our fully PCI compliant payment service. <a href="#">Read more</a></p>
             <paper-spinner id="spinner" active="true"></paper-spinner>
             <iframe id="paymentIframe" name="realexIFrame" on-load="onFrameLoaded" height="609"></iframe>
@@ -98,7 +99,7 @@
                 },
                 currency: {
                     type: String,
-                    value: "GBP"
+                    value: "GBP"    // never need to change this because we're only storing a card
                 },
                 payerExist: {
                     type: String,
@@ -118,9 +119,9 @@
                
             },
 
-            onConsumerData: function(consumer) {
+            onConsumerData: function (consumer) {
                 console.log("New card got consumer: ", consumer);
-                this.payerExists = consumer.PaymentMethods.length > 0;
+                this.set('payerExist',(consumer.PaymentMethods.length > 0) ? "1" : "0");
             },
 
             loadRealexForm: function() {
@@ -142,8 +143,8 @@
             onCardHash: function (hashResponse) {
                 //We have received the hash data, now fill in the form and post  
                 console.log("Received card hash. Posting form...", hashResponse);
-                this.cardHash = hashResponse.CardHash;
-                this.cardTimestamp = hashResponse.Timestamp;
+                this.set('cardHash', hashResponse.CardHash);
+                this.set('cardTimestamp', hashResponse.Timestamp);
                 this._requestedForm = true;
                 this.$.realexForm.submit();
             },
