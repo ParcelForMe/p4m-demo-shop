@@ -11,11 +11,8 @@
             min-width: 100px;
         }
         .p4m-button.p4m-button-active {
-
-            border: none;
             background-color: rgba(68, 144, 68, 0.7);
             color: #000000;
-            margin: 4px;
         }
         .p4m-button.p4m-button-active:hover {
             background-color: rgba(68, 144, 68, 1.0);
