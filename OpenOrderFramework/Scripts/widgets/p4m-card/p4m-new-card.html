@@ -30,6 +30,7 @@
                 <!-- End Card Storage Fields -->
                 <input type="hidden" name="MERCHANT_RESPONSE_URL" value="{{responseUrl}}" />
                 <input type="hidden" name="PAYER_LOCALE" value="{{consumerData.Locale}}" />
+                <input type="hidden" name="P4M_SOURCE" value="web" />
                 <input type="hidden" name="CARD_PAYMENT_BUTTON" value="Store Card" />
             </form>
         </div>
@@ -81,7 +82,7 @@
             properties: {
                 responseUrl: {
                     type: String,
-                    value: "https://dev.parcelfor.me:443/realex/v2/cardTokenResponse"
+                    value: "https://local.parcelfor.me:443/realex/v2/cardTokenResponse"
                 },
                 consumerData: {
                     type: Object,
@@ -89,13 +90,15 @@
                 },
                 cardHash: {
                     type: String,
+                    notify: true,
                 },
                 cardTimestamp: {
                     type: String,
+                    notify: true,
                 },
                 cardMerchantId: {
                     type: String,
-                    value: "parcelforme"
+                    notify: true,
                 },
                 currency: {
                     type: String,
@@ -103,10 +106,16 @@
                 },
                 payerExist: {
                     type: String,
-                    value: "0"
+                    value: "0",
+                    notify: true,
+                },
+                payerLocale: {
+                    type: String,
+                    notify: true,
                 },
                 newCardId: {
-                    type: String
+                    type: String,
+                    notify: true,
                 }
             },
 
@@ -143,10 +152,12 @@
             onCardHash: function (hashResponse) {
                 //We have received the hash data, now fill in the form and post  
                 console.log("Received card hash. Posting form...", hashResponse);
-                this.set('cardHash', hashResponse.CardHash);
+                this.set('cardMerchantId', hashResponse.MerchantId);
+                this.set('cardHash', hashResponse.Hash);
                 this.set('cardTimestamp', hashResponse.Timestamp);
                 this._requestedForm = true;
                 this.$.realexForm.submit();
+                window.addEventListener("message", this.receiveMessage, false);
             },
 
             onFrameLoaded: function () {
@@ -157,11 +168,10 @@
 
             },
 
-            onCardMerchantId: function () {
-                console.log("Received card merchant");
+            receiveMessage: function (event)
+            {
+                alert("got it");
             }
-
-
         });
     </script>
 </dom-module>
