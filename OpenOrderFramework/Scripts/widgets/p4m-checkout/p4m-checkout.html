@@ -222,6 +222,7 @@
             updateP4mCart: function () {
                 console.log("Updating remote cart");
                 this.$.orderSummary.showAsLoading();
+                this.$.p4mPurchase.setLoadingState(true);
 
                 //Send changes to P4M
                 var cartMessage =
@@ -246,6 +247,7 @@
             onCartData: function (data) {
                 console.log("Received new cart data");
                 this.$.orderSummary.showAsLoaded();
+                this.$.p4mPurchase.setLoadingState(false);
                 if (data.Success) {
                     this.cartData = data.Cart;
                     if (this.cartData && this.cartData.Id === null) {
