@@ -13,7 +13,7 @@
             
             <div id="details" class="card-panel">
                 <div id="description">{{cartItemData.Desc}}</div>
-                <div id="price">{{cartItemData.Price}}</div>
+                <div id="price">{{_priceStr}}</div>
             </div>
 
             <div id="quantity" class="card-panel">
@@ -83,6 +83,13 @@
                     type: Object,
                     notify: true,
                     observer: "onDataChange"
+                },
+                currencySymbol: {
+                    type: String,
+                    value: "£"
+                },
+                _priceStr: {
+                    type: String
                 }
             },
 
@@ -95,6 +102,7 @@
             },
 
             onDataChange: function (e) {
+                this._priceStr = this.currencySymbol + this.cartItemData.Price.toFixed(2);
             },
 
             onWish: function (e) {
