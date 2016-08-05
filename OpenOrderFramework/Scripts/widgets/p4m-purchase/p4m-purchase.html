@@ -13,7 +13,7 @@
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <p4m-api id="localApi" is-local="true"></p4m-api>
-            <p4m-card selected-card-id={{selectedCard.Id}} show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
+            <p4m-card id="card" selected-card-id={{selectedCard.Id}} on-cvv="onCvv" show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
             <p class="p4m-error">{{errorMsg}}</p>   
       
@@ -38,16 +38,20 @@
             color: red;
             font-weight: 500;
         }
+        #p4BuyNowButton.disabled {
+            cursor: not-allowed;
+        }
 
 
     </style>
 
     <script>
         var States = {
-            NOT_PURCHASED: 0,
-            PURCHASING: 1,
-            FAILED_PURCHASE: 2,
-            PURCHASED: 3
+            CVV_NEEDED: 0,
+            NOT_PURCHASED: 1,         
+            PURCHASING: 2,
+            FAILED_PURCHASE: 3,
+            PURCHASED: 4
         }
     //
         Polymer({
@@ -64,7 +68,12 @@
                     notify: true
                 },
 
+
                 btnMsgNotPurchased: {
+                    type: String,
+                    value: "Buy now"
+                },
+                btnMsgNeedCvv: {
                     type: String,
                     value: "Buy now"
                 },
@@ -105,13 +114,22 @@
             },
             observers: [
                 "onCartDataChange(cartData.*)",
-                "onStateChange(_state)",
+                "onStateChange(_state)"
                 //"onCardSelected(selectedCard)"
             ],
 
             ready: function ()
             {
                 this.load();
+            },
+
+            onCvv: function(e) {
+                if (!this.$.card.cvv || this.$.card.cvv === "") {
+                    this._state = States.CVV_NEEDED;
+                }
+                else {
+                    this._state = States.NOT_PURCHASED;
+                }
             },
 
             onStateChange: function () {
@@ -133,7 +151,7 @@
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
-                this._state = States.NOT_PURCHASED;
+                this._state = States.CVV_NEEDED;
             },
 
             onPurchase: function (e) {
@@ -201,13 +219,15 @@
             onCardSelected: function (e) {
                 this.updateUi();
             },
-
             updateUi: function () {
-                //Disable if truthy value passed, or not logged in, or no cart
+        
                 if (!this._loggedIn || !this.cartData) {                    
                     this.showAsNotValid();
                 }
-                else if (this._state === States.NOT_PURCHASED) {
+                else if (this._state == States.CVV_NEEDED) {
+                    this.showAsCvvRequired();
+                }
+                else if (this._state == States.NOT_PURCHASED) {
                     this.showAsNotPurchased();
                 }
                 else if (this._state == States.PURCHASING) {
@@ -246,6 +266,16 @@
                 this.$.p4mBuyNowButton.classList.add('disabled');
                 this.setLoadingState(false);
                 this.topClass = "invalid";
+            },
+
+            showAsCvvRequired: function() {
+                this.buttonText = this.btnMsgNeedCvv; //"Enter CVV";
+                this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
+                this.$.p4mBuyNowButton.classList.add('disabled');
+                this.setLoadingState(false);
+
+                this.topClass = "invalid";
+                this._state = States.CVV_NEEDED;
             },
 
             showAsBuying: function () {
