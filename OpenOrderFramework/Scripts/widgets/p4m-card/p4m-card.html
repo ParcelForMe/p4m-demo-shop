@@ -15,7 +15,9 @@
                             <div class="card-name">{{cardData.Name}}</div>
                             <div class="card-description">{{cardData.Description}}</div>
                             <div class="card-issuer">{{cardData.Issuer}}</div>
-                            <input is="iron-input" type="text" id="cvv" bind-value="{{cvv}}" placeholder="Verification code" />
+                            <template is="dom-if" if="{{isSelected}}">
+                                <input is="iron-input" type="text" id="cvv" bind-value="{{cvv}}" placeholder="Verification code" />
+                            </template>
                         </div>                        
                     </div>
                 </div>

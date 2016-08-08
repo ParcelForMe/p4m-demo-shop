@@ -8,12 +8,19 @@
 
     <template>
         <div id="p4mPurchaseContainer" class$="{{_topClass}}">
-            <p>In the box below enter the <a href="#">Check Digits</a> on the reverse of your payment card and click Buy.</p>
+        
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <p4m-api id="localApi" is-local="true"></p4m-api>
-            <p4m-card id="card" selected-card-id={{selectedCard.Id}} on-cvv="onCvv" show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
+            <template is="dom-if" if="{{isSelectedCard()}}">
+                <p>In the box below enter the <a href="#">Check Digits</a> on the reverse of your payment card and click Buy.</p>
+                <p4m-card id="card" selected-card-id={{selectedCard.Id}} on-cvv="onCvv" show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
+            </template>
+            <template is="dom-if" if="{{isNoSelectedCard()}}">
+                <p>Please select a payment method.</p>
+            </template>
+                     
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
             <p class="p4m-error">{{errorMsg}}</p>   
       
@@ -21,7 +28,7 @@
         <p4m-overlay id="overlay" with-backdrop></p4m-overlay>
     </template>
 
-    <style>
+    <style> 
 
         #p4mPurchaseContainer {
             _display: flex;
@@ -123,8 +130,15 @@
                 this.load();
             },
 
+            isNoSelectedCard: function() {
+                return !this.selectedCard;
+            },
+            isSelectedCard: function () {
+                return this.selectedCard;
+            },
+
             onCvv: function(e) {
-                if (!this.$.card.cvv || this.$.card.cvv === "") {
+                if (!this.$$('#card').cvv || this.$$('#card').cvv === "") {
                     this._state = States.CVV_NEEDED;
                 }
                 else {
