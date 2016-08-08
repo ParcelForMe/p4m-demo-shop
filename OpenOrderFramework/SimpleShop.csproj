@@ -542,13 +542,9 @@
     <Content Include="Scripts\Lib\font-awesome\scss\_spinning.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_stacked.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_variables.scss" />
-<<<<<<< HEAD
-    <Content Include="Scripts\Lib\gfs-checkout-widget\css\custom.css" />
-=======
     <Content Include="Scripts\Lib\gfs-checkout-widget\.gitignore" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\css\custom.css" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\gfs-checkout-widget - Copy.html" />
->>>>>>> origin/master
     <Content Include="Scripts\Lib\gfs-checkout-widget\gfs-checkout-widget.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\back_button.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\Collect Plus.png" />
@@ -582,12 +578,15 @@
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick_on.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\x.png" />
-<<<<<<< HEAD
-=======
     <Content Include="Scripts\Lib\gfs-checkout-widget\index.html" />
->>>>>>> origin/master
     <Content Include="Scripts\Lib\gfs-checkout-widget\local-image-widget\local-image.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\map-region-manager\map-region-manager.html" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.gitignore" />
+    <Content Include="Scripts\Lib\gfs-droppoint\gfs-droppoint.html" />
+    <Content Include="Scripts\Lib\gfs-droppoint\images\opensign.png" />
+    <Content Include="Scripts\Lib\gfs-droppoint\images\parking.png" />
+    <Content Include="Scripts\Lib\gfs-droppoint\images\tick.png" />
+    <Content Include="Scripts\Lib\gfs-droppoint\images\tick_on.png" />
     <Content Include="Scripts\Lib\iron-ajax\.bower.json" />
     <Content Include="Scripts\Lib\iron-ajax\.travis.yml" />
     <Content Include="Scripts\Lib\iron-ajax\bower.json" />
@@ -826,9 +825,34 @@
     <Content Include="Scripts\Lib\gfs-checkout-widget\Docs\non day definite.json" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\Example drop point response.json" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\LICENSE" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\config" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\description" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\HEAD" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\applypatch-msg.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\commit-msg.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\post-update.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\pre-applypatch.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\pre-commit.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\pre-push.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\pre-rebase.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\prepare-commit-msg.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\hooks\update.sample" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\index" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\info\exclude" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\logs\HEAD" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\logs\refs\heads\master" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\logs\refs\remotes\origin\HEAD" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\objects\pack\pack-043d9d96986eb7e93206f1f6ed84b248ecb93438.idx" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\objects\pack\pack-043d9d96986eb7e93206f1f6ed84b248ecb93438.pack" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\packed-refs" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\refs\heads\master" />
+    <Content Include="Scripts\Lib\gfs-droppoint\.git\refs\remotes\origin\HEAD" />
+    <Content Include="Scripts\Lib\gfs-droppoint\bower.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Scripts\Lib\gfs-droppoint\.git\objects\info\" />
+    <Folder Include="Scripts\Lib\gfs-droppoint\.git\refs\tags\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
