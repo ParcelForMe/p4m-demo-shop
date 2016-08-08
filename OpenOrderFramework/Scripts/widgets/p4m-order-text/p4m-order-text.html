@@ -32,10 +32,12 @@
                     type: Object
                 },
                 addressTypeStr: {
-                    type: String
+                    type: String,
+                    value: "address"
                 },
                 deliveryAddressStr: {
-                    type: String
+                    type: String,
+                    value: "Please select an address"
                 },
                 deliveryDateStr: {
                     type: String
@@ -61,6 +63,9 @@
                     this.deliveryAddressStr = this._addressToStr(deliveryAddr);
                     this.addressTypeStr = this._addressType(deliveryAddr);
                     this.deliveryDateStr = this._expectedDeliveryDateStr(this.cartData.ExpDeliveryDate);
+                }
+                else {
+
                 }
             },
 

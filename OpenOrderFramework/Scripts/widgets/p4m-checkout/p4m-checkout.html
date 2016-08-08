@@ -236,12 +236,18 @@
 
             onRemoteCartData: function(data) {
                 console.log("Received remote cart data", data);
-                if (!data.Success)
+                if (!data.Success) {
                     console.log(data.Error);
-                else if (!data.Cart || !data.Cart.Items || data.Cart.Items.length === 0)
-                    window.location.reload(true);
-                else
                     this.onCartData(data);
+                } 
+                   
+                else if (!data.Cart || !data.Cart.Items || data.Cart.Items.length === 0) {
+                    window.location.reload(true);
+                }                  
+                else {
+                    this.onCartData(data);
+                }
+                    
             },
 
             onCartData: function (data) {
@@ -290,7 +296,8 @@
             },
 
             selectCollectPoint: function (collectPointId, collectPointAddress, callback) {
-                //Make API call to add invisible address 
+                //Make API call to add invisible address
+
                 var postData =
                 {
                     "Address": {
