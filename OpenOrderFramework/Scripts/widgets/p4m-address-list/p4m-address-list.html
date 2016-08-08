@@ -103,7 +103,7 @@
 
             onCartAddressDataChange: function (e) {
                 var i = 0;
-                console.log("Changed delivery or billing address");
+                //console.log("Changed delivery or billing address");
                 if (this.addressListData) {
                     this.addressListData.forEach((function (item) {
                         this.notifyPath('addressListData.#' + i + "._update", Math.random());
@@ -115,11 +115,11 @@
             },
 
             filterNewOnly: function (e) {
-                return (typeof(e.Label) === "undefined");
+                return (typeof(e.Label) === "undefined" && e.AddressType == "Address");
             },
 
             filterOldOnly: function (e) {
-                return (typeof(e.Label) === "string");
+                return (typeof (e.Label) === "string" && e.AddressType == "Address");
             }
 
         });
