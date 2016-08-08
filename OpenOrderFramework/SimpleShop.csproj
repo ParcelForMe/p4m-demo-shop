@@ -542,13 +542,10 @@
     <Content Include="Scripts\Lib\font-awesome\scss\_spinning.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_stacked.scss" />
     <Content Include="Scripts\Lib\font-awesome\scss\_variables.scss" />
-<<<<<<< HEAD
     <Content Include="Scripts\Lib\gfs-checkout-widget\css\custom.css" />
-=======
     <Content Include="Scripts\Lib\gfs-checkout-widget\.gitignore" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\css\custom.css" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\gfs-checkout-widget - Copy.html" />
->>>>>>> origin/master
     <Content Include="Scripts\Lib\gfs-checkout-widget\gfs-checkout-widget.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\back_button.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\Collect Plus.png" />
@@ -582,10 +579,7 @@
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\tick_on.png" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\images\x.png" />
-<<<<<<< HEAD
-=======
     <Content Include="Scripts\Lib\gfs-checkout-widget\index.html" />
->>>>>>> origin/master
     <Content Include="Scripts\Lib\gfs-checkout-widget\local-image-widget\local-image.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\Lib\iron-ajax\.bower.json" />
