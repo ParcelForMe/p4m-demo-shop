@@ -41,7 +41,7 @@
                             <p4m-delivery></p4m-delivery>
                         </iron-page>
                         <iron-page>
-                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod"></p4m-card-list>
+                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
                         </iron-page>
                         <iron-page>
                             <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
@@ -357,6 +357,10 @@
                     this.updateP4mCart();
                     this.$.localApi.call('removeDiscountCode', {"discountCode": code}, null, null);
                 }
+            },
+
+            onGotNewCard: function(){
+                this.$.api.call('consumer', null, null, this.onConsumerData.bind(this));
             },
 
             onSelectAddress: function (e) {
