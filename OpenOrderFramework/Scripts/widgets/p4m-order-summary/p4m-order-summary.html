@@ -104,6 +104,10 @@
                     type: String,
                     value: '£'
                 },
+                useSpinner: {
+                    type: Object,
+                    value: false
+                },
                 _cartItemCount: {
                     type: Number,
                     notify: true,
@@ -193,15 +197,21 @@
             },
          
             showAsLoaded: function () {
-                this.$.spinner.active = false;
-                this.$.spinner.classList.add('hidden');
-                this.$.p4mContainer.classList.remove('loading');
+                if (this.useSpinner) {
+                    this.$.spinner.active = false;
+                    this.$.spinner.classList.add('hidden');
+                    this.$.p4mContainer.classList.remove('loading');
+                }
+
             },
 
             showAsLoading: function () {
-                this.$.spinner.active = true;
-                this.$.spinner.classList.remove('hidden');
-                this.$.p4mContainer.classList.add('loading');
+                if (this.useSpinner) {
+                    this.$.spinner.active = true;
+                    this.$.spinner.classList.remove('hidden');
+                    this.$.p4mContainer.classList.add('loading');
+                }
+
             }
 
         });

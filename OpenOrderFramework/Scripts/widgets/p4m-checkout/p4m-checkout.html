@@ -280,7 +280,7 @@
                 this.cartData.ServiceName = data.service;
                 this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
                 if (data.collectionPoint) {
-                    this.selectCollectPoint(data.deliveryAddress, function () {
+                    this.selectCollectPoint(data.Id, data.deliveryAddress, function () {
                         self.updateP4mCart();
                     });
                 }
@@ -289,7 +289,7 @@
                 }
             },
 
-            selectCollectPoint: function (collectPointAddress, callback) {
+            selectCollectPoint: function (collectPointId, collectPointAddress, callback) {
                 //Make API call to add invisible address 
                 var postData =
                 {
