@@ -279,9 +279,9 @@
                 this.cartData.ShippingAmt = data.shipping;
                 this.cartData.ServiceName = data.service;
                 this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
-                if (data.collectPoint) {
-                    this.selectCollectPoint(data.collectPoint, function () {
-                        this.updateP4mCart();
+                if (data.collectionPoint) {
+                    this.selectCollectPoint(data.deliveryAddress, function () {
+                        self.updateP4mCart();
                     });
                 }
                 else {
@@ -289,16 +289,16 @@
                 }
             },
 
-            selectCollectPoint: function (collectPointData, callback) {
+            selectCollectPoint: function (collectPointAddress, callback) {
                 //Make API call to add invisible address 
                 var postData =
                 {
                     "Address": {
                         "AddressType": "Collect",
-                        "Street1": collectPointData.geoLocation.addressLines[0],
-                        "Street2": collectPointData.geoLocation.addressLines[1],
-                        "City": collectPointData.geoLocation.town,
-                        "PostCode": collectPointData.geoLocation.postCode
+                        "Street1": collectPointAddress.addressLines[0],
+                        "Street2": collectPointAddress.addressLines[1]||"",
+                        "City": collectPointAddress.town,
+                        "PostCode": collectPointAddress.postCode
                     },
                     "isPrefDeliveryAddr": false,
                     "isBillingAddr": false
@@ -307,6 +307,7 @@
                 this.$.api.call("postAddress", null, postData, function (result) {
                     console.log("Added address. Result:", result);
                     self.cartData.AddressId = result.Address.Id;
+                    self.consumerData.Addresses.push(result.Address);
                     //self.cartData.ServiceName = "Collection point";
                     callback(result);
                 });

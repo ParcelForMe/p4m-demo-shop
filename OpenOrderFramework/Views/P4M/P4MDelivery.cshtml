@@ -24,9 +24,16 @@
         console.log('selectedServiceChanged', e.detail);
         sendP4mData(e.detail);
     });
-    window.addEventListener('droppoint-changed', function (e) {
-        console.log('droppoint-changed', e.detail);
-    });
+
+    function addressLinesToStr(lines) {
+        return lines.reduce((result, currentValue) => {
+            if (result) {
+                result += ", ";
+            }
+            result += currentValue;
+            return result;
+        });
+    }
 
 
     function sendP4mData(data) {
