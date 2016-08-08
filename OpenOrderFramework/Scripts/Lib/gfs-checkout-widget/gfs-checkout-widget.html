@@ -1365,7 +1365,7 @@
                         var homeMarkerConfig = {
                             position: results[0].geometry.location,
                             map: self._map,
-                            animation: google.maps.Animation.DROP,
+                            //animation: google.maps.Animation.DROP,
                             title: 'Home',
                             html: 'Home',
                             icon: self._getHomeIcon()
@@ -1402,7 +1402,7 @@
 						var markerConfig = {
 							position: new google.maps.LatLng(pointItem.geoLocation.coordinates.latitude, pointItem.geoLocation.coordinates.longitude),
 							map: self._map,
-							animation: google.maps.Animation.DROP,
+							//animation: google.maps.Animation.DROP,
 							title: pointItem.droppointDescription,
 							customData: pointItem,
 							icon: self._droppointIcon(getCountryCode) + '/' + pointItem.providerName + '.png',
@@ -1665,7 +1665,7 @@
                     if (this.selectedMarkerIcon) {
                         this._currentMarker.setIcon(this._getSelectedMarkerIcon());
                     } else {
-                        this._currentMarker.setAnimation(google.maps.Animation.BOUNCE);
+                        //this._currentMarker.setAnimation(google.maps.Animation.BOUNCE);
                     }
 
                     this.$.dropPointRadio.setAttribute('checked', 'true');
