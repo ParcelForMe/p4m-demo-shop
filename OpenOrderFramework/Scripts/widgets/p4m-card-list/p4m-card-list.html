@@ -10,7 +10,7 @@
             <p><a id="addNewCardLink" href="#" on-tap="addNewCard">Add a new card</a></p>
 
             <iron-collapse id="newCardCollapse">
-                <p4m-new-card id="newCard" consumer-data="{{consumerData}}"></p4m-new-card>
+                <p4m-new-card id="newCard" consumer-data="{{consumerData}}" on-gotnewcard="onGotNewCard"></p4m-new-card>
             </iron-collapse>
             
             <template is="dom-repeat" items="{{consumerData.PaymentMethods}}"><!-- filter="_cardsOnly">-->
@@ -72,6 +72,10 @@
                     lbl.innerText = "Add a new card";
                 }
                 ctrl.toggle();
+            },
+
+            onGotNewCard: function () {
+                this.addNewCard();
             },
 
             onConsumerDataChange: function () {
