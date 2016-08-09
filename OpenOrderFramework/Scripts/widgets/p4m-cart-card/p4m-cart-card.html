@@ -23,12 +23,12 @@
 
             <div id="wishlist" class="card-panel hidden">
                 <!-- show a heart icon for wish list -->
-                <img src="http://icons.veryicon.com/32/Holiday/Love%20Is%20In%20The%20Web%20Valentine/heart.png" />
+                <iron-icon id="wishIcon" class="heart" icon="icons:favorite"></iron-icon>
             </div>
 
         </div>
         <div id="actions">
-            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-movingtowish="onMovingToWish" on-unwish="onUnwish"></p4m-wish>
+            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-movingtowish="onMovingToWish" on-wish="onWish"></p4m-wish>
         </div>
         
     </template>
@@ -76,6 +76,57 @@
             margin-left: 4px;
             margin-right:4px;
         }
+        .heart {
+            animation-name: go-red;
+            animation-duration: 0.5s;
+            color: red;
+            height: 60px;
+            width: 60px;
+            margin-top: 0px;
+        }
+
+        .heart.explode {
+            animation-name: go-explode;
+            animation-duration: 0.5s;
+            color: white;
+            height: 100px;
+            width: 100px;
+            margin-top: -40px;
+        }
+
+        @keyframes go-red {
+            from {
+                color: white;
+                height: 50px;
+                width: 50px;
+                margin-top: 10px;
+            }
+
+            to {
+                color: red;
+                height: 60px;
+                width: 60px;
+                margin-top: 0px;
+            }
+        }
+
+        @keyframes go-explode {
+            from {
+                color: red;
+                height: 60px;
+                width: 60px;
+                margin-top: 0px;
+            }
+
+            to {
+                color: white;
+                height: 100px;
+                width: 100px;
+                margin-top: -40px;
+            }
+        }
+
+
     </style>
 
     <script>
@@ -116,7 +167,14 @@
                 this.remove();
                 this.$.quantity.classList.add('hidden');
                 this.$.wishlist.classList.remove('hidden');
+            },
+
+            onWish: function (e) {
+                this.$.wishIcon.classList.add('explode');
+
             }
+
+
 
         });
     </script>
