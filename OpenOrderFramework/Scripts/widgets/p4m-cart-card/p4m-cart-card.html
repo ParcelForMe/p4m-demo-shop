@@ -77,9 +77,9 @@
             margin-right:4px;
         }
         .heart {
-            animation-name: go-red;
-            animation-duration: 0.5s;
-            color: red;
+            animation-name: go-green;
+            animation-duration: 0.25s;
+            color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
             height: 60px;
             width: 60px;
             margin-top: 0px;
@@ -89,12 +89,9 @@
             animation-name: go-explode;
             animation-duration: 0.5s;
             color: white;
-            height: 100px;
-            width: 100px;
-            margin-top: -40px;
         }
 
-        @keyframes go-red {
+        @keyframes go-green {
             from {
                 color: white;
                 height: 50px;
@@ -103,7 +100,7 @@
             }
 
             to {
-                color: red;
+                color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
                 height: 60px;
                 width: 60px;
                 margin-top: 0px;
@@ -112,7 +109,7 @@
 
         @keyframes go-explode {
             from {
-                color: red;
+                color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
                 height: 60px;
                 width: 60px;
                 margin-top: 0px;
