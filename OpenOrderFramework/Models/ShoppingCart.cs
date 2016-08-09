@@ -34,16 +34,14 @@ namespace OpenOrderFramework.Models
             return cart;
         }
 
-        public void CalcTax(Discount discount = null, decimal taxPercent = 20M)
+        public void CalcTax(decimal taxPercent = 20M)
         {
             var itemsTotal = Items.Sum(d => d.Count * d.Item.Price);
-            if (discount != null)
-                this.DiscountCode = discount.Code;
-            if (this.DiscountCode != null)
+            this.Discount = 0;
+            foreach(var discount in this.Discounts)
             {
-                discount = storeDB.Discounts.Where(d => d.Code == this.DiscountCode).FirstOrDefault();
-                if (discount != null)
-                    this.Discount = Math.Round((itemsTotal + this.Shipping) * (discount.Percentage / 100), 2);
+                discount.Amount = Math.Round((itemsTotal + this.Shipping) * (discount.Discount.Percentage / 100), 2);
+                this.Discount += discount.Amount;
             }
             this.Tax = Math.Round((itemsTotal + this.Shipping - this.Discount) * (taxPercent / 100), 2);
             this.Total = itemsTotal + this.Shipping + this.Tax - this.Discount;
@@ -143,6 +141,20 @@ namespace OpenOrderFramework.Models
             var result = storeDB.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList();
             foreach (var item in result)
                 item.Item = storeDB.Items.Find(item.ItemId);
+            return result;
+        }
+
+        [NotMapped]
+        public List<CartDiscount> Discounts
+        {
+            get { return GetCartDiscounts(); }
+        }
+
+        public List<CartDiscount> GetCartDiscounts()
+        {
+            var result = storeDB.CartDiscounts.Where(disc => disc.CartId == ShoppingCartId).ToList();
+            foreach (var disc in result)
+                disc.Discount = storeDB.Discounts.Where(d => d.Code == disc.DiscountCode).FirstOrDefault();
             return result;
         }
 

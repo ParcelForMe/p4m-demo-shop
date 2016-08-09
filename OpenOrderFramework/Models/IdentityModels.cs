@@ -28,16 +28,19 @@ namespace OpenOrderFramework.Models {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser> {
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false) {
+            Database.SetInitializer<ApplicationDbContext>(null);
         }
 
 
         public DbSet<Item> Items { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartDiscount> CartDiscounts { get; set; }
         public DbSet<Catagorie> Catagories { get; set; }
         public DbSet<Discount> Discounts { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<OrderDiscount> OrderDiscounts { get; set; }
 
         static ApplicationDbContext() {
             // Set the database intializer which is run once during application start

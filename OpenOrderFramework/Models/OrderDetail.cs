@@ -15,4 +15,13 @@ namespace OpenOrderFramework.Models
         public virtual Item Item { get; set; }
         public virtual Order Order { get; set; }
     }
+
+    public class OrderDiscount
+    {
+        public int OrderDiscountId { get; set; }
+        public int OrderId { get; set; }
+        public int DiscountCode { get; set; }
+        public string Description { get; set; }
+        public decimal Amount { get; set; }
+    }
 }
