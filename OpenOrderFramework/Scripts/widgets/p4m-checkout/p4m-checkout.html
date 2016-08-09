@@ -44,7 +44,7 @@
                             <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
                         </iron-page>
                         <iron-page>
-                            <p4m-address-list address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
+                            <p4m-address-list id="addressList" address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
                 </div>
@@ -372,27 +372,35 @@
 
             onSelectAddress: function (e) {
                 console.log("Selected address", e.detail);
-                if (e.detail.isBilling)
-                    this.set('cartData.BillingAddressId', e.detail.id);
-                else if (e.detail.isDelivery)
-                    this.set('cartData.AddressId', e.detail.id);
-                this.updateP4mCart();
+                if (e.detail) {
+                    if (e.detail.isBilling) {
+                        this.set('cartData.BillingAddressId', e.detail.id);
+                    }                       
+                    else if (e.detail.isDelivery) {
+                        this.set('cartData.AddressId', e.detail.id);
+                    }                    
+                    this.updateP4mCart();
+                }
             },
 
             onAddAddress: function (addressElement) {
-                onUpdateAddress(addressElement);
+                this.onUpdateAddress(addressElement);
             },
 
             onUpdateAddress: function (addressElement) {
                 // here we're adding or updating an address only, not setting a default value on the consumer at this stage
+                //zzzzzzzz
+                this.$.addressList.showAsLoading();
                 var postData =
                 {
-                    "Address": addressElement.detail.addressData,
+                    "Address": addressElement.detail.addressData
                     //"isPrefDeliveryAddr": addressElement.detail.isDelivery,
                     //"isBillingAddr": addressElement.detail.isBilling
                 };
+                var self = this;
                 this.$.api.call("postAddress", null, postData, function (result) {
                     //addressElement.detail.mode = "view";
+                    self.$.addressList.showAsLoaded();
                 });
             },
         });
