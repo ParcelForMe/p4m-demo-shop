@@ -321,8 +321,9 @@ namespace OpenOrderFramework.Controllers
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;
 #pragma warning disable 4014
                     // we've waited enough - don't wait for the order to be saved as well!
-                    CreateLocalOrderAsync(purchaseResult);
+                    var orderId = await CreateLocalOrderAsync(purchaseResult);
 #pragma warning restore 4014
+                    result.RedirectUrl = "http://localhost:3000/Checkout/Complete?id=" + orderId; //("Complete", "Checkout", new { id = orderId });
                 }
                 else
                 {
