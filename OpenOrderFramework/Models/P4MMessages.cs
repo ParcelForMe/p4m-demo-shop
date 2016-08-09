@@ -53,6 +53,7 @@ namespace OpenOrderFramework.Models
         public P4MCart Cart { get; set; }
         public P4MAddress DeliverTo { get; set; }
         public P4MAddress BillTo { get; set; }
+        public string RedirectUrl { get; set; }
         // 3D Secure fields
         public string ACSUrl { get; set; }
         public string PaReq { get; set; }
