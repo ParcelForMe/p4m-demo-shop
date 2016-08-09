@@ -8,17 +8,17 @@
         <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
         <div id="content">
             <template is="dom-if" if="{{isWish}}">
-                <a href="#"><div id="p4mWishBtn" class="" on-click="toggleWish">Remove from wish list</div></a>
+                <div id="p4mWishBtn" class="">Moving to wish list...</div>
             </template>
             <template is="dom-if" if="{{_notWish}}">
-                <a href="#"><div id="p4mWishBtn" class="" on-click="toggleWish">Move to wish list</div></a>
+                <a href="#"><div id="p4mWishBtn" class="" on-click="toggleWish">Move to my <span class="p4m-label">Parcel for Me</span> wish list</div></a>
             </template>
          </div>
 
     </template>
 
     <style>
-
+        .p4m-label {color:darkgreen}
     </style>
 
     <script>
