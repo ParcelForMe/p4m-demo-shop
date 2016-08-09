@@ -21,9 +21,14 @@
                 <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]" type="text" id="qty" bind-value="{{cartItemData.Qty}}" />
             </div>
 
+            <div id="wishlist" class="card-panel hidden">
+                <!-- show a heart icon for wish list -->
+                <img src="http://icons.veryicon.com/32/Holiday/Love%20Is%20In%20The%20Web%20Valentine/heart.png" />
+            </div>
+
         </div>
         <div id="actions">
-            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-wish="onWish" on-unwish="onUnwish"></p4m-wish>
+            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-movingtowish="onMovingToWish" on-unwish="onUnwish"></p4m-wish>
         </div>
         
     </template>
@@ -105,11 +110,12 @@
                 this._priceStr = this.currencySymbol + this.cartItemData.Price.toFixed(2);
             },
 
-            onWish: function (e) {
+            onMovingToWish: function (e) {
                 //Trigger removal from shopping cart
                 console.log("Received wish", e);          
                 this.remove();
-               
+                this.$.quantity.classList.add('hidden');
+                this.$.wishlist.classList.remove('hidden');
             }
 
         });

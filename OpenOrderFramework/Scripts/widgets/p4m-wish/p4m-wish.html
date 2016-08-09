@@ -59,10 +59,11 @@
             sync: function () {
                 if (this.isWish) {
                     this.itemData.Currency = this.currency;
+                    this.fire("movingtowish", this.itemData);
                     this.$.api.call('postWish', {}, this.itemData, () => this.broadcastState());
                 }
                 else {
-                    this.$.api.call('deleteWish', { "sku": this.itemData.sku }, null, () => this.broadcastState());
+                    //this.$.api.call('deleteWish', { "sku": this.itemData.sku }, null, () => this.broadcastState());
                 }
             },
             broadcastState: function () {
