@@ -248,6 +248,7 @@
                 this.hideDlgSpinner();
                 this._restoreCartStatusMessage = "Restored cart";
                 this.$.lastCartDlg.close();
+                window.location.reload(true);
             },
 
             hideDlgSpinner: function () {
