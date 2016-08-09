@@ -1,6 +1,7 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../p4m-address/p4m-address.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 
 <dom-module id="p4m-address-list">
 
@@ -15,6 +16,7 @@
             <template is="dom-repeat" items="{{addressListData}}" filter="filterOldOnly">
                 <p4m-address address-data="{{item}}" on-canceledit="cancelEdit" cart-data="{{cartData}}" mode="view" on-save="onUpdateAddress" on-select="onSelectAddress"></p4m-address>
             </template>
+            <paper-spinner id="spinner"></paper-spinner>
 
         </div>
 
@@ -24,6 +26,20 @@
         #container {
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        #spinner {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: 65px;
+            left: 40%;
+            margin: auto;
+        }
+
+        .hidden {
+            display: none;
         }
 
     </style>
@@ -115,11 +131,23 @@
             },
 
             filterNewOnly: function (e) {
-                return (typeof(e.Label) === "undefined" && e.AddressType == "Address");
+                return (typeof(e.Label) === "undefined");
             },
 
             filterOldOnly: function (e) {
                 return (typeof (e.Label) === "string" && e.AddressType == "Address");
+            },
+
+            showAsLoaded: function () {
+                this.$.spinner.active = false;
+                this.$.spinner.classList.add('hidden');
+                this.$.container.classList.remove('loading');
+            },
+
+            showAsLoading: function () {
+                this.$.spinner.active = true;
+                this.$.spinner.classList.remove('hidden');
+                this.$.container.classList.add('loading');
             }
 
         });

@@ -31,10 +31,10 @@
 
                         <div class="address-actions">
                             <div id="deliveryToggle" class="toggle-button">
-                                <a href="#" on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</a>
+                                <div on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</div>
                             </div>
                             <div id="billingToggle" class="toggle-button">
-                                <a href="#" on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</a>
+                                <div on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</div>
                             </div>
                             <div>
                                 <template is="dom-if" if="{{isBilling}}">
@@ -117,15 +117,16 @@
             -webkit-border-radius: 25px;
             -moz-border-radius: 25px;
             background-color: #D0D0D0;
+            cursor: grab;
         }
 
         .toggle-button.chosen {
             background-color: rgba(13, 165, 83, 0.8); /*peli icon colour*/
-       
         }
 
         .toggle-button iron-icon {
             margin: 13px;
+
         }
 
         .toggle-button.chosen iron-icon {
