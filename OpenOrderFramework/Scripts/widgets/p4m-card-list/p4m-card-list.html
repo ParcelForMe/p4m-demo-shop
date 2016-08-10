@@ -13,8 +13,8 @@
                 <p4m-new-card id="newCard" consumer-data="{{consumerData}}" on-gotnewcard="onGotNewCard"></p4m-new-card>
             </iron-collapse>
             
-            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}"><!-- filter="_cardsOnly">-->
-                <p4m-card card-data="{{item}}" on-selected="onCardSelected" selected-card-id="{{selectedCardId}}"></p4m-card>
+            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}">
+                <p4m-card card-data="{{item}}" on-selected="onCardSelected" show-cvv="false" selected-card-id="{{selectedCardId}}"></p4m-card>
             </template>
         </div>
 

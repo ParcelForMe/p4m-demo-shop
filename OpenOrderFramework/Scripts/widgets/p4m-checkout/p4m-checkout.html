@@ -177,12 +177,10 @@
             },
 
             getLocalCart: function () {
-                console.log("Get local cart");
                 this.$.localApi.call('getP4MCart',null, null, this.onCartData.bind(this) );
             },
 
             getP4mCart: function () {
-                console.log("Get remote cart");
                 this.$.api.call('currentCart', { sessionId: this.sessionId }, null, this.onRemoteCartData.bind(this));
             },
 
@@ -216,14 +214,11 @@
             },
 
             onConsumerDataChange: function(newVal, oldVal) {
-                console.log("Consumer data changed to", newVal);
             },
 
             updateP4mCart: function () {
-                console.log("Updating remote cart");
                 this.$.orderSummary.showAsLoading();
                 this.$.p4mPurchase.setLoadingState(true);
-
 
                 //Send changes to P4M
                 var cartMessage =
@@ -236,9 +231,8 @@
             },
 
             onRemoteCartData: function(data) {
-                console.log("Received remote cart data", data);
                 if (!data.Success) {
-                    console.log(data.Error);
+                    console.error(data.Error);
                     this.onCartData(data);
                 } 
                    
@@ -252,9 +246,9 @@
             },
 
             onCartData: function (data) {
-                console.log("Received new cart data");
                 this.$.orderSummary.showAsLoaded();
                 this.$.p4mPurchase.setLoadingState(false);
+                this.$.p4mPurchase.updateUi();
                 if (data.Success) {
                     this.cartData = data.Cart;
                     if (this.cartData && this.cartData.Id === null) {
@@ -313,7 +307,6 @@
                 };
                 var self = this;
                 this.$.api.call("postAddress", null, postData, function (result) {
-                    console.log("Added address. Result:", result);
                     self.cartData.AddressId = result.Address.Id;
                     self.consumerData.Addresses.push(result.Address);
                     //self.cartData.ServiceName = "Collection point";
@@ -322,7 +315,6 @@
             },
 
             onSelectPaymentMethod: function (e) {
-                console.log("Selected payment method", e.detail);
                 var updCart = this.selectedCard !== undefined && this.selectedCard !== null;
                 this.set('cartData.PayMethodId', e.detail.Id);
                 this.selectedCard = e.detail;
@@ -338,7 +330,6 @@
             },
 
             onDiscount: function (e) {
-                console.log('discount received');
                 this.set('cartData.Tax', Number(e.detail.Tax));
                 var cartDiscount = this.cartData.Discounts.find((element, index, arr) => element.Code === e.detail.Code);
                 if (cartDiscount) {
@@ -365,7 +356,6 @@
             },
 
             onDiscountDelete: function (e, code) {
-                console.log('discount delete received');
 
                 var item = this.cartData.Discounts.find((element, index, arr) => element.Code === code);
                 if (item) {
@@ -381,7 +371,6 @@
             },
 
             onSelectAddress: function (e) {
-                console.log("Selected address", e.detail);
                 if (e.detail) {
                     if (e.detail.isBilling) {
                         this.set('cartData.BillingAddressId', e.detail.id);

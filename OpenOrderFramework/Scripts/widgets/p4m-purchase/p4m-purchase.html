@@ -135,8 +135,12 @@
                 return !(this.selectedCard === null);
             },
 
-            onCvv: function(e) {
-                if (!this.$$('#card').cvv || this.$$('#card').cvv === "") {
+            onCvv: function (e) {
+                var card = this.$$('#card');
+                if (!card) {
+                    this._state = States.CVV_NEEDED;
+                }
+                else if (!card.cvv || card.cvv === "") {
                     this._state = States.CVV_NEEDED;
                 }
                 else {
@@ -260,6 +264,7 @@
                 }
                 else {
                     this.hideOverlay();
+
                     this._topClass = "active";
                 }
             },
@@ -284,10 +289,13 @@
                 this.buttonText = this.btnMsgNeedCvv; //"Enter CVV";
                 this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.add('disabled');
-                this.setLoadingState(false);
-
+                this.setLoadingState(false);             
                 this.topClass = "invalid";
                 this._state = States.CVV_NEEDED;
+                var card = this.$$('#card');
+                if (card) {
+                    card.updateUi();
+                }
             },
 
             showAsBuying: function () {
