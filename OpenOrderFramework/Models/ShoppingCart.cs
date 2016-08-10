@@ -40,7 +40,7 @@ namespace OpenOrderFramework.Models
             this.Discount = 0;
             foreach(var discount in this.Discounts)
             {
-                discount.Amount = Math.Round((itemsTotal + this.Shipping) * (discount.Discount.Percentage / 100), 2);
+                discount.Amount = Math.Round(itemsTotal * (discount.Discount.Percentage / 100), 2);
                 this.Discount += discount.Amount;
             }
             this.Tax = Math.Round((itemsTotal + this.Shipping - this.Discount) * (taxPercent / 100), 2);

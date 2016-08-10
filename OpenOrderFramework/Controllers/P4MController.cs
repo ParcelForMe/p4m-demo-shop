@@ -208,6 +208,24 @@ namespace OpenOrderFramework.Controllers
             return View("P4MDelivery");
         }
 
+        [HttpPost]
+        [Route("p4m/shippingDetails")]
+        public JsonResult ShippingDetails(ShippingDetails details)
+        {
+            var result = new P4MBaseMessage();
+            try
+            {
+                var localCart = ShoppingCart.GetCart(this.HttpContext);
+                localCart.Shipping = details.Amount;
+                storeDB.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet); 
+        }
+
         [HttpGet]
         [Route("p4m/applyDiscountCode/{discountCode}")]
         public JsonResult ApplyDiscountCode(string discountCode)
@@ -303,9 +321,11 @@ namespace OpenOrderFramework.Controllers
             try
             {
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
+                cartTotal = Math.Round(cartTotal, 2);
                 var localCart = ShoppingCart.GetCart(HttpContext);
+                localCart.CalcTax();
                 //decimal cartTot = Convert.ToDecimal(cartTotal);
-                if (false && cartTotal != localCart.Total)
+                if (cartTotal != localCart.Total)
                 {
                     localCart.EmptyCart();
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;

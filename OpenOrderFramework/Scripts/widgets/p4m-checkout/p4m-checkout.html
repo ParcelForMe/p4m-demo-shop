@@ -277,6 +277,8 @@
 
             updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
                 var self = this;
+                var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDateEnd };
+                this.$.localApi.call('shippingDetails', null, shippingDetails, null);
                 this.cartData.ShippingAmt = data.shipping;
                 this.cartData.ServiceName = data.service;
                 this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;

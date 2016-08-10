@@ -149,8 +149,10 @@ namespace OpenOrderFramework.Models
         public decimal Qty { get; set; }
     }
 
-    public class P4MRedirect
+    public class ShippingDetails
     {
-        public string RedirectUrl { get; set; }
+        public string Service { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime DueDate { get; set; }
     }
 }
