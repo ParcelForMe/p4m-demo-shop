@@ -305,8 +305,9 @@
                                 intermediateCallback(JSON.parse(httpRequest.responseText));
                             }
                             catch (e) {
-                                console.error("JSON response error: " + httpRequest.responseText);
-                                intermediateCallback(JSON.parse(httpRequest.responseText));
+                                console.error(e);
+                                //console.error("JSON response error: " + httpRequest.responseText);
+                                //intermediateCallback(JSON.parse(httpRequest.responseText));
                             }
                         }
                     });
