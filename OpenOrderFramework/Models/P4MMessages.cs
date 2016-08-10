@@ -40,9 +40,10 @@ namespace OpenOrderFramework.Models
 
     public class CartUpdateMessage : P4MBaseMessage
     {
+        public decimal Discount { get; set; }
         public decimal Tax { get; set; }
         public decimal Shipping { get; set; }
-        public decimal Discount { get; set; }
+        public List<P4MDiscount> Discounts { get; set; }
     }
 
     public class PurchaseMessage : P4MBaseMessage

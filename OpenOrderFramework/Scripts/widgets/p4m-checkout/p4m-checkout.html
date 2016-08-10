@@ -198,6 +198,7 @@
                         self.$.cart.clearChanges(); 
                         self.cartData.Tax = newCartTotals.Tax;
                         self.cartData.ShippingAmt = newCartTotals.Shipping;
+                        self.cartData.Discounts = newCartTotals.Discounts;
                         self.updateP4mCart();
                     });
                 }
@@ -330,9 +331,18 @@
 
             onDiscount: function (e) {
                 this.set('cartData.Tax', Number(e.detail.Tax));
-
-                if (this.cartData.Discounts.find((element, index, arr)=> element.Code === e.detail.Code)) {
+                var cartDiscount = this.cartData.Discounts.find((element, index, arr) => element.Code === e.detail.Code);
+                if (cartDiscount) {
                     console.log("Added existing discount")
+                    if (cartDiscount.Description !== e.detail.Description ||
+                        cartDiscount.Amount !== e.detail.Amount ||
+                        cartDiscount.Code !== e.detail.Code)
+                    {
+                        cartDiscount.Description = e.detail.Description;
+                        cartDiscount.Amount = e.detail.Amount;
+                        cartDiscount.Code = e.detail.Code;
+                        this.updateP4mCart();
+                    }
                 }
                 else {
                     this.push('cartData.Discounts',

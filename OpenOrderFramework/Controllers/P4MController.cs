@@ -95,11 +95,10 @@ namespace OpenOrderFramework.Controllers
                     LinkToImage = item.ItemPictureUrl,
                 });
             }
-            if (localCart.DiscountCode != null)
+            if (localCart.Discounts != null && localCart.Discounts.Count > 0)
             {
-                var discount = storeDB.Discounts.FirstOrDefault();
-                var discDesc = discount == null ? "Discount description" : discount.Description;
-                p4mCart.Discounts = new List<P4MDiscount> { new P4MDiscount { Code = localCart.DiscountCode, Description = discDesc, Amount = (double)localCart.Discount } };
+                foreach(var disc in localCart.Discounts)
+                    p4mCart.Discounts = new List<P4MDiscount> { new P4MDiscount { Code = disc.DiscountCode, Description = disc.Description, Amount = (double)disc.Amount } };
             }
             return p4mCart;
         }
@@ -160,11 +159,14 @@ namespace OpenOrderFramework.Controllers
             var localCart = ShoppingCart.GetCart(HttpContext);
             localCart.Shipping = (decimal)p4mCart.ShippingAmt;
             localCart.Tax = (decimal)p4mCart.Tax;
-            var discount = p4mCart.Discounts.FirstOrDefault();
-            if (discount != null)
+            foreach(var discount in p4mCart.Discounts)
             {
-                localCart.DiscountCode = discount.Code;
-                localCart.Discount = (decimal)discount.Amount;
+                localCart.Discounts.Add(new CartDiscount
+                {
+                    DiscountCode = discount.Code,
+                    Description = discount.Description,
+                    Amount = (decimal)discount.Amount
+                });
             }
             foreach (var item in p4mCart.Items)
             {
@@ -221,7 +223,14 @@ namespace OpenOrderFramework.Controllers
                 {
                     result.Description = discount.Description;
                     var localCart = ShoppingCart.GetCart(this.HttpContext);
-                    localCart.CalcTax(discount);
+                    var disc = localCart.Discounts.Where(d => d.DiscountCode == discount.Code).FirstOrDefault();
+                    if (disc == null)
+                    {
+                        disc = new CartDiscount { DiscountCode = discount.Code, CartId = localCart.ShoppingCartId, Description = discount.Description };
+                        storeDB.CartDiscounts.Add(disc);
+                        storeDB.SaveChanges();
+                    }
+                    localCart.CalcTax();
                     result.Code = discountCode;
                     result.Amount = localCart.Discount;
                     result.Tax = localCart.Tax;
@@ -238,16 +247,15 @@ namespace OpenOrderFramework.Controllers
         [Route("p4m/removeDiscountCode/{discountCode}")]
         public JsonResult RemoveDiscountCode(string discountCode)
         {
-            // because SimpleShop only supports one discount we just remove whatever is there
             var result = new DiscountMessage();
             try
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
-                localCart.DiscountCode = null;
-                localCart.Discount = 0;
+                var disc = storeDB.CartDiscounts.Where(d => d.DiscountCode == discountCode).FirstOrDefault();
+                storeDB.CartDiscounts.Remove(disc);
                 localCart.CalcTax();
                 result.Code = discountCode;
-                result.Amount = 0;
+                result.Amount = localCart.Discount;
                 result.Tax = localCart.Tax;
             }
             catch (Exception e)
@@ -276,6 +284,7 @@ namespace OpenOrderFramework.Controllers
                 result.Tax = localCart.Tax;
                 result.Shipping = localCart.Shipping;
                 result.Discount = localCart.Discount;
+                result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
             {
