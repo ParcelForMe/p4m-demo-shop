@@ -393,9 +393,9 @@
                     flex-direction: column;
                 }
 
-                    .cardList .droppoint-margin {
-                        margin-right: 35px;
-                    }
+                .cardList .droppoint-margin {
+                    margin-right: 35px;
+                }
             }
 
             @media (max-width: 440px) {
@@ -1090,7 +1090,7 @@
                 // assign the new data.
                 this._data = e.detail.response;
                 this._dropPoints = this._dropPoints.concat(this._data.droppoints);
-                console.log("GET Droppoints:" + this._data.droppoints);
+                //console.log("GET Droppoints:" + this._data.droppoints);
                 this._findAllDeliveryDroppoints();
                 this._loadDroppointMarkers(this._data.droppoints);
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
@@ -1544,6 +1544,10 @@
 
                     //Get viewport rectangle
                     var bounds = self._map.getBounds();
+                    if (!bounds) {
+                        console.error("Failed to get map bounds");
+                        return;
+                    }
                     var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
                     var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
                     var viewPort = [northEast, southWest];
@@ -1586,7 +1590,7 @@
                 if (this.$.toggleDropPointsView.checked) {
                     this.$.dropPointListContainer.classList.add('hidden');
                     this.$.mapContainer.classList.remove('hidden');
-                    this._makeMap();
+                    //this._makeMap();
                     this._loadDroppointMarkers(this._dropPoints);
                     this._fixMapMarker();
                 } else {
