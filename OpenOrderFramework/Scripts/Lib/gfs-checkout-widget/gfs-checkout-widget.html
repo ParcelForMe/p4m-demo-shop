@@ -1175,9 +1175,10 @@
 
 				var deliveryDroppointsSize = Object.keys(this._deliveryDroppoints).length;
 				if (((defaultDelivery === 'CollectionPoint') || (this._data.dayDefinite.length === 0)) && (deliveryDroppointsSize !== 0)) {
-					if ((this._data.standardRates.length === 0) && (this._data.dayDefinite.length === 0))
-						this.$$("#standardDeliveriesOption").parentNode.classList.add("hidden");
-						this.$$("#calendarDeliveriesOption").parentNode.classList.add("hidden");
+				    if ((this._data.standardRates.length === 0) && (this._data.dayDefinite.length === 0)) {
+				        this.$$("#standardDeliveriesOption").parentNode.classList.add("hidden");
+				        this.$$("#calendarDeliveriesOption").parentNode.classList.add("hidden");
+				    }
 
 					this.$.dropPointPanel.opened = true;
 					this.$.standardDeliveriesOption.checked = "";
