@@ -251,6 +251,13 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\card.css" />
     <Content Include="Content\datepicker.css" />
+    <Content Include="Content\logos\Collect Plus.png" />
+    <Content Include="Content\logos\Doddle.png" />
+    <Content Include="Content\logos\dpd.png" />
+    <Content Include="Content\logos\dpd2.png" />
+    <Content Include="Content\logos\Gfs.png" />
+    <Content Include="Content\logos\Hermes.png" />
+    <Content Include="Content\logos\Inpost.png" />
     <Content Include="Content\PagedList1.css" />
     <Content Include="Content\test.css" />
     <Content Include="Content\test.html" />
