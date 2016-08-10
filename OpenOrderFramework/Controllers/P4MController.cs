@@ -223,7 +223,7 @@ namespace OpenOrderFramework.Controllers
                 {
                     result.Description = discount.Description;
                     var localCart = ShoppingCart.GetCart(this.HttpContext);
-                    var disc = localCart.Discounts.Where(d => d.DiscountCode == discount.Code).FirstOrDefault();
+                    var disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     if (disc == null)
                     {
                         disc = new CartDiscount { DiscountCode = discount.Code, CartId = localCart.ShoppingCartId, Description = discount.Description };
@@ -232,7 +232,8 @@ namespace OpenOrderFramework.Controllers
                     }
                     localCart.CalcTax();
                     result.Code = discountCode;
-                    result.Amount = localCart.Discount;
+                    disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
+                    result.Amount = disc.Amount;
                     result.Tax = localCart.Tax;
                 }
             }
@@ -251,8 +252,9 @@ namespace OpenOrderFramework.Controllers
             try
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
-                var disc = storeDB.CartDiscounts.Where(d => d.DiscountCode == discountCode).FirstOrDefault();
+                var disc = storeDB.CartDiscounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discountCode).FirstOrDefault();
                 storeDB.CartDiscounts.Remove(disc);
+                storeDB.SaveChanges();
                 localCart.CalcTax();
                 result.Code = discountCode;
                 result.Amount = localCart.Discount;
@@ -303,7 +305,7 @@ namespace OpenOrderFramework.Controllers
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
                 var localCart = ShoppingCart.GetCart(HttpContext);
                 //decimal cartTot = Convert.ToDecimal(cartTotal);
-                if (cartTotal != localCart.Total)
+                if (false && cartTotal != localCart.Total)
                 {
                     localCart.EmptyCart();
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;
