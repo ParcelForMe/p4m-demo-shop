@@ -30,19 +30,23 @@ namespace OpenOrderFramework.Models
         public P4MAddress DeliverTo { get; set; }
     }
 
-    public class DiscountMessage : P4MBaseMessage
+    public class CartTotalsMessage : P4MBaseMessage
+    {
+        public decimal Tax { get; set; }
+        public decimal Shipping { get; set; }
+        public decimal Discount { get; set; }
+        public decimal Total { get; set; }
+    }
+
+    public class DiscountMessage : CartTotalsMessage
     {
         public string Code { get; set; }
-        public decimal Tax { get; set; }
         public string Description { get; set; }
         public decimal Amount { get; set; }
     }
 
-    public class CartUpdateMessage : P4MBaseMessage
+    public class CartUpdateMessage : CartTotalsMessage
     {
-        public decimal Discount { get; set; }
-        public decimal Tax { get; set; }
-        public decimal Shipping { get; set; }
         public List<P4MDiscount> Discounts { get; set; }
     }
 

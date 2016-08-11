@@ -212,12 +212,15 @@ namespace OpenOrderFramework.Controllers
         [Route("p4m/shippingDetails")]
         public JsonResult ShippingDetails(ShippingDetails details)
         {
-            var result = new P4MBaseMessage();
+            var result = new CartTotalsMessage();
             try
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
                 localCart.Shipping = details.Amount;
-                storeDB.SaveChanges();
+                localCart.CalcTax();
+                result.Discount = localCart.Discount;
+                result.Tax = localCart.Tax;
+                result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -252,7 +255,9 @@ namespace OpenOrderFramework.Controllers
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
+                    result.Shipping = localCart.Shipping;
                     result.Tax = localCart.Tax;
+                    result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -276,7 +281,9 @@ namespace OpenOrderFramework.Controllers
                 localCart.CalcTax();
                 result.Code = discountCode;
                 result.Amount = localCart.Discount;
+                result.Shipping = localCart.Shipping;
                 result.Tax = localCart.Tax;
+                result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -304,6 +311,7 @@ namespace OpenOrderFramework.Controllers
                 result.Tax = localCart.Tax;
                 result.Shipping = localCart.Shipping;
                 result.Discount = localCart.Discount;
+                result.Total = localCart.Total;
                 result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
