@@ -1552,14 +1552,14 @@
                     var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
                     var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
                     var viewPort = [northEast, southWest];
-                    console.log('ViewPort:', JSON.stringify(viewPort));
+                    //console.log('ViewPort:', JSON.stringify(viewPort));
                     // only continue if the viewport is different
                     if ((northEast[0] != southWest[0]) || (northEast[1] != southWest[1])) {
                         var boxes = [];
                         self.$.regionManager.coveredRectangles.forEach(function(rect) {
                             boxes.push(rect.toGeoBox());
                         });
-                        console.log('Covered rectangles:', JSON.stringify(boxes));
+                        //console.log('Covered rectangles:', JSON.stringify(boxes));
                         // self._drawBoxes(boxes, 'red');
 
                         boxes = [];
@@ -1567,7 +1567,7 @@
                             boxes.push(rect.toGeoBox());
                         });
 
-                        console.log('Boxes to request:', JSON.stringify(boxes));
+                       // console.log('Boxes to request:', JSON.stringify(boxes));
                         // self._drawBoxes(boxes, 'green');
 
                         if (boxes.length > 0) {
@@ -1646,6 +1646,7 @@
             _selectDropPoint: function(marker) {
                 marker.customData.chosen = true;
                 debugger;
+                //console.log(JSON.stringify(marker.customData));
                 this.fire("droppoint-changed", marker.customData);
             },
 
