@@ -2120,7 +2120,6 @@
             },
 
             updateDeliveryOptions: function (methodId, dateOverride) {
-                debugger;
                 var method = this._getDeliveryRateById(methodId);
                 this.selectedServiceDetails.serviceId = methodId;
                 this.selectedServiceDetails.service = method.methodTitle;
@@ -2136,8 +2135,7 @@
                     this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeTo).add(method.maxDD - method.minDD, 'days').toISOString();
                 }
 
-
-                this.selectedServiceDetails.checked = true;// e.target.checked;
+                this.selectedServiceDetails.checked = true;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
                 if (this.$.dropPointDeliveriesOption.checked == true) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
