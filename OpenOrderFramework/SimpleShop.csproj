@@ -587,6 +587,9 @@
     <Content Include="Scripts\Lib\gfs-checkout-widget\index.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\local-image-widget\local-image.html" />
     <Content Include="Scripts\Lib\gfs-checkout-widget\map-region-manager\map-region-manager.html" />
+    <Content Include="Scripts\Lib\gfs-delivery-address\.gitignore" />
+    <Content Include="Scripts\Lib\gfs-delivery-address\gfs-delivery-address.html" />
+    <Content Include="Scripts\Lib\gfs-delivery-address\index.html" />
     <Content Include="Scripts\Lib\gfs-droppoint\.gitignore" />
     <Content Include="Scripts\Lib\gfs-droppoint\gfs-droppoint.html" />
     <Content Include="Scripts\Lib\gfs-droppoint\images\opensign.png" />
@@ -854,6 +857,7 @@
     <Content Include="Scripts\Lib\gfs-droppoint\.git\refs\heads\master" />
     <Content Include="Scripts\Lib\gfs-droppoint\.git\refs\remotes\origin\HEAD" />
     <Content Include="Scripts\Lib\gfs-droppoint\bower.json" />
+    <Content Include="Scripts\Lib\gfs-delivery-address\bower.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

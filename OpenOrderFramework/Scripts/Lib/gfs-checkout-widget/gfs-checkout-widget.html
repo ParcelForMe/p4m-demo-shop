@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html" />
+﻿<link rel="import" href="../polymer/polymer.html" />
 <link rel="import" href="../brick-calendar/dist/brick-calendar.html" />
 <link rel="import" href="../iron-ajax/iron-ajax.html" />
 <link rel="import" href="../iron-list/iron-list.html" />
@@ -11,7 +11,7 @@
 <link rel="import" href="../paper-toast/paper-toast.html">
 <link rel="import" href="../paper-button/paper-button.html">
 
-<script src="../moment/min/moment.min.js"></script>
+<script src="../momentjs/min/moment.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI&libraries=places"></script>
 <link href="css/custom.css" rel="stylesheet" />
 
@@ -393,9 +393,9 @@
                     flex-direction: column;
                 }
 
-                .cardList .droppoint-margin {
-                    margin-right: 35px;
-                }
+                    .cardList .droppoint-margin {
+                        margin-right: 35px;
+                    }
             }
 
             @media (max-width: 440px) {
@@ -450,13 +450,13 @@
 
         <map-region-manager id="regionManager"></map-region-manager>
 
-        <div id="widgetContainer">
-            <div class="header">
-                <input name="deliveryTypePanel" id="standardDeliveriesOption" on-click="_toggleStandardDeliveryPanelCollapse" type="radio" value="{{defaultDelivery}}" />
-                <label for="standardDeliveriesOption">
-                    <h3>{{standardDeliveryTitle}}</h3>
-                </label>
-            </div>
+		<div id="widgetContainer">
+			<div class="header">
+				<input name="deliveryTypePanel" id="standardDeliveriesOption" on-click="_toggleStandardDeliveryPanelCollapse" type="radio" value="{{defaultDelivery}}" />
+				<label for="standardDeliveriesOption">
+					<h3>{{standardDeliveryTitle}}</h3>
+				</label>
+			</div>
 
             <iron-collapse id="standardDeliveryPanel">
                 <div class="toggle-content">
@@ -560,7 +560,7 @@
                         </div>
                     </div>
                     <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
-                    <div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div>
+					<div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div>
 
                     <div id="gfsMapCanvas">
                         <div class="loading">
@@ -1090,7 +1090,7 @@
                 // assign the new data.
                 this._data = e.detail.response;
                 this._dropPoints = this._dropPoints.concat(this._data.droppoints);
-                //console.log("GET Droppoints:" + this._data.droppoints);
+                console.log("GET Droppoints:" + this._data.droppoints);
                 this._findAllDeliveryDroppoints();
                 this._loadDroppointMarkers(this._data.droppoints);
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
@@ -1706,6 +1706,7 @@
                     }
                 }
             },
+
 
             _locateMe: function() {
                 var self = this;

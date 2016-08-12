@@ -195,9 +195,8 @@
                 if (changes.length > 0) {
                     this.$.localApi.call('itemQtyChanged', {}, changes, function (newCartTotals) {
                         //console.log("Called local api itemQtyChanged");
-                        self.$.cart.clearChanges(); 
-                        self.cartData.Tax = newCartTotals.Tax;
-                        self.cartData.ShippingAmt = newCartTotals.Shipping;
+                        self.$.cart.clearChanges();
+                        self.updCartTotals(newCartTotals);
                         self.cartData.Discounts = newCartTotals.Discounts;
                         self.updateP4mCart();
                     });
@@ -207,6 +206,12 @@
                 }
 
 
+            },
+
+            updCartTotals: function(newCartTotals) {
+                this.cartData.Tax = newCartTotals.Tax;
+                this.cartData.ShippingAmt = newCartTotals.Shipping;
+                this.cartData.Total = newCartTotals.Total;
             },
 
             onConsumerData: function(data) {
@@ -277,32 +282,56 @@
 
             updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
                 var self = this;
+
                 this.cartData.ShippingAmt = data.shipping;
                 this.cartData.ServiceName = data.service;
                 this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
-                if (data.collectionPoint) {
-                    this.selectCollectPoint(data, function () {
+
+                var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDateEnd };
+                // got new shipping details so we need to get updated tax from the host
+                this.$.localApi.call('shippingDetails', null, shippingDetails, function (cartTotals) {
+                    self.updCartTotals(cartTotals); // this updates tax
+                    self.cartData.Carrier = data.carrier;
+                    self.cartData.ShippingAmt = data.shipping;
+                    self.cartData.ServiceName = data.service;
+                    self.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
+                    if (data.collectionPoint) {
+                        self.selectCollectPoint(data.carrier, data.collectionPoint, data.deliveryAddress, function () {
+                            self.updateP4mCart();
+                        });
+                    }
+                    else {
                         self.updateP4mCart();
-                    });
-                }
-                else {
-                    this.updateP4mCart();
-                }
+                    }
+                });
             },
 
-            selectCollectPoint: function (data, callback) {
-                //Make API call to add invisible address
 
+            selectCollectPoint: function (carrier, collectPointId, collectPointAddress, callback) {
+
+                //Make API call to add invisible address
+                console.log("Drop point address: ", collectPointAddress);
+                var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : null;
+                var prefOrder = this.consumerData.Addresses.length || 1;
                 var postData =
                 {
                     "Address": {
-                        "DropPointId": data.collectionPoint,
-                        "DropPointProviderId": data.serviceCode,
                         "AddressType": "Collect",
-                        "Street1": data.deliveryAddress.addressLines[0],
-                        "Street2": data.deliveryAddress.addressLines[1] || "",
-                        "City": data.deliveryAddress.town,
-                        "PostCode": data.deliveryAddress.postCode
+                        "Label": carrier,
+                        "CompanyName": directions,
+                        "Street1": collectPointAddress.addressLines[0]||"",
+                        "Street2": collectPointAddress.addressLines[1]||"",
+                        "City": collectPointAddress.town,
+                        "PostCode": collectPointAddress.postCode,
+                        "State": collectPointAddress.county,
+                        "Country": collectPointAddress.country,
+                        "CountryCode": collectPointAddress.countryCode,
+                        "Phone": collectPointAddress.phone,
+                        "Latitude": collectPointAddress.coordinates.latitude,
+                        "Longitude": collectPointAddress.coordinates.longitude,
+                        "DropPointProviderId": collectPointAddress.DropPointProviderId,
+                        "DropPointId": collectPointId,
+                        "CollectPrefOrder": prefOrder
                     },
                     "isPrefDeliveryAddr": false,
                     "isBillingAddr": false
@@ -344,6 +373,7 @@
                         cartDiscount.Description = e.detail.Description;
                         cartDiscount.Amount = e.detail.Amount;
                         cartDiscount.Code = e.detail.Code;
+                        this.cartData.Tax = e.detail.Tax;
                         this.updateP4mCart();
                     }
                 }
@@ -354,6 +384,7 @@
                         Amount: e.detail.Amount,
                         Code: e.detail.Code
                     });
+                    this.cartData.Tax = e.detail.Tax;
                     this.updateP4mCart();
                 }
             },
@@ -364,6 +395,7 @@
                 if (item) {
                     item.Amount = 0;
                     item.Description = "Deleted";
+                    this.cartData.Tax = e.detail.Tax;
                     this.updateP4mCart();
                     this.$.localApi.call('removeDiscountCode', {"discountCode": code}, null, null);
                 }
@@ -396,11 +428,11 @@
                 var postData =
                 {
                     "Address": addressElement.detail.addressData
-                    //"isPrefDeliveryAddr": addressElement.detail.isDelivery,
-                    //"isBillingAddr": addressElement.detail.isBilling
                 };
                 var self = this;
                 this.$.api.call("postAddress", null, postData, function (result) {
+                    console.log("Got address result: ", result);
+                    addressElement.detail.addressData.Id = result.Address.Id;
                     //addressElement.detail.mode = "view";
                     self.$.addressList.showAsLoaded();
                 });

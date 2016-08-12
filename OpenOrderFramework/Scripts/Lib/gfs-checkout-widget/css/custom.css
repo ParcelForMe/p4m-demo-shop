@@ -8,10 +8,6 @@ gfs-checkout brick-calendar {
 	border: none;
 }
 
-gfs-checkout brick-calendar .calendar {
-	height: auto!important;
-}
-
 gfs-checkout brick-calendar .calendar .month {
 	width:100%;
 }

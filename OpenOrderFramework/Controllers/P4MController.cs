@@ -208,6 +208,27 @@ namespace OpenOrderFramework.Controllers
             return View("P4MDelivery");
         }
 
+        [HttpPost]
+        [Route("p4m/shippingDetails")]
+        public JsonResult ShippingDetails(ShippingDetails details)
+        {
+            var result = new CartTotalsMessage();
+            try
+            {
+                var localCart = ShoppingCart.GetCart(this.HttpContext);
+                localCart.Shipping = details.Amount;
+                localCart.CalcTax();
+                result.Discount = localCart.Discount;
+                result.Tax = localCart.Tax;
+                result.Total = localCart.Total;
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet); 
+        }
+
         [HttpGet]
         [Route("p4m/applyDiscountCode/{discountCode}")]
         public JsonResult ApplyDiscountCode(string discountCode)
@@ -234,7 +255,9 @@ namespace OpenOrderFramework.Controllers
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
+                    result.Shipping = localCart.Shipping;
                     result.Tax = localCart.Tax;
+                    result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -258,7 +281,9 @@ namespace OpenOrderFramework.Controllers
                 localCart.CalcTax();
                 result.Code = discountCode;
                 result.Amount = localCart.Discount;
+                result.Shipping = localCart.Shipping;
                 result.Tax = localCart.Tax;
+                result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -286,6 +311,7 @@ namespace OpenOrderFramework.Controllers
                 result.Tax = localCart.Tax;
                 result.Shipping = localCart.Shipping;
                 result.Discount = localCart.Discount;
+                result.Total = localCart.Total;
                 result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
@@ -303,9 +329,11 @@ namespace OpenOrderFramework.Controllers
             try
             {
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
+                cartTotal = Math.Round(cartTotal, 2);
                 var localCart = ShoppingCart.GetCart(HttpContext);
+                localCart.CalcTax();
                 //decimal cartTot = Convert.ToDecimal(cartTotal);
-                if (false && cartTotal != localCart.Total)
+                if (cartTotal != localCart.Total)
                 {
                     localCart.EmptyCart();
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;
