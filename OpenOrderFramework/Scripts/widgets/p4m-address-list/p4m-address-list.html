@@ -135,8 +135,7 @@
             },
 
             filterOldOnly: function (e) {
-                return (typeof (e.Label) === "string");
-                // && e.AddressType == "Address");
+                return (typeof (e.Label) === "string" && e.AddressType == "Address");
             },
 
             showAsLoaded: function () {
