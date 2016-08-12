@@ -393,9 +393,9 @@
                     flex-direction: column;
                 }
 
-                    .cardList .droppoint-margin {
-                        margin-right: 35px;
-                    }
+                .cardList .droppoint-margin {
+                    margin-right: 35px;
+                }
             }
 
             @media (max-width: 440px) {
@@ -500,7 +500,7 @@
                             <div id="calendar-delivery-options" class="hidden">
                                 <h4>{{calendarDayPrompt}}</h4>
                                 <ul class="separated">
-                                    <template is="dom-repeat" items="{{_selectedDayDeliveries}}" sort="sortDayDefiniteServices">
+                                    <template is="dom-repeat" items="{{_selectedDayDeliveries.deliveries}}" sort="sortDayDefiniteServices">
 
                                         <li class="delivery-place">
                                             <input type="radio"
@@ -508,7 +508,7 @@
                                                    value="{{item.id}}"
                                                    id="{{item.id}}"
                                                    checked="{{item.selected}}"
-                                                   on-click="updateDeliveryOptionsEvent"
+                                                   on-click="updateDayDeliveryOptionsEvent"
                                                    class="radio calendar-delivery-selection" />
                                             <span class="gfsmethodname">
                                                 {{item.methodTitle}}
@@ -1645,8 +1645,6 @@
 
             _selectDropPoint: function(marker) {
                 marker.customData.chosen = true;
-                debugger;
-                //console.log(JSON.stringify(marker.customData));
                 this.fire("droppoint-changed", marker.customData);
             },
 
@@ -1795,8 +1793,8 @@
 
             _deliveryDateSelected: function(e) {
                 var deliveries = this._findDayDefiniteDeliveries(e.detail.date);
-                if (deliveries && deliveries.length > 0) {
-                    this._selectedDayDeliveries = deliveries;
+                if (deliveries && deliveries.length > 0) {//eeee _selectedDayDeliveries should include date as well
+                    this._selectedDayDeliveries = { "date": e.detail.date, "deliveries": deliveries };
                 } else {
                     this.$$('brick-calendar').chosen = [];
                 }
@@ -2121,15 +2119,24 @@
 				return JSON.stringify(this.selectedServiceDetails);
             },
 
-            updateDeliveryOptions: function(methodId) {
+            updateDeliveryOptions: function (methodId, dateOverride) {
+                debugger;
                 var method = this._getDeliveryRateById(methodId);
                 this.selectedServiceDetails.serviceId = methodId;
                 this.selectedServiceDetails.service = method.methodTitle;
                 this.selectedServiceDetails.serviceCode = method.carrierCode;
                 this.selectedServiceDetails.carrier = method.carrierName;
                 this.selectedServiceDetails.shipping = method.price;
-                this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
-                this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeTo).add(method.maxDD - method.minDD, 'days').toISOString();
+                if (dateOverride) {
+                    this.selectedServiceDetails.expDeliveryDateStart = moment(dateOverride).toISOString();
+                    this.selectedServiceDetails.expDeliveryDateEnd = moment(dateOverride).toISOString();
+                }
+                else {
+                    this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
+                    this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeTo).add(method.maxDD - method.minDD, 'days').toISOString();
+                }
+
+
                 this.selectedServiceDetails.checked = true;// e.target.checked;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
                 if (this.$.dropPointDeliveriesOption.checked == true) {
@@ -2152,13 +2159,16 @@
                 }
             },
 
+            updateDayDeliveryOptionsEvent: function(e) {
+                if (e.target.checked) {
+                    this.updateDeliveryOptions(e.target.id, this._selectedDayDeliveries.date); ///eeeee 
+                }
+            },
 
 			updateDeliveryOptionsEvent: function(e) {
-                if (e.target.checked) {
-                    
+                if (e.target.checked) {                    
                     this.updateDeliveryOptions(e.target.id);
-
-               }
+                }
             }
         });
     </script>
