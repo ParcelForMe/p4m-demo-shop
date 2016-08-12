@@ -118,13 +118,12 @@ namespace OpenOrderFramework.Models
 
         public void EmptyCart()
         {
-            var cartItems = storeDB.Carts.Where(
-                cart => cart.CartId == ShoppingCartId);
-
+            var cartItems = storeDB.Carts.Where(cart => cart.CartId == ShoppingCartId);
             foreach (var cartItem in cartItems)
-            {
                 storeDB.Carts.Remove(cartItem);
-            }
+            var cartDiscs = storeDB.CartDiscounts.Where(disc => disc.CartId == ShoppingCartId);
+            foreach (var disc in cartDiscs)
+                storeDB.CartDiscounts.Remove(disc);
             storeDB.ShoppingCarts.Remove(this);
             // Save changes
             storeDB.SaveChanges();
@@ -213,17 +212,10 @@ namespace OpenOrderFramework.Models
         {
             if (context.Session[CartSessionKey] == null)
             {
-                //if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
-                //{
-                //    context.Session[CartSessionKey] = context.User.Identity.Name;
-                //}
-                //else
-                //{
-                    // Generate a new random GUID using System.Guid class
-                    Guid tempCartId = Guid.NewGuid();
-                    // Send tempCartId back to client as a cookie
-                    context.Session[CartSessionKey] = tempCartId.ToString();
-                //}
+                // Generate a new random GUID using System.Guid class
+                Guid tempCartId = Guid.NewGuid();
+                // Send tempCartId back to client as a cookie
+                context.Session[CartSessionKey] = tempCartId.ToString();
             }
             return context.Session[CartSessionKey].ToString();
         }

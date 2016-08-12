@@ -171,7 +171,7 @@ namespace OpenOrderFramework.Controllers
             foreach (var item in p4mCart.Items)
             {
                 var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
-                localCart.AddToCart(localItem);
+                localCart.AddToCart(localItem, (int)Math.Round(item.Qty));
             }
             await storeDB.SaveChangesAsync();
         }
@@ -344,8 +344,8 @@ namespace OpenOrderFramework.Controllers
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
-                //var purchaseResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
+                //var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
+                var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
