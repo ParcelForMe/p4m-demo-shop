@@ -135,7 +135,8 @@
             },
 
             filterOldOnly: function (e) {
-                return (typeof (e.Label) === "string" && e.AddressType == "Address");
+                return (typeof (e.Label) === "string");
+                // && e.AddressType == "Address");
             },
 
             showAsLoaded: function () {
@@ -148,6 +149,10 @@
                 this.$.spinner.active = true;
                 this.$.spinner.classList.remove('hidden');
                 this.$.container.classList.add('loading');
+            },
+
+            getDropDropPointById: function (dropPointId) {
+                return (this.addressListData.find(function (item) { return item.DropPointId == dropPointId }));
             }
 
         });
