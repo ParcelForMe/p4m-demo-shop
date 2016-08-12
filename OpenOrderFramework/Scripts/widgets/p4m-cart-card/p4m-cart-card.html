@@ -1,11 +1,11 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-input/iron-input.html" />
 <link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
-<link rel="import" href="../p4m-wish/p4m-wish.html" />
 
 <dom-module id="p4m-cart-card">
 
     <template>
+        <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="local" version="v2"></p4m-api>
         <div id="container">
             <div id="image" class="card-panel">
                 <img src="{{cartItemData.LinkToImage}}" />
@@ -28,7 +28,14 @@
 
         </div>
         <div id="actions">
-            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span><p4m-wish item-data="{{cartItemData}}" on-movingtowish="onMovingToWish" on-wish="onWish"></p4m-wish>
+            <a href="#" on-tap="remove">Delete</a><span class="divider">|</span>
+            <template is="dom-if" if="{{notWish}}">
+                <a href="#"><div id="p4mWishBtn" on-click="makeWish">Move to my <span class="p4m-label">Parcel for Me</span> wish list</div></a>
+            </template>
+            <template is="dom-if" if="{{isWish}}">
+                <a href="#"><div id="p4mWishBtn">Moving to wish list...</div></a>
+            </template>
+            
         </div>
         
     </template>
@@ -156,22 +163,33 @@
 
             onDataChange: function (e) {
                 this._priceStr = this.currencySymbol + this.cartItemData.Price.toFixed(2);
+                this.setWish(false);
             },
 
-            onMovingToWish: function (e) {
-                //Trigger removal from shopping cart
-                console.log("Received wish", e);          
+            setWish(value) {
+                this.isWish = value;
+                this.notWish = !this.isWish;
+            },
+
+            makeWish: function() {          
+                this.showAsWishing();
+                this.$.api.call('postWish', {}, this.itemData, () => this.onWishComplete());
                 this.remove();
+            },
+
+            showAsWishing: function () {
+                //Trigger removal from shopping cart   
+                this.setWish(true);
+                this.$.wishIcon.classList.remove('explode');
                 this.$.quantity.classList.add('hidden');
                 this.$.wishlist.classList.remove('hidden');
+                
             },
 
-            onWish: function (e) {
+            onWishComplete: function (e) {
                 this.$.wishIcon.classList.add('explode');
-
+                
             }
-
-
 
         });
     </script>

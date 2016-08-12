@@ -31,3 +31,5 @@
         .p4m-button.disabled {
             background-color: rgba(100, 100, 100, 1.0);
         }
+
+        .p4m-label { color: darkgreen }
