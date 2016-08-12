@@ -308,42 +308,47 @@
 
 
             selectCollectPoint: function (carrier, collectPointId, collectPointAddress, callback) {
-
                 //Make API call to add invisible address
-                console.log("Drop point address: ", collectPointAddress);
-                var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : null;
-                var prefOrder = this.consumerData.Addresses.length || 1;
-                var postData =
-                {
-                    "Address": {
-                        "AddressType": "Collect",
-                        "Label": carrier,
-                        "CompanyName": directions,
-                        "Street1": collectPointAddress.addressLines[0]||"",
-                        "Street2": collectPointAddress.addressLines[1]||"",
-                        "City": collectPointAddress.town,
-                        "PostCode": collectPointAddress.postCode,
-                        "State": collectPointAddress.county,
-                        "Country": collectPointAddress.country,
-                        "CountryCode": collectPointAddress.countryCode,
-                        "Phone": collectPointAddress.phone,
-                        "Latitude": collectPointAddress.coordinates.latitude,
-                        "Longitude": collectPointAddress.coordinates.longitude,
-                        "DropPointProviderId": collectPointAddress.DropPointProviderId,
-                        "DropPointId": collectPointId,
-                        "CollectPrefOrder": prefOrder
-                    },
-                    "isPrefDeliveryAddr": false,
-                    "isBillingAddr": false
-                };
+                var existingDropPoint = this.$.addressListgetDropPointById(collectPointId);
+                if (!existingDropPoint) {
+                    var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : "";
+                    var prefOrder = this.consumerData.Addresses.length || 1;
+                    var postData =
+                    {
+                        "Address": {
+                            "AddressType": "Collect",
+                            "Label": carrier,
+                            "CompanyName": directions,
+                            "Street1": collectPointAddress.addressLines[0] || "",
+                            "Street2": collectPointAddress.addressLines[1] || "",
+                            "City": collectPointAddress.town,
+                            "PostCode": collectPointAddress.postCode,
+                            "State": collectPointAddress.county,
+                            "Country": collectPointAddress.country,
+                            "CountryCode": collectPointAddress.countryCode,
+                            "Phone": collectPointAddress.phone,
+                            "Latitude": collectPointAddress.coordinates.latitude,
+                            "Longitude": collectPointAddress.coordinates.longitude,
+                            "DropPointProviderId": collectPointAddress.DropPointProviderId,
+                            "DropPointId": collectPointId,
+                            "CollectPrefOrder": prefOrder
+                        },
+                        "isPrefDeliveryAddr": false,
+                        "isBillingAddr": false
+                    };
 
-                var self = this;
-                this.$.api.call("postAddress", null, postData, function (result) {
-                    self.cartData.AddressId = result.Address.Id;
-                    self.consumerData.Addresses.push(result.Address);
-                    //self.cartData.ServiceName = "Collection point";
-                    callback(result);
-                });
+                    var self = this;
+                    this.$.api.call("postAddress", null, postData, function (result) {
+                        self.cartData.AddressId = result.Address.Id;
+                        self.consumerData.Addresses.push(result.Address);
+                        //self.cartData.ServiceName = "Collection point";
+                        callback(result);
+                    });
+                }
+                else {
+                    self.cartData.AddressId = collectPointAddress.Id;
+                    callback(existingDropPoint);
+                }
             },
 
             onSelectPaymentMethod: function (e) {
