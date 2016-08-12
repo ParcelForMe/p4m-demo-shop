@@ -281,7 +281,7 @@
                 this.cartData.ServiceName = data.service;
                 this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
                 if (data.collectionPoint) {
-                    this.selectCollectPoint(data.Id, data.deliveryAddress, function () {
+                    this.selectCollectPoint(data, function () {
                         self.updateP4mCart();
                     });
                 }
@@ -290,21 +290,24 @@
                 }
             },
 
-            selectCollectPoint: function (collectPointId, collectPointAddress, callback) {
+            selectCollectPoint: function (data, callback) {
                 //Make API call to add invisible address
 
                 var postData =
                 {
                     "Address": {
+                        "DropPointId": data.collectionPoint,
+                        "DropPointProviderId": data.serviceCode,
                         "AddressType": "Collect",
-                        "Street1": collectPointAddress.addressLines[0],
-                        "Street2": collectPointAddress.addressLines[1]||"",
-                        "City": collectPointAddress.town,
-                        "PostCode": collectPointAddress.postCode
+                        "Street1": data.deliveryAddress.addressLines[0],
+                        "Street2": data.deliveryAddress.addressLines[1] || "",
+                        "City": data.deliveryAddress.town,
+                        "PostCode": data.deliveryAddress.postCode
                     },
                     "isPrefDeliveryAddr": false,
                     "isBillingAddr": false
                 };
+
                 var self = this;
                 this.$.api.call("postAddress", null, postData, function (result) {
                     self.cartData.AddressId = result.Address.Id;
