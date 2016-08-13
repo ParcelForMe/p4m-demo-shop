@@ -328,6 +328,8 @@ namespace OpenOrderFramework.Controllers
             var result = new PurchaseMessage();
             try
             {
+                if (string.IsNullOrWhiteSpace(cvv))
+                    throw new Exception("Please enter your CVV");
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
                 cartTotal = Math.Round(cartTotal, 2);
                 var localCart = ShoppingCart.GetCart(HttpContext);
@@ -344,8 +346,8 @@ namespace OpenOrderFramework.Controllers
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
-                var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
+                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
+                //var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
@@ -358,11 +360,8 @@ namespace OpenOrderFramework.Controllers
                     // so the retailer can store whatever is required at this point
                     ShoppingCart.GetCart(this).EmptyCart();
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;
-#pragma warning disable 4014
-                    // we've waited enough - don't wait for the order to be saved as well!
                     var orderId = await CreateLocalOrderAsync(purchaseResult);
-#pragma warning restore 4014
-                    result.RedirectUrl = "http://localhost:3000/Checkout/Complete?id=" + orderId; //("Complete", "Checkout", new { id = orderId });
+                    result.RedirectUrl = this.Url.Action("Complete", "Checkout", new { id = orderId }, this.Request.Url.Scheme);
                 }
                 else
                 {
@@ -372,6 +371,48 @@ namespace OpenOrderFramework.Controllers
                     result.ACSResponseUrl = purchaseResult.ACSResponseUrl;
                     result.P4MData = purchaseResult.P4MData;
                 }
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        [Route("p4m/paypal")]
+        public async Task<JsonResult> PaypalPurchase(string cartId, decimal cartTotal)
+        {
+            var result = new PurchaseMessage();
+            try
+            {
+                // validate that the cart total from the widget is correct to prevent cart tampering in the browser
+                cartTotal = Math.Round(cartTotal, 2);
+                var localCart = ShoppingCart.GetCart(HttpContext);
+                localCart.CalcTax();
+                //decimal cartTot = Convert.ToDecimal(cartTotal);
+                if (cartTotal != localCart.Total)
+                {
+                    localCart.EmptyCart();
+                    HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                    throw new Exception("Your cart is invalid and has been cleared. We're sorry for any inconvenience. Please keep shopping");
+                }
+
+                var token = Request.Cookies["p4mToken"].Value;
+                var client = new HttpClient();
+                client.SetBearerToken(token);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
+                apiResult.EnsureSuccessStatusCode();
+                var messageString = await apiResult.Content.ReadAsStringAsync();
+                var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
+                if (!purchaseResult.Success)
+                    throw new Exception(purchaseResult.Error);
+                // retailer has opted to use 3D Secure and the consumer is enrolled
+                result.ACSUrl = purchaseResult.ACSUrl;
+                result.PaReq = purchaseResult.PaReq;
+                result.ACSResponseUrl = purchaseResult.ACSResponseUrl;
+                result.P4MData = purchaseResult.P4MData;
             }
             catch (Exception e)
             {
