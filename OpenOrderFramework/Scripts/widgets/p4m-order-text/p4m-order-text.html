@@ -5,9 +5,9 @@
 
     <template>
         <div id="container">
-            Thanks for ordering from us {{consumerData.GivenName}}.
+            Thanks for ordering from us <span class="p4m-label">{{consumerData.GivenName}}</span>.
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your {{addressTypeStr}}: {{deliveryAddressStr}}{{deliveryDateStr}}.
+                We'll deliver your order to your <span class="p4m-label">{{addressTypeStr}}: {{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}</span>.
             </template>
         </div>
     </template>
@@ -62,6 +62,7 @@
                     var deliveryAddr = this._addressById(this.cartData.AddressId);
                     this.deliveryAddressStr = this._addressToStr(deliveryAddr);
                     this.addressTypeStr = this._addressType(deliveryAddr);
+                    this.deliveryDatePrefixStr = this._expectedDeliveryDatePrefixStr(this.cartData.ExpDeliveryDate);
                     this.deliveryDateStr = this._expectedDeliveryDateStr(this.cartData.ExpDeliveryDate);
                 }
                 else {
@@ -102,15 +103,27 @@
                 }
             },
 
+            
             _expectedDeliveryDateStr: function (dateStr) {
                 if (dateStr) {                                   
-                    return " by " + moment(new Date(dateStr)).format('dddd Do MMMM YYYY');
+                    return moment(new Date(dateStr)).format('dddd Do MMMM YYYY');
                 }
                 else {
-                    return ". Please select a delivery method to continue";
+                    return "Please select a delivery method to continue";
                 }
                 
+            },
+
+            _expectedDeliveryDatePrefixStr: function (dateStr) {
+                if (dateStr) {
+                    return " by ";
+                }
+                else {
+                    return ". ";
+                }
+
             }
+
 
         });
     </script>
