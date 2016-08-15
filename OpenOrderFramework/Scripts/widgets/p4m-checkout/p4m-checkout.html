@@ -309,7 +309,7 @@
 
             selectCollectPoint: function (carrier, collectPointId, collectPointAddress, callback) {
                 //Make API call to add invisible address
-                var existingDropPoint = this.$.addressListgetDropPointById(collectPointId);
+                var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
                 if (!existingDropPoint) {
                     var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : "";
                     var prefOrder = this.consumerData.Addresses.length || 1;
