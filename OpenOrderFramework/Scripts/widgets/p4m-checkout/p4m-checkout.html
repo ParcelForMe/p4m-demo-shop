@@ -15,6 +15,8 @@
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 <link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
+<link rel="import" href="../../Lib/gfs-checkout-widget/gfs-checkout-widget.html">
+
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-checkout">
@@ -37,8 +39,14 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page>
-                            Delivery options here
-                            <p4m-delivery></p4m-delivery>
+
+                            <gfs-checkout gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
+
+                            <template is="dom-if" if="{{_notUseGfsCheckout}}">
+                                <p4m-delivery></p4m-delivery>
+                            </template>
+                            <template is="dom-if" if="{{useGfsCheckout}}">
+                            </template>
                         </iron-page>
                         <iron-page>
                             <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
@@ -116,7 +124,11 @@
     </style>
 
     <script>
-    //
+        //
+        /*window.addEventListener('selectedServiceChanged', function (e) {
+            console.log('p4m: selectedServiceChanged', e);
+        });*/
+
         Polymer({
             is: "p4m-checkout",
 
@@ -148,6 +160,20 @@
                 selectedCard: {
                     type: Object
                 },
+                useGfsCheckout: {
+                    type: Object,
+                    value: false
+                },
+                gfsAccessToken: {
+                    type: String
+                },
+                gfsData: {
+                    type: String
+                },
+                _notUseGfsCheckout: {
+                    type: Object,
+                    value: true
+                },
                 _changeTimer: {
                     //Timer object to allow sending of changes once user has finished interaction
                     type: Object
@@ -161,6 +187,7 @@
 
             ready: function()
             {
+                this._notUseGfsCheckout = !this.useGfsCheckout;
 
                 if (!this.sessionId) {
                     this.sessionId = this.$.sessionCookie.readCookie();
@@ -443,6 +470,11 @@
                     self.$.addressList.showAsLoaded();
                 });
             },
+
+            onGfsServiceChanged: function (e) {
+                console.log("p4m widget: onGfsServiceChanged():", e);
+                this.updateShipping(e.detail);
+            }
         });
     </script>
 </dom-module>

@@ -90,7 +90,7 @@
             },
 
             onCartDataChange: function () {
-                if (!this.selectedCardId && this.cartData && this.cartData.PayMethodId) {
+                if (!this.selectedCardId && this.cartData && this.cartData.PayMethodId && this.consumerData) {
                     console.log("Setting selectedCardId to", this.cartData.PayMethodId);
                     var foundCard = this.getCardDataById(this.cartData.PayMethodId || this.consumerData.PayMethodId);
                     if (foundCard) {

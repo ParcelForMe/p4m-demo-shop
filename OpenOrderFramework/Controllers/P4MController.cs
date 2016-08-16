@@ -44,6 +44,27 @@ namespace OpenOrderFramework.Controllers
             var cart = GetP4MCartFromLocalCart();
             if (localCart == null || cart == null || cart.Items.Count == 0)
                 return Redirect("/home");
+
+            var token = Response.Cookies["gfsCheckoutToken"].Value;
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
+                var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
+                    uri,
+                    "ambitious_alice",
+                    "m@dhatt3r");
+
+                var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
+                token = Base64Encode(tokenResponse.AccessToken);
+                Response.Cookies["gfsCheckoutToken"].Value = token;
+                Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+            }
+            ViewBag.AccessToken = token;
+
+            var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
+
+            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson.Result);
+
             // Return the view
             return View("P4MCheckout");
         }

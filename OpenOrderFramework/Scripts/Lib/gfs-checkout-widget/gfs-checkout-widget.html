@@ -451,161 +451,167 @@
         <map-region-manager id="regionManager"></map-region-manager>
 
 		<div id="widgetContainer">
-			<div class="header">
-				<input name="deliveryTypePanel" id="standardDeliveriesOption" on-click="_toggleStandardDeliveryPanelCollapse" type="radio" value="{{defaultDelivery}}" />
-				<label for="standardDeliveriesOption">
-					<h3>{{standardDeliveryTitle}}</h3>
-				</label>
-			</div>
+            <div id="pages" selected="0">
+                <div class="page" id="pageStandard">
+                    <div class="header">
+                        <input name="deliveryTypePanel" id="standardDeliveriesOption" on-click="_toggleStandardDeliveryPanelCollapse" type="radio" value="{{defaultDelivery}}" />
+                        <label for="standardDeliveriesOption">
+                            <h3>{{standardDeliveryTitle}}</h3>
+                        </label>
+                    </div>
 
-            <iron-collapse id="standardDeliveryPanel">
-                <div class="toggle-content">
-                    <div id="standard-loading" class="loading"><paper-spinner active id="standard-spinner"></paper-spinner></div>
-                    <ul class="separated">
-                        <template is="dom-repeat" items="{{standardRates}}" sort="sortServices">
-                            <li class="gfsStd">
-                                <input name="shipping_method" on-click="updateDeliveryOptionsEvent" type="radio" checked="{{item.selected}}" value="{{item.id}}" id="{{item.id}}" class="radio standard-delivery-selection" />
-                                <label for$="{{item.id}}">
-                                    <span class="methodname">{{item.methodTitle}}</span>
-                                    <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                    <span>{{item.deliveryDateRange}}</span>
-                                </label>
-                            </li>
+                    <iron-collapse id="standardDeliveryPanel">
+                        <div class="toggle-content">
+                            <div id="standard-loading" class="loading"><paper-spinner active id="standard-spinner"></paper-spinner></div>
+                            <ul class="separated">
+                                <template is="dom-repeat" items="{{standardRates}}" sort="sortServices">
+                                    <li class="gfsStd">
+                                        <input name="shipping_method" on-click="updateDeliveryOptionsEvent" type="radio" checked="{{item.selected}}" value="{{item.id}}" id="{{item.id}}" class="radio standard-delivery-selection" />
+                                        <label for$="{{item.id}}">
+                                            <span class="methodname">{{item.methodTitle}}</span>
+                                            <span class="price">{{currencySymbol}}{{item.price}}</span>
+                                            <span>{{item.deliveryDateRange}}</span>
+                                        </label>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </iron-collapse>
+
+                    <div class="header">
+                        <input name="deliveryTypePanel" id="calendarDeliveriesOption" on-click="_toggleCalendarPanelCollapse" type="radio" value="{{defaultDelivery}}" />
+                        <label for="calendarDeliveriesOption">
+                            <h3>{{calendarDeliveryTitle}}</h3>
+                        </label>
+                    </div>
+
+                    <iron-collapse id="calendarPanel">
+
+                        <template is="dom-if" if="{{useCalendar}}">
+
+                            <div id="calendar-loading" class="loading">
+                                <paper-spinner active id="calendar-spinner"></paper-spinner>
+                            </div>
+
+                            <div class="row">
+                                <div>
+                                    <brick-calendar id="calendar-widget" class="gfs-checkout hidden" controls first-weekday-num=0></brick-calendar>
+                                    <!-- Clicking on a day in the calendar sets _selectedDayDeliveries -->
+                                </div>
+                                <div>
+                                    <div id="calendar-delivery-options" class="hidden">
+                                        <h4>{{calendarDayPrompt}}</h4>
+                                        <ul class="separated">
+                                            <template is="dom-repeat" items="{{_selectedDayDeliveries.deliveries}}" sort="sortDayDefiniteServices">
+
+                                                <li class="delivery-place">
+                                                    <input type="radio"
+                                                           name="shipping_method"
+                                                           value="{{item.id}}"
+                                                           id="{{item.id}}"
+                                                           checked="{{item.selected}}"
+                                                           on-click="updateDayDeliveryOptionsEvent"
+                                                           class="radio calendar-delivery-selection" />
+                                                    <span class="gfsmethodname">
+                                                        {{item.methodTitle}}
+                                                        <span class="price">{{currencySymbol}}{{item.price}}</span>
+                                                    </span>
+                                                </li>
+
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
-                    </ul>
+                    </iron-collapse>
+
+
+                    <div class="p4m-button" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
                 </div>
-            </iron-collapse>
-
-            <div class="header">
-                <input name="deliveryTypePanel" id="calendarDeliveriesOption" on-click="_toggleCalendarPanelCollapse" type="radio" value="{{defaultDelivery}}" />
-                <label for="calendarDeliveriesOption">
-                    <h3>{{calendarDeliveryTitle}}</h3>
-                </label>
-            </div>
-
-            <iron-collapse id="calendarPanel">
-
-                <template is="dom-if" if="{{useCalendar}}">
-
-                    <div id="calendar-loading" class="loading">
-                        <paper-spinner active id="calendar-spinner"></paper-spinner>
+                <div class="page" id="pageDroppoints" opened="{{_droppointOpened}}">
+                    <div class="p4m-button" on-click="showPage_Standard">Back</div>
+                    <div class="header">
+                        <input name="deliveryTypePanel" id="dropPointDeliveriesOption" type="radio" value="{{defaultDelivery}}" /><label for="dropPointDeliveriesOption"><h3>{{dropPointTitle}}</h3></label>
+                    </div>
+                    <div id="toggleDropPointsViewControls">
+                        <div class="toggle-label">List&nbsp;<i class="fa fa-ellipsis-v"></i></div>
+                        <paper-toggle-button id="toggleDropPointsView" class="gfs-toggle" on-change="_showDropPointsView" active="true" checked></paper-toggle-button>
+                        <div class="toggle-label"><i class="fa fa-map-marker"></i>&nbsp;Map</div>
                     </div>
 
-                    <div class="row">
-                        <div>
-                            <brick-calendar id="calendar-widget" class="gfs-checkout hidden" controls first-weekday-num=0></brick-calendar>
-                            <!-- Clicking on a day in the calendar sets _selectedDayDeliveries -->
+                    <div class="gfsDropPoint" id="mapContainer">
+                        <div class="search-postcode-wrap">
+                            <input type="text" id="droppointAddress" class="form-control" placeholder="Find alternative postcode" />
+                            <div type="submit" id="droppointSubmit" class="btn btn-default" on-click="_findPostcode">Find</div>
+                            <div id="wrongPostoce"></div>
                         </div>
-                        <div>
-                            <div id="calendar-delivery-options" class="hidden">
-                                <h4>{{calendarDayPrompt}}</h4>
-                                <ul class="separated">
-                                    <template is="dom-repeat" items="{{_selectedDayDeliveries.deliveries}}" sort="sortDayDefiniteServices">
 
-                                        <li class="delivery-place">
-                                            <input type="radio"
-                                                   name="shipping_method"
-                                                   value="{{item.id}}"
-                                                   id="{{item.id}}"
-                                                   checked="{{item.selected}}"
-                                                   on-click="updateDayDeliveryOptionsEvent"
-                                                   class="radio calendar-delivery-selection" />
-                                            <span class="gfsmethodname">
-                                                {{item.methodTitle}}
-                                                <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                            </span>
-                                        </li>
 
-                                    </template>
-                                </ul>
+                        <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
+                            <div id="droppoint_overlay" style="height: {{mapHeight}}px; display: block">
+                                <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
+                                    <img src="./images/x.png" alt="close" />
+                                </div>
+                                <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" container-class="overlay" show-distance="false" show-opening-hours="true"></gfs-droppoint>
+                            </div>
+                        </div>
+                        <div class="hidden">
+                            <div id="droppoint_info" on-click="_showDropPointDetails">
+                                <gfs-droppoint id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" button-type="tick"></gfs-droppoint>
+                                <div id="droppoint_detail_link">
+                                    <a class="droppoint_info"> View Opening Times </a>
+                                </div>
+                            </div>
+                        </div>
+                        <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
+                        <div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div>
+
+                        <div id="gfsMapCanvas">
+                            <div class="loading">
+                                <paper-spinner active id="map-spinner"></paper-spinner>
                             </div>
                         </div>
                     </div>
-                </template>
-            </iron-collapse>
 
-            <div class="header">
-                <input name="deliveryTypePanel" id="dropPointDeliveriesOption" on-click="_toggleDropPointPanelCollapse" type="radio" value="{{defaultDelivery}}" /><label for="dropPointDeliveriesOption"><h3>{{dropPointTitle}}</h3></label>
-            </div>
-            <iron-collapse id="dropPointPanel" opened="{{_droppointOpened}}">
-
-                <div id="toggleDropPointsViewControls">
-                    <div class="toggle-label">List&nbsp;<i class="fa fa-ellipsis-v"></i></div>
-                    <paper-toggle-button id="toggleDropPointsView" class="gfs-toggle" on-change="_showDropPointsView" active="true" checked></paper-toggle-button>
-                    <div class="toggle-label"><i class="fa fa-map-marker"></i>&nbsp;Map</div>
-                </div>
-
-                <div class="gfsDropPoint" id="mapContainer">
-                    <div class="search-postcode-wrap">
-                        <input type="text" id="droppointAddress" class="form-control" placeholder="Find alternative postcode" />
-                        <div type="submit" id="droppointSubmit" class="btn btn-default" on-click="_findPostcode">Find</div>
-                        <div id="wrongPostoce"></div>
-                    </div>
-
-
-                    <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
-                        <div id="droppoint_overlay" style="height: {{mapHeight}}px; display: block">
-                            <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
-                                <img src="./images/x.png" alt="close" />
+                    <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
+                    <div id="dropPointListContainer" class="hidden">
+                        <h4>Drop Points</h4>
+                        <div class="cardList">
+                            <div id="list-loading" class="loading">
+                                <paper-spinner active id="list-spinner"></paper-spinner>
                             </div>
-                            <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" container-class="overlay" show-distance="false" show-opening-hours="true"></gfs-droppoint>
-                        </div>
-                    </div>
-                    <div class="hidden">
-                        <div id="droppoint_info" on-click="_showDropPointDetails">
-                            <gfs-droppoint id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" button-type="tick"></gfs-droppoint>
-                            <div id="droppoint_detail_link">
-                                <a class="droppoint_info"> View Opening Times </a>
-                            </div>
-                        </div>
-                    </div>
-                    <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
-					<div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div>
-
-                    <div id="gfsMapCanvas">
-                        <div class="loading">
-                            <paper-spinner active id="map-spinner"></paper-spinner>
-                        </div>
-                    </div>
-                </div>
-
-
-                <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
-                <div id="dropPointListContainer" class="hidden">
-                    <h4>Drop Points</h4>
-                    <div class="cardList">
-                        <div id="list-loading" class="loading">
-                            <paper-spinner active id="list-spinner"></paper-spinner>
-                        </div>
-                        <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
-                            <gfs-droppoint show-opening-hours="true" container-class="dp-card" button-type="standard" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
-                        </template>
-                    </div>
-                </div>
-                <div>
-                    <div id="droppoint-delivery-options">
-                        <h4>{{dropPointDeliveryTitle}}</h4>
-                        <ul class="separated">
-                            <template is="dom-repeat" items="{{_selectedDroppoints}}" sort="sortServices">
-
-                                <li class="delivery-place">
-                                    <input type="radio"
-                                           name="shipping_method"
-                                           value="{{item.id}}"
-                                           id="{{item.id}}"
-                                           on-click="updateDeliveryOptionsEvent"
-                                           class="radio droppoint-delivery-selection" />
-                                    <label for$="{{item.id}}">
-                                        <span class="gfsmethodname">{{item.methodTitle}}</span>
-                                        <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                        <span>{{item.deliveryDateRange}}</span>
-                                    </label>
-                                </li>
+                            <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
+                                <gfs-droppoint show-opening-hours="true" container-class="dp-card" button-type="standard" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
                             </template>
-                        </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div id="droppoint-delivery-options">
+                            <h4>{{dropPointDeliveryTitle}}</h4>
+                            <ul class="separated">
+                                <template is="dom-repeat" items="{{_selectedDroppoints}}" sort="sortServices">
+
+                                    <li class="delivery-place">
+                                        <input type="radio"
+                                               name="shipping_method"
+                                               value="{{item.id}}"
+                                               id="{{item.id}}"
+                                               on-click="updateDeliveryOptionsEvent"
+                                               class="radio droppoint-delivery-selection" />
+                                        <label for$="{{item.id}}">
+                                            <span class="gfsmethodname">{{item.methodTitle}}</span>
+                                            <span class="price">{{currencySymbol}}{{item.price}}</span>
+                                            <span>{{item.deliveryDateRange}}</span>
+                                        </label>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </iron-collapse>
+            </div>
+
         </div>
         <input type="text" value="{{_selectedDropPoint.droppointId}}" id="dropPointRadio" class="hidden" />
         <paper-toast id="errorNotification" class="fit-bottom"></paper-toast>
@@ -983,12 +989,17 @@
 
 					// check which is the default delivery option
                     switch (this.defaultDelivery) {
-                    	case 'Standard':
-                    		return this.$.standardDeliveryPanel.opened = true;
-                    	case 'Express':
-                    		return this.$.calendarPanel.opened = true;
+                        case 'Standard':
+                            this.showPage_Standard();
+                            this.$.standardDeliveryPanel.opened = true;
+                            break;
+                        case 'Express':
+                            this.showPage_Standard();
+                            this.$.calendarPanel.opened = true;
+                            break;
                     	case 'CollectionPoint':
-                    		return this.$.dropPointPanel.opened = true;
+                    	    this.showPage_Droppoints();
+                    	    break;
                     }
                 }
             },
@@ -1030,14 +1041,13 @@
                 window.setTimeout(this._delayedInit.bind(this), 0);
             },
 
-            _handleError: function(e) {
+            _handleError: function (e) {
+                //zzz
             	// hide all services except standard
             	this.$$("#calendarDeliveriesOption").parentNode.classList.add("hidden");
             	this.$$("#dropPointDeliveriesOption").parentNode.classList.add("hidden");
-
             	this.$$('#standard-loading').classList.add('hidden');
             	this.$.standardDeliveriesOption.checked = "checked";
-
 
             	// create an array for polymer
             	this.standardRates = [];
@@ -1067,7 +1077,7 @@
 
             	this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
 
-            	this.fire('selectedServiceChanged', this.selectedServiceDetails);
+            	this.fire('selectedservicechanged', this.selectedServiceDetails);
 
             },
 
@@ -1101,12 +1111,12 @@
                 this._processInputData();
 
                 if (this.useDropPoints) {
-                    if (this.defaultDelivery === 'CollectionPoint') {
-                        this.$$(".search-postcode-wrap").classList.remove('hidden');
-                        this.$$("#droppoint-delivery-options").classList.remove('hidden');
+                    //if (this.defaultDelivery === 'CollectionPoint') {
+                        //this.$$(".search-postcode-wrap").classList.remove('hidden');
+                       // this.$$("#droppoint-delivery-options").classList.remove('hidden');
                         this._makeMap();
                         this._loadDroppointMarkers(this._dropPoints);
-                    }
+                    //}
                     // sort droppoint data
                     this._findAllDeliveryDroppoints();
                 }
@@ -1297,7 +1307,8 @@
                 window.setTimeout(this._markDeliveryDays.bind(this), 500);
             },
 
-            _makeMap: function() {
+            _makeMap: function () {
+                debugger;
                 var self = this;
 
                 var home = null;
@@ -1379,17 +1390,17 @@
                     }
                 });
 
- //               google.maps.event.addListener(self._map, 'bounds_changed', function() {
- //                   // initialise region manager
- //                   var bounds = self._map.getBounds();
- //                   var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
- //                   var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
- //                   self.$.regionManager.addRegion([northEast, southWest]);
- //                   console.log("initalise region manager" + bounds);
- //                   // remove the listener
- //                   google.maps.event.clearListeners(self._map, 'bounds_changed');
- //               });
-                // this._loadDroppointMarkers();
+                google.maps.event.addListener(self._map, 'bounds_changed', function() {
+                    // initialise region manager
+                    var bounds = self._map.getBounds();
+                    var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
+                    var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
+                    self.$.regionManager.addRegion([northEast, southWest]);
+                    console.log("initalise region manager" + bounds);
+                    // remove the listener
+                    google.maps.event.clearListeners(self._map, 'bounds_changed');
+                });
+                this._loadDroppointMarkers();
             },
 
             _loadDroppointMarkers: function (dropPointsArray) {
@@ -1981,7 +1992,7 @@
 					this.selectedServiceDetails.collectionPoint = null;
 					this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
 				}
-				this.fire('selectedServiceChanged', this.selectedServiceDetails);
+				this.fire('selectedservicechanged', this.selectedServiceDetails);
 				this.fire("getStandardSelectedService", this.selectedServiceDetails);
 			},
 
@@ -2025,7 +2036,7 @@
 			},
 
 			_toggleDropPointPanelCollapse: function (e) {
-				this._toggleCollapse('dropPointPanel');
+/*
 				this.$$(".search-postcode-wrap").classList.remove('hidden');
 				this.$$("#droppoint-delivery-options").classList.remove('hidden');
 
@@ -2046,6 +2057,7 @@
 				this._makeMap();
                 this._loadDroppointMarkers(this._dropPoints);
                 this._fixMapMarker();
+                */
             },
 
 			_toggleStandardDeliveryPanelCollapse: function (e) {
@@ -2144,8 +2156,8 @@
                     this.selectedServiceDetails.collectionPoint = null;
                     this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
                 }
-                this.fire('selectedServiceChanged', this.selectedServiceDetails);
-
+                this.fire('selectedservicechanged', this.selectedServiceDetails);
+                /*
                 if (this.$.standardDeliveriesOption.checked === true)
                     this.fire("getStandardSelectedService", this.selectedServiceDetails);
 
@@ -2154,7 +2166,7 @@
 
                 if (this.$.dropPointDeliveriesOption.checked === true) {
                     this.fire("getDroppointSelectedService", this.selectedServiceDetails);
-                }
+                }*/
             },
 
             updateDayDeliveryOptionsEvent: function(e) {
@@ -2167,7 +2179,22 @@
                 if (e.target.checked) {                    
                     this.updateDeliveryOptions(e.target.id);
                 }
-            }
+			},
+
+			showPage_Standard: function () {
+			    //this.$.pages.selectIndex(0);
+			    this.$.pageStandard.classList.remove("hidden")
+			    this.$.pageDroppoints.classList.add("hidden")
+			},
+
+			showPage_Droppoints: function () {
+			    //this.$.pages.selectIndex(1);
+			    this.$.pageStandard.classList.add("hidden")
+			    this.$.pageDroppoints.classList.remove("hidden")
+			    this.$.dropPointDeliveriesOption.checked = true;
+
+			}
+
         });
     </script>
 </dom-module>
