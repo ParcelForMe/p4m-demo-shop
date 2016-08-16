@@ -19,6 +19,7 @@
             </template>
                      
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
+            <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">{{paypalText}}</div>
             <p class="p4m-error">{{errorMsg}}</p>   
       
         </div>
@@ -52,7 +53,7 @@
     <script>
         var States = {
             CVV_NEEDED: 0,
-            NOT_PURCHASED: 1,         
+            NOT_PURCHASED: 1,
             PURCHASING: 2,
             FAILED_PURCHASE: 3,
             PURCHASED: 4
@@ -73,6 +74,14 @@
                     notify: true
                 },
 
+                usePaypal: {
+                    type: Boolean,
+                    value: false
+                },
+                paypalText: {
+                    type: String,
+                    value: "Pay with Paypal"
+                },
 
                 btnMsgNotPurchased: {
                     type: String,
@@ -137,10 +146,7 @@
 
             onCvv: function (e) {
                 var card = this.$$('#card');
-                if (!card) {
-                    this._state = States.CVV_NEEDED;
-                }
-                else if (!card.cvv || card.cvv === "") {
+                if (!card || !card.cvv || card.cvv === "") {
                     this._state = States.CVV_NEEDED;
                 }
                 else {
@@ -163,11 +169,20 @@
                 }
             },
 
+            buyViaPaypal: function () {
+                if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE || this._state === States.CVV_NEEDED) {
+                    this._state = States.PURCHASING;
+                    this.$.localApi.call('paypalSetup', { cartId: this.cartData.Id, cartTotal: this.cartData.Total }, null, this.onPaypalSetup.bind(this));
+                }
+            },
+
             load: function () {
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
                 this._state = States.CVV_NEEDED;
+                if (this.usePaypal)
+                    this.$.p4mPaypalButton.classList.remove("hidden");
             },
 
             onPurchase: function (e) {
@@ -190,6 +205,25 @@
                             window.location.href = this.redirectUrl;
                         }
                     }
+                }
+            },
+
+            paypalUrl: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=",
+
+            onPaypalSetup: function (e) {
+                if (e.Success == false) {
+                    this.errorMsg = this.msgFailedPayment;
+                    var card = this.$$('#card');
+                    if (!card || !card.cvv || card.cvv === "") {
+                        this._state = States.CVV_NEEDED;
+                    }
+                    else {
+                        this._state = States.FAILED_PURCHASE;
+                    }
+                }
+                else {
+                    // we have a token from PP so now we can launch PP in a popup
+                    this.open(this.paypalUrl + token, "paypalWindow", 650, 750);
                 }
             },
 
@@ -222,19 +256,24 @@
                 document.body.appendChild(form);
 
                 // open the popup
-                var w = 650, h = 750;
-                var left = (screen.width / 2) - (w / 2);
-                var top = (screen.height / 2) - (h / 2);
-                window.open('', 'p4m3DSecurePopup', 'toolbar=no, location=no, directories=no, status=no, menubar=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+                this.openPopup('', 'p4m3DSecurePopup', 650, 750);
                 // submit the form from this window into the popup
                 form.submit();
                 // remove the form from this window
                 form.remove();
             },
 
+            openPopup: function(url, id, w, h) {
+                // open the popup
+                var left = (screen.width / 2) - (w / 2);
+                var top = (screen.height / 2) - (h / 2);
+                window.open(url, id, 'toolbar=no, location=no, directories=no, status=no, menubar=yes, copyhistory=no, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+            },
+
             onCardSelected: function (e) {
                 this.updateUi();
             },
+
             updateUi: function () {
         
                 if (!this._loggedIn || !this.cartData) {                    
@@ -273,6 +312,8 @@
                 this.buttonText = this.btnMsgNotPurchased;
                 this.$.p4mBuyNowButton.classList.add('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.remove('disabled');
+                this.$.p4mPaypalButton.classList.add('p4m-button-active');
+                this.$.p4mPaypalButton.classList.remove('disabled');
                 this.setLoadingState(false);
                 this.topClass = "active";
             },
@@ -281,6 +322,8 @@
                 this.buttonText = this.btnMsgNotValid; //"Cart empty";
                 this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.add('disabled');
+                this.$.p4mPaypalButton.classList.remove('p4m-button-active');
+                this.$.p4mPaypalButton.classList.add('disabled');
                 this.setLoadingState(false);
                 this.topClass = "invalid";
             },
@@ -289,7 +332,9 @@
                 this.buttonText = this.btnMsgNeedCvv; //"Enter CVV";
                 this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.add('disabled');
-                this.setLoadingState(false);             
+                this.$.p4mPaypalButton.classList.add('p4m-button-active');
+                this.$.p4mPaypalButton.classList.remove('disabled');
+                this.setLoadingState(false);
                 this.topClass = "invalid";
                 this._state = States.CVV_NEEDED;
                 var card = this.$$('#card');
@@ -302,6 +347,8 @@
                 this.buttonText = this.btnMsgBuying;//"Please wait...";
                 this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.add('disabled');
+                this.$.p4mPaypalButton.classList.remove('p4m-button-active');
+                this.$.p4mPaypalButton.classList.add('disabled');
                 this.setLoadingState(true);
                 this.topClass = "buying";
             },
@@ -310,6 +357,8 @@
                 this.buttonText = this.btnMsgComplete; //"Purchase complete";
                 this.$.p4mBuyNowButton.classList.remove('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.add('disabled');
+                this.$.p4mPaypalButton.classList.remove('p4m-button-active');
+                this.$.p4mPaypalButton.classList.add('disabled');
                 this.setLoadingState(false);
                 this.topClass = "complete";
             },
@@ -318,6 +367,8 @@
                 this.buttonText = this.btnMsgFailed;
                 this.$.p4mBuyNowButton.classList.add('p4m-button-active');
                 this.$.p4mBuyNowButton.classList.remove('disabled');
+                this.$.p4mPaypalButton.classList.add('p4m-button-active');
+                this.$.p4mPaypalButton.classList.remove('disabled');
                 this.setLoadingState(false);
                 this.topClass = "failed";
             },

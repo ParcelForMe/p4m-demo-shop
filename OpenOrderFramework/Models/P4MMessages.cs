@@ -45,6 +45,11 @@ namespace OpenOrderFramework.Models
         public decimal Amount { get; set; }
     }
 
+    public class TokenMessage : P4MBaseMessage
+    {
+        public string Token { get; set; }
+    }
+
     public class CartUpdateMessage : CartTotalsMessage
     {
         public List<P4MDiscount> Discounts { get; set; }

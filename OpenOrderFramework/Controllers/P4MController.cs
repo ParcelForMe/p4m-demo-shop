@@ -347,7 +347,6 @@ namespace OpenOrderFramework.Controllers
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
-                //var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
@@ -380,10 +379,12 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("p4m/paypal")]
-        public async Task<JsonResult> PaypalPurchase(string cartId, decimal cartTotal)
+        [Route("p4m/paypalSetup")]
+        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal)
         {
-            var result = new PurchaseMessage();
+            // this is the first part of a paypal transaction, which sends a request from P4M to Realex
+            // when this returns we redirect the consumer to PP in a popup window
+            var result = new TokenMessage();
             try
             {
                 // validate that the cart total from the widget is correct to prevent cart tampering in the browser
@@ -402,17 +403,14 @@ namespace OpenOrderFramework.Controllers
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await client.GetAsync(string.Format("{0}paypal/{1}", P4MConstants.BaseApiAddress, cartId));
+                var apiResult = await client.GetAsync(string.Format("{0}paypalSetup/{1}", P4MConstants.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
-                var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
-                if (!purchaseResult.Success)
-                    throw new Exception(purchaseResult.Error);
+                var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
+                if (!setupResult.Success)
+                    throw new Exception(setupResult.Error);
                 // retailer has opted to use 3D Secure and the consumer is enrolled
-                result.ACSUrl = purchaseResult.ACSUrl;
-                result.PaReq = purchaseResult.PaReq;
-                result.ACSResponseUrl = purchaseResult.ACSResponseUrl;
-                result.P4MData = purchaseResult.P4MData;
+                result.Token = setupResult.Token;
             }
             catch (Exception e)
             {
