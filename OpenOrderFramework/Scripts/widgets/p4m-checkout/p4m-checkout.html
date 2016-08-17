@@ -40,7 +40,7 @@
                         </iron-page>
                         <iron-page name="deliveryPage">
 
-                            <gfs-checkout gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
+                            <gfs-checkout gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -393,6 +393,15 @@
                 }
             },
 
+            toggleDetailExpansion: function(expand) {             
+                if (expand) {
+                    this.$.panelContainer.classList.add('smallSummary');
+                }
+                else {
+                    this.$.panelContainer.classList.remove('smallSummary');
+                }
+            },
+
             onSelectPaymentMethod: function (e) {
                 var updCart = this.selectedCard !== undefined && this.selectedCard !== null;
                 this.set('cartData.PayMethodId', e.detail.Id);
@@ -486,18 +495,21 @@
             },
 
             onSelectTab: function(e) {
-                if (e.detail && e.detail.item && e.detail.item.getAttribute('name') == "deliveryPage") {
-                    this.$.panelContainer.classList.add('smallSummary');
-                }
-                else {
-                    this.$.panelContainer.classList.remove('smallSummary');
-                }
+
             },
 
             onGfsServiceChanged: function (e) {
                 console.log("p4m widget: onGfsServiceChanged():", e);
                 this.updateShipping(e.detail);
             },
+
+            onGfsShowDroppoints: function (e) {
+                this.toggleDetailExpansion(true);
+            },
+
+            onGfsShowStandard: function (e) {
+                this.toggleDetailExpansion(false);
+            }
 
 
         });

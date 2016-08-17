@@ -147,16 +147,6 @@
                 z-index: 0 !important;
             }
 
-            paper-toggle-button.gfs-toggle {
-                display: inline-block;
-                --paper-toggle-button-checked-bar-color: #909090;
-                --paper-toggle-button-checked-button-color: #909090;
-                --paper-toggle-button-checked-ink-color: #909090;
-                --paper-toggle-button-unchecked-bar-color: #909090;
-                --paper-toggle-button-unchecked-button-color: #909090;
-                --paper-toggle-button-unchecked-ink-color: #909090;
-            }
-
             a.droppoint_info,
             a.droppoint_info:visited,
             a.droppoint_info:active {
@@ -349,16 +339,21 @@
             }
 
             .search-postcode-wrap {
-                margin: 10px 0;
-                width: 265px;
+                display: flex;
+                flex-direction: row;
+                xmargin: 10px 0;
+                xwidth: 265px;
             }
 
-            #droppointAddress.form-control {
+            #droppointAddress {
                 display: inline-block;
-                width: 203px;
+                margin-top: 10px;
+                margin-left: 10px;
+                padding: 0px 5px 0px 5px;
+                height: 41px;
             }
 
-            #wrongPostoce {
+            #wrongPostoce { /* TODO: Check if this is a typo */
                 color: #d60000;
             }
 
@@ -366,6 +361,38 @@
                 --paper-toast-background-color: red;
                 --paper-toast-color: white;
             }
+
+            .gfs-button {
+                margin: 10px;
+                padding: 10px;
+                background-color: rgba(200, 200, 200, 1.0);
+                color: #000000;
+                border-radius: 4px;
+                text-align: center;
+                xborder: solid 1px #E0E0E0;
+                cursor: pointer; 
+                min-width: 100px;
+            }
+
+            .gfs-button:hover {
+                background-color: rgba(68, 144, 68, 1.0);
+                color: #FFFFFF;
+                transition-duration: 0.5s;
+            }
+
+            .gfs-button.small-button {
+                width: 100px;
+                padding: 5px 10px 5px 10px;
+            }
+
+            .gfs-button.search-button {
+                width: 100px;
+                margin-left: 0px;
+
+                border-bottom-left-radius: 0px;
+                border-top-left-radius: 0px;
+            }
+            
 
             @media (max-width: 493px) {
                 .header label h3 {
@@ -527,23 +554,27 @@
                     </iron-collapse>
 
 
-                    <div class="p4m-button" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
+                    <div class="gfs-button" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
                 </div>
                 <div class="page" id="pageDroppoints" opened="{{_droppointOpened}}">
-                    <div class="p4m-button" on-click="showPage_Standard">Back</div>
-                    <div class="header">
+                    <div class="gfs-button small-button" on-click="showPage_Standard">Back</div>
+                    <div class="header" style="display:none">
                         <input name="deliveryTypePanel" id="dropPointDeliveriesOption" type="radio" value="{{defaultDelivery}}" /><label for="dropPointDeliveriesOption"><h3>{{dropPointTitle}}</h3></label>
                     </div>
                     <div id="toggleDropPointsViewControls">
-                        <div class="toggle-label">List&nbsp;<i class="fa fa-ellipsis-v"></i></div>
-                        <paper-toggle-button id="toggleDropPointsView" class="gfs-toggle" on-change="_showDropPointsView" active="true" checked></paper-toggle-button>
-                        <div class="toggle-label"><i class="fa fa-map-marker"></i>&nbsp;Map</div>
+                        <template is="dom-if" if="{{_showingDroppointsMap}}">
+                            <a href="#" on-tap="_toggleDroppointView">View as a list</a>
+                        </template>
+                        <template is="dom-if" if="{{_showingDroppointsList}}">
+                            <a href="#" on-tap="_toggleDroppointView">View as a map</a>
+                        </template>
+
                     </div>
 
                     <div class="gfsDropPoint" id="mapContainer">
                         <div class="search-postcode-wrap">
-                            <input type="text" id="droppointAddress" class="form-control" placeholder="Find alternative postcode" />
-                            <div type="submit" id="droppointSubmit" class="btn btn-default" on-click="_findPostcode">Find</div>
+                            <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
+                            <div type="submit" id="droppointSubmit" class="gfs-button search-button" on-click="_findPostcode">Find</div>
                             <div id="wrongPostoce"></div>
                         </div>
 
@@ -845,6 +876,16 @@
                     value: "Choose"
                 },
 
+                _showingDroppointsMap: {
+                    type: Object,
+                    value: true
+                },
+
+                _showingDroppointsList: {
+                    type: Object,
+                    value: false
+                },
+
                 _infoWindow: {
                     type: Object
                 },
@@ -1114,8 +1155,9 @@
                     //if (this.defaultDelivery === 'CollectionPoint') {
                         //this.$$(".search-postcode-wrap").classList.remove('hidden');
                        // this.$$("#droppoint-delivery-options").classList.remove('hidden');
-                        this._makeMap();
-                        this._loadDroppointMarkers(this._dropPoints);
+                        this._makeMap(); //eee
+                       // this._loadDroppointMarkers(this._dropPoints);
+                        this._showDropPointsView();
                     //}
                     // sort droppoint data
                     this._findAllDeliveryDroppoints();
@@ -1383,6 +1425,7 @@
                         };
                         marker = new google.maps.Marker(homeMarkerConfig);
                         self._map.setCenter(homeMarkerConfig.position);
+                        self._loadDroppointMarkers();
                     } else {
                         console.log('Google Maps API ERROR - Geocode was not successful for the following reason: ' + status);
                         $("#gfsMapCanvas").append("<div style='color: #d60000; margin: 20px auto; text-align: center;'> Postcode <strong>" + self.initialAddress + "</strong> return zero restults </div>");
@@ -1399,7 +1442,7 @@
                     // remove the listener
                     google.maps.event.clearListeners(self._map, 'bounds_changed');
                 });
-                this._loadDroppointMarkers();
+                
             },
 
             _loadDroppointMarkers: function (dropPointsArray) {
@@ -1597,17 +1640,34 @@
                 this._dropPointDetailsClass = "fade-in";
             },
 
-            _showDropPointsView: function() {
-                if (this.$.toggleDropPointsView.checked) {
+            _toggleDroppointView: function() {
+                this._showingDroppointsList = !this._showingDroppointsList;
+                this._showingDroppointsMap = !this._showingDroppointsMap;
+                this._showDropPointsView();
+            },
+
+            _showDropPointsView: function () {
+                var self = this;
+                if (this._showingDroppointsMap) {
+                    //Show droppoints
                     this.$.dropPointListContainer.classList.add('hidden');
                     this.$.mapContainer.classList.remove('hidden');
                     //this._makeMap();
                     this._loadDroppointMarkers(this._dropPoints);
                     this._fixMapMarker();
-                } else {
+
+                    //This little hack fixes the grey map problem
+                    window.setTimeout(function () {
+                        google.maps.event.trigger(self._map, 'resize');
+                    }, 100);
+
+
+                }
+                else {
                     this.$.dropPointListContainer.classList.remove('hidden');
                     this.$.mapContainer.classList.add('hidden');
                 }
+
             },
 
             _hideDropPointDetails: function() {
@@ -1670,8 +1730,8 @@
                 }
             },
 
-            _fixMapMarker: function() {
-                if (this.$.toggleDropPointsView.checked && this._selectedDropPoint) {
+            _fixMapMarker: function () {
+                if (this._showingDroppointsMap && this._selectedDropPoint) {
                     this._currentMarker = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     this._infoWindow.open(this._map, this._currentMarker);
                     //this.$['infobox-droppoint'].render();
@@ -1984,6 +2044,7 @@
 				this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeFrom).add(method.maxDD - method.minDD, 'days').toISOString();
 				this.selectedServiceDetails.checked = cheapestMethod.selected;
 				this.selectedServiceDetails.currencySymbol = this.currencySymbol;
+                //TODO: Use data model to record state instead
 				if (this.$.dropPointDeliveriesOption.checked == true) {
 					this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
 					this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
@@ -2006,9 +2067,6 @@
                     item.opened = false;
                 });
                 myElement.opened = !myState;
-                window.setTimeout(function() {
-                    google.maps.event.trigger(self._map, 'resize');
-                }, 100);
             },
 
 			_toggleCalendarPanelCollapse: function (e) {
@@ -2148,6 +2206,7 @@
 
                 this.selectedServiceDetails.checked = true;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
+                //TODO: Use data model to record state, not UI elements
                 if (this.$.dropPointDeliveriesOption.checked == true) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
                     this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
@@ -2184,6 +2243,7 @@
 			    //this.$.pages.selectIndex(0);
 			    this.$.pageStandard.classList.remove("hidden")
 			    this.$.pageDroppoints.classList.add("hidden")
+			    this.fire('show-standard');
 			},
 
 			showPage_Droppoints: function () {
@@ -2191,6 +2251,8 @@
 			    this.$.pageStandard.classList.add("hidden")
 			    this.$.pageDroppoints.classList.remove("hidden")
 			    this.$.dropPointDeliveriesOption.checked = true;
+			    this._showDropPointsView();
+			    this.fire('show-droppoints');
 
 			}
 
