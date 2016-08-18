@@ -40,7 +40,7 @@
                         </iron-page>
                         <iron-page name="deliveryPage">
 
-                            <gfs-checkout gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -257,6 +257,35 @@
 
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
+                var p4mCollectPoints = this.consumerData.Addresses
+                    .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude) ? item : null })
+                    .map(function (item) {
+                        var gfsAddress = {
+                            droppointId: item.DropPointId,
+                            geoLocation: {
+                                
+                                postCode: item.PostCode,
+                                addressLines: [item.Street1],
+                                town: item.City,
+                                coordinates: {
+                                    latitude: item.Latitude,
+                                    longitude: item.Longitude                                
+                                },
+                                countryCode: item.CountryCode,
+                                county: "",
+                                directions: ""
+                            },
+                            providerId: item.DropPointProviderId,
+                            providerLogo: "https://s-media-cache-ak0.pinimg.com/avatars/pelithepenguin_1453991623_140.jpg",
+                            providerName: item.CompanyName
+
+                           
+                        };
+                        return gfsAddress;
+                    });
+                this.$.gfsCheckoutWidget.setPreferredDroppoints(p4mCollectPoints);
+
+                this.$.gfsCheckoutWidget._showPreferredDroppoints();
             },
 
             onConsumerDataChange: function(newVal, oldVal) {

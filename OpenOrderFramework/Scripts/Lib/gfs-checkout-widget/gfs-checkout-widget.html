@@ -595,7 +595,7 @@
                                 <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
                                     <img src="./images/x.png" alt="close" />
                                 </div>
-                                <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" container-class="overlay" show-distance="false" show-opening-hours="true"></gfs-droppoint>
+                                <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" container-class="overlay" show-distance="true" show-opening-hours="true"></gfs-droppoint>
                             </div>
                         </div>
                         <div class="hidden">
@@ -615,8 +615,9 @@
                                 </div>
                             </div>
                             <div id="preferredDroppoints">
+                                <h2>My Collection Points</h2>
                                 <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" show-opening-hours="false" container-class="" button-type="tick" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
+                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
                                 </template>
                             </div>
                         </div>
@@ -633,7 +634,7 @@
                                 <paper-spinner active id="list-spinner"></paper-spinner>
                             </div>
                             <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
-                                <gfs-droppoint show-opening-hours="true" container-class="dp-card" button-type="standard" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
+                                <gfs-droppoint show-opening-hours="true" show-distance="true" container-class="dp-card" button-type="standard" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
                             </template>
                         </div>
                     </div>
@@ -1252,7 +1253,7 @@
 
 
 			setPreferredDroppoints: function (droppointList) {
-			    this._preferredDroppoints = droppointList.filter(function (item) { return true });
+			    this._preferredDroppoints = droppointList;//.filter(function (item) { return true });
 			    if (this._preferredDroppoints.length > 0) {
 			        this._showPreferredDroppoints();
 			    }
@@ -1732,10 +1733,14 @@
 
             _fixMapMarker: function () {
                 if (this._showingDroppointsMap && this._selectedDropPoint) {
-                    this._currentMarker = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
+                    var dp = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId);
+                    if (dp) {
+                        this._currentMarker = dp.marker;
+                    }
+                    else {
+                        console.error("Couldn't find drop point by ID", this._selectedDropPoint.droppointId);
+                    }
                     this._infoWindow.open(this._map, this._currentMarker);
-                    //this.$['infobox-droppoint'].render();
-                    //this.$['overlay-droppoint'].render();
 
                     if (this.selectedMarkerIcon) {
                         this._currentMarker.setIcon(this._getSelectedMarkerIcon());
