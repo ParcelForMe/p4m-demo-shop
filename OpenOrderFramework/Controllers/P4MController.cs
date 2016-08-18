@@ -440,6 +440,21 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        [Route("p4m/paypalCancel")]
+        public HttpResponseMessage PaypalCancel(string pasref, string token, string PayerID)
+        {
+            // just close the PP popup
+            var htmlResponse = new HttpResponseMessage();
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html><html><body>");
+            sb.AppendLine("<script>window.close();</script>");
+            sb.AppendLine("</body></html>");
+            htmlResponse.Content = new StringContent(sb.ToString());
+            htmlResponse.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
+            return htmlResponse;
+        }
+
         public async Task<int> CreateLocalOrderAsync(PurchaseMessage purchase)
         {
             Order order = null;
@@ -520,20 +535,24 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("p4m/3dsPurchaseComplete/{cartId}")]
-        public async Task<ActionResult> ThreeDSPurchaseComplete(string cartId)
+        [Route("p4m/purchaseComplete/{cartId}")]
+        public async Task<ActionResult> PurchaseComplete(string cartId)
         {
             var cartMessage = await GetCartFromP4MAsync(cartId);
-            var purchase = new PurchaseMessage
+            if (cartMessage.Success)
             {
-                Cart = cartMessage.Cart,
-                BillTo = cartMessage.BillTo,
-                DeliverTo = cartMessage.DeliverTo
-            };
-            var orderId = await CreateLocalOrderAsync(purchase);
-            ShoppingCart.GetCart(this).EmptyCart();
-            HttpContext.Session[ShoppingCart.CartSessionKey] = null;
-            return RedirectToAction("Complete", "Checkout", new { id = orderId });
+                var purchase = new PurchaseMessage
+                {
+                    Cart = cartMessage.Cart,
+                    BillTo = cartMessage.BillTo,
+                    DeliverTo = cartMessage.DeliverTo
+                };
+                var orderId = await CreateLocalOrderAsync(purchase);
+                ShoppingCart.GetCart(this).EmptyCart();
+                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                return RedirectToAction("Complete", "Checkout", new { id = orderId });
+            }
+            return View("error");
         }
         //        public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
         //        {
