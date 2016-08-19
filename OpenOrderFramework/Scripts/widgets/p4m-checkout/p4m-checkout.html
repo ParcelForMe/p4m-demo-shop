@@ -258,7 +258,8 @@
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
                 var p4mCollectPoints = this.consumerData.Addresses
-                    .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude) ? item : null })
+                    //TODO: Find out why DropPointProviderId is always 0
+                    .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude && /*item.DropPointProviderId &&*/ item.DropPointId) })
                     .map(function (item) {
                         var gfsAddress = {
                             droppointId: item.DropPointId,
@@ -284,8 +285,6 @@
                         return gfsAddress;
                     });
                 this.$.gfsCheckoutWidget.setPreferredDroppoints(p4mCollectPoints);
-
-                this.$.gfsCheckoutWidget._showPreferredDroppoints();
             },
 
             onConsumerDataChange: function(newVal, oldVal) {
