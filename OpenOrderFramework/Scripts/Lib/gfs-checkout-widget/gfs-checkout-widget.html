@@ -1687,37 +1687,6 @@
                 }
             },
 
-            // for peli marker ico
-            //_getMarkerIcon: function () {
-            //	if (this.markerIcon) {
-            //		if (this.markerIcon[0] === "/") {
-            //			return this.markerIcon;
-            //		}
-            //		else {
-            //			return this.resolveUrl(this.markerIcon);
-            //		}
-            //	}
-            //	else {
-            //		return null;
-            //	}
-
-            //},
-
-            //_getSelectedMarkerIcon: function () {
-            //	if (this.selectedMarkerIcon) {
-            //		if (this.markerIcon[0] === "/") {
-            //			return this.markerIcon;
-            //		}
-            //		else {
-            //			return this.resolveUrl(this.selectedMarkerIcon);
-            //		}
-            //	}
-            //	else {
-            //		return this._getMarkerIcon();
-            //	}
-
-            //},
-
             _selectDropPoint: function(marker) {
                 marker.customData.chosen = true;
                 this.fire("droppoint-changed", marker.customData);
@@ -1740,20 +1709,26 @@
                     var dp = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId);
                     if (dp) {
                         this._currentMarker = dp.marker;
-                        this._infoWindow.open(this._map, this._currentMarker);
-
-                        if (this.selectedMarkerIcon) {
-                            this._currentMarker.setIcon(this._getSelectedMarkerIcon());
-                        } else {
-                            //this._currentMarker.setAnimation(google.maps.Animation.BOUNCE);
-                        }
-
-                        this.$.dropPointRadio.setAttribute('checked', 'true');
-                        this._map.panTo(this._currentMarker.getPosition());
                     }
                     else {
-                        console.error("Couldn't find drop point by ID", this._selectedDropPoint.droppointId);
+                        //Make a marker
+                        this._loadDroppointMarkers([this._selectedDropPoint]);
+                        this._dropPoints.push(this._selectedDropPoint);
+                        this._currentMarker = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     }
+                    this._infoWindow.open(this._map, this._currentMarker);
+
+                    /*
+                    if (this.selectedMarkerIcon) {
+                        this._currentMarker.setIcon(this._getSelectedMarkerIcon());
+                    } else {
+                        //this._currentMarker.setAnimation(google.maps.Animation.BOUNCE);
+                    }*/
+
+                    this.$.dropPointRadio.setAttribute('checked', 'true');
+                    this._map.panTo(this._currentMarker.getPosition());
+                    
+
 
                 }
             },

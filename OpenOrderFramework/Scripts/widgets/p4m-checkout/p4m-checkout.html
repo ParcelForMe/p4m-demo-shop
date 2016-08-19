@@ -263,10 +263,11 @@
                     .map(function (item) {
                         var gfsAddress = {
                             droppointId: item.DropPointId,
+                            droppointDescription: item.CompanyName,
                             geoLocation: {
-                                
+                                    
                                 postCode: item.PostCode,
-                                addressLines: [item.Street1],
+                                addressLines: [item.CompanyName, item.Street1],
                                 town: item.City,
                                 coordinates: {
                                     latitude: item.Latitude,
@@ -278,9 +279,7 @@
                             },
                             providerId: item.DropPointProviderId,
                             providerLogo: "https://s-media-cache-ak0.pinimg.com/avatars/pelithepenguin_1453991623_140.jpg",
-                            providerName: item.CompanyName
-
-                           
+                            providerName: item.Label                        
                         };
                         return gfsAddress;
                     });
