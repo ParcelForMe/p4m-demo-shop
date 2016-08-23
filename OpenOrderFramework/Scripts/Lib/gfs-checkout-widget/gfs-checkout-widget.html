@@ -94,6 +94,15 @@
                 float: right;
             }
 
+            #preferredDroppoints {
+                height: 400px; /* same as map */
+                overflow-y: scroll;
+            }
+
+            #preferredDroppoints h3 {
+                margin-top: -4px;
+            }
+
             #locateme {
                 bottom: 40px;
                 right: 40px;
@@ -619,15 +628,12 @@
                                 </div>
                             </div>
                             <div id="preferredDroppoints">
-                                <h2>My Collection Points</h2>
+                                <h3>My Collection Points</h3>
                                 <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                     <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
                                 </template>
                             </div>
                         </div>
-
-     
-
                     </div>
 
                     <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
