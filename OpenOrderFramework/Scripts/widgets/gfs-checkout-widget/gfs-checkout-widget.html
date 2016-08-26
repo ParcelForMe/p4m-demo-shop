@@ -1,17 +1,17 @@
-﻿<link rel="import" href="../polymer/polymer.html" />
-<link rel="import" href="../brick-calendar/dist/brick-calendar.html" />
-<link rel="import" href="../iron-ajax/iron-ajax.html" />
-<link rel="import" href="../iron-list/iron-list.html" />
-<link rel="import" href="../iron-collapse/iron-collapse.html" />
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<link rel="import" href="../../Lib/brick-calendar/dist/brick-calendar.html" />
+<link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../../Lib/iron-list/iron-list.html" />
+<link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
-<link rel="import" href="../gfs-delivery-address/gfs-delivery-address.html" />
-<link rel="import" href="../gfs-checkout-widget/map-region-manager/map-region-manager.html" />
-<link rel="import" href="../paper-toggle-button/paper-toggle-button.html" />
-<link rel="import" href="../paper-spinner/paper-spinner.html" />
-<link rel="import" href="../paper-toast/paper-toast.html">
-<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../../Lib/gfs-delivery-address/gfs-delivery-address.html" />
+<link rel="import" href="../../Lib/gfs-checkout-widget/map-region-manager/map-region-manager.html" />
+<link rel="import" href="../../Lib/paper-toggle-button/paper-toggle-button.html" />
+<link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+<link rel="import" href="../../Lib/paper-toast/paper-toast.html">
+<link rel="import" href="../../Lib/paper-button/paper-button.html">
 
-<script src="../momentjs/min/moment.min.js"></script>
+<script src="../../Lib/momentjs/min/moment.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI&libraries=places"></script>
 <link href="css/custom.css" rel="stylesheet" />
 
@@ -792,7 +792,7 @@
 
                 mapHeight: {
                     type: Number,
-                    value: 500
+                    value: 400
                 },
 
                 homeIcon: {
@@ -881,6 +881,7 @@
 
                 _dropPoints: {
                     type: Array,
+                    value: [],
                     notify: true
                 },
 
@@ -1111,27 +1112,19 @@
             },
 
             _handlePatchResponse: function (e) {
-                //this.$$('#list-spinner').active = false;
-                //this.$$('#list-loading').classList.add('hidden');
-                //this.$$('#standard-loading').classList.add('hidden');
-                //this.$$("#map-spinner").classList.add('hidden');
-
-                // if (e.detail.response != 'OK')
-                // {
-                //     this.$.errorNotification = "Error Occured.. " + e.detail.response;
-                //     this.$.errorNotification.show();
-                // }
-                // close no matter what, can't hold the order up because of api issues
                 this.fire("close-checkout-complete", e.detail.response);
             },
 
             _handleGetDroppointsResponse: function(e) {
-                // assign the new data.
+                //New droppoint data
                 this._data = e.detail.response;
+                this._data.droppoints = this._processDroppointList(this._data.droppoints);
                 this._dropPoints = this._dropPoints.concat(this._data.droppoints);
-                console.log("GET Droppoints:" + this._data.droppoints);
+                this._processPreferredDroppoints(); //Replaces non-native objects with native GFS ones where possible, for data binding
                 this._findAllDeliveryDroppoints();
                 this._loadDroppointMarkers(this._data.droppoints);
+
+                //TODO: Replace this with a method or event; we want to avoid referencing the View from logic code
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
             },
 
@@ -1167,15 +1160,6 @@
             },
 
 			_processInputData: function () {
-				/*if (this._data.dayDefinite)
-				{
-					this._data.dayDefinite.forEach((function(item)
-					{
-						var tokens = item.code.split('_');
-						var timeStampStr = tokens[tokens.length-1];
-						item.timeStamp = parseInt(timeStampStr) * 1000;
-					}).bind(this));
-				}*/
 				this._processDayDefiniteData();
 				this._processNonDayDefiniteData();
 			},
@@ -1263,19 +1247,34 @@
 
 
 			setPreferredDroppoints: function (droppointList) {
+			    var self = this;
 			    this._preferredDroppoints = droppointList;//.filter(function (item) { return true });
+			    this._processPreferredDroppoints();
+
 			    if (this._preferredDroppoints.length > 0) {
 			        this._showPreferredDroppoints();
 			    }
 			},
 
-			droppointOpenChanged: function (_droppointOpened) {
-			    if (this._selectedDropPoint) {
-			        this.set('_selectedDropPoint.chosen', _droppointOpened);
-			        this.fire("droppoint-changed", this._selectedDropPoint);
-			    }
+			_processPreferredDroppoints: function()
+			{
+			    //Now replace preferred items with real data
+			    var self = this;
+			    this._preferredDroppoints = this._preferredDroppoints.map(function (item) {
+			        var existingItem = self._droppointById(null, item.droppointId);
+			        if (existingItem) {
+			            existingItem.chosen = item.chosen;
+			        }
+			        return existingItem || item;
+			    });
 			},
 
+			_processDroppointList: function(dropPointList)
+			{
+                //Ensure that droppoint data is formatted correctly
+			    return dropPointList.map(function (item) { item.collectionPoint = true; return item; })	
+			},
+            
             // find the earliest of each service
             _getGroupedByService: function() {
                 var self = this;
@@ -1473,7 +1472,7 @@
 						//console.log(pointItem.geoLocation.coordinates.longitude, pointItem.geoLocation.coordinates.latitude);
 						marker = new google.maps.Marker(markerConfig);
 						marker.addListener('click', function (clickedMarker) {
-							self._selectDropPoint(this);
+							self._selectDropPointMarker(this);
 						});
 						// add a link to the marker to get to it from the droppoint, need to animate and centre the marker if selecting from list view
 						pointItem.marker = marker;
@@ -1612,33 +1611,30 @@
                     var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
                     var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
                     var viewPort = [northEast, southWest];
-                    //console.log('ViewPort:', JSON.stringify(viewPort));
-                    // only continue if the viewport is different
-                    if ((northEast[0] != southWest[0]) || (northEast[1] != southWest[1])) {
-                        var boxes = [];
-                        self.$.regionManager.coveredRectangles.forEach(function(rect) {
-                            boxes.push(rect.toGeoBox());
-                        });
-                        //console.log('Covered rectangles:', JSON.stringify(boxes));
-                        // self._drawBoxes(boxes, 'red');
 
-                        boxes = [];
-                        (self.$.regionManager.getUncoveredRectangles(viewPort)).forEach(function(rect) {
-                            boxes.push(rect.toGeoBox());
-                        });
+                    var boxes = [];
 
-                       // console.log('Boxes to request:', JSON.stringify(boxes));
-                        // self._drawBoxes(boxes, 'green');
+                    self.$.regionManager.getUncoveredRectangles(viewPort).forEach(function(rect) {
+                        boxes.push(rect.toGeoBox());
+                    });
 
-                        if (boxes.length > 0) {
-                            self.$.regionManager.addRegion([northEast, southWest]);
-                            self.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + self._sessionId + "&regions=" + JSON.stringify(boxes);
-                            self.$.ajaxGetDroppoints.headers = self._computeHeader();
-                            self.$.ajaxGetDroppoints.generateRequest();
-                        }
-                        // remove the listener
-                        google.maps.event.clearListeners(self._map, 'bounds_changed');
+                    // console.log('Boxes to request:', JSON.stringify(boxes));
+                    // self._drawBoxes(boxes, 'green');
+
+                    if (boxes.length > 0) {
+                        console.log("Requesting", boxes.length, "regions");
+                        self.$.regionManager.addRegion([northEast, southWest]);
+                        self.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + self._sessionId + "&regions=" + JSON.stringify(boxes);
+                        self.$.ajaxGetDroppoints.headers = self._computeHeader();
+                        self.$.ajaxGetDroppoints.generateRequest();
                     }
+                    else {
+                        console.log("Not requesting any regions");
+                    }
+                    // remove the listener
+                    // TODO: Understand why we're removing the listener
+                    google.maps.event.clearListeners(self._map, 'bounds_changed');
+    
                 }
             },
 
@@ -1667,8 +1663,6 @@
                     window.setTimeout(function () {
                         google.maps.event.trigger(self._map, 'resize');
                     }, 100);
-
-
                 }
                 else {
                     this.$.dropPointListContainer.classList.remove('hidden');
@@ -1693,20 +1687,42 @@
                 }
             },
 
-            _selectDropPoint: function(marker) {
-                marker.customData.chosen = true;
-                this.fire("droppoint-changed", marker.customData);
+            //Select a drop point marker
+            _selectDropPointMarker: function (marker) {
+                this.selectDropPoint(marker.customData.droppointId);
+                //marker.customData.chosen = true;
+                //this.fire("droppoint-changed", marker.customData);
+            },
+
+            selectDropPoint: function(dropPointId) {
+                //Select the drop point, if it is known.
+                var dp = this._droppointById(null, dropPointId);
+                if (dp) {
+                    this._selectedDropPoint = dp;
+                    //this.set('_selectedDropPoint.chosen', true);
+                    this.fire("droppoint-changed", dp);
+                }
+                else {
+                    console.log("Couldn't find droppoint", dropPointId);
+                }
             },
 
             _unselectDropPoint: function() {
                 if (this._selectedDropPoint) {
-                    this._selectedDropPoint.chosen = false;
-                    if (this._currentMarker)
-                        this._currentMarker.setAnimation(null);
                     if (this._infoWindow) {
                         this._infoWindow.close();
                     }
                     this._hideDropPointDetails();
+                    this._selectedDropPoint = null;
+                }
+            },
+
+            chooseDropPoint: function(droppointId) {
+                var dp = this._droppointById(null, droppointId);
+                if (dp) {
+                    this.selectDropPoint(droppointId);
+                    this.set('_selectedDropPoint.chosen', true);
+                    this.fire("droppoint-changed", this._selectedDropPoint);
                 }
             },
 
@@ -1719,23 +1735,12 @@
                     else {
                         //Make a marker
                         this._loadDroppointMarkers([this._selectedDropPoint]);
-                        this._dropPoints.push(this._selectedDropPoint);
-                        this._currentMarker = this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
+                        this._currentMarker = this._selectedDropPoint.marker; //this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     }
                     this._infoWindow.open(this._map, this._currentMarker);
 
-                    /*
-                    if (this.selectedMarkerIcon) {
-                        this._currentMarker.setIcon(this._getSelectedMarkerIcon());
-                    } else {
-                        //this._currentMarker.setAnimation(google.maps.Animation.BOUNCE);
-                    }*/
-
                     this.$.dropPointRadio.setAttribute('checked', 'true');
                     this._map.panTo(this._currentMarker.getPosition());
-                    
-
-
                 }
             },
 
@@ -1743,22 +1748,20 @@
                 console.log('_droppointChanged', e.detail);
                 var changedDroppoint = e.detail;
 
-                // todo provider id needs to be in here as well
                 if (this._selectedDropPoint)
                     if (changedDroppoint.droppointId !== this._selectedDropPoint.droppointId)
                         this._unselectDropPoint();
 
                 this._selectedDropPoint = changedDroppoint;
-                // find the marker for animation
                 this._fixMapMarker();
                 var deliveries = this._findDropPointDeliveries(this._selectedDropPoint.providerId);
                 this._selectedDroppoints = deliveries;
-
-                //If a drop point has been chosen and it's not the previous choice, unchoose it
-                console.log('_droppointChanged', e.detail);
             },
 
-            _droppointById: function(providerId, droppointId) {
+            _droppointById: function (providerId, droppointId) {
+                if (!this._dropPoints) {
+                    return;
+                }
                 for (var i = 0; i < this._dropPoints.length; i++) {
                     if (/*(this._dropPoints[i].providerId === providerId) && */(this._dropPoints[i].droppointId === droppointId)) {
                         return this._dropPoints[i];
@@ -2035,7 +2038,8 @@
 				this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeFrom).add(method.maxDD - method.minDD, 'days').toISOString();
 				this.selectedServiceDetails.checked = cheapestMethod.selected;
 				this.selectedServiceDetails.currencySymbol = this.currencySymbol;
-                //TODO: Use data model to record state instead
+
+			    //TODO: Use data model to record state instead
 				if (this.$.dropPointDeliveriesOption.checked == true) {
 					this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
 					this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
@@ -2082,31 +2086,6 @@
 				this.fire("getCalendarSelectedService");
 				this.fire("getDroppointSelectedService");
 			},
-
-			_toggleDropPointPanelCollapse: function (e) {
-/*
-				this.$$(".search-postcode-wrap").classList.remove('hidden');
-				this.$$("#droppoint-delivery-options").classList.remove('hidden');
-
-				var standardItems = document.getElementsByClassName("standard-delivery-selection");
-				for (var i = 0; i < standardItems.length; i++) {
-					standardItems[i].checked = false;
-				}
-
-				var calendarItems = document.getElementsByClassName("calendar-delivery-selection");
-				for (var i = 0; i < calendarItems.length; i++) {
-					calendarItems[i].checked = false;
-				}
-
-				this.fire("getStandardSelectedService");
-				this.fire("getCalendarSelectedService");
-				this.fire("getDroppointSelectedService");
-
-				this._makeMap();
-                this._loadDroppointMarkers(this._dropPoints);
-                this._fixMapMarker();
-                */
-            },
 
 			_toggleStandardDeliveryPanelCollapse: function (e) {
 				this._toggleCollapse('standardDeliveryPanel');
@@ -2197,6 +2176,7 @@
 
                 this.selectedServiceDetails.checked = true;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
+
                 //TODO: Use data model to record state, not UI elements
                 if (this.$.dropPointDeliveriesOption.checked == true) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;

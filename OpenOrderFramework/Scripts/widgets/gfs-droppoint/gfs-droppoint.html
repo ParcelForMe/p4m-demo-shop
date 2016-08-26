@@ -132,25 +132,25 @@
 				transition: opacity 300ms ease-in-out 
 			}
 
-				.choose-droppoint:hover {
-					opacity: .85;
+			.choose-droppoint:hover {
+				opacity: .85;
+			}
+
+			.choose-droppoint.chosen {
+				background-color: #4CAF50; /* Green */
+			}
+
+				.choose-droppoint.chosen:hover {
+					opacity: 1;
 				}
 
-				.choose-droppoint.chosen {
-					background-color: #4CAF50; /* Green */
-				}
+			.choose-droppoint.unchoose {
+				background-color: #d60000; /* Green */
+			}
 
-					.choose-droppoint.chosen:hover {
-						opacity: 1;
-					}
-
-				.choose-droppoint.unchose {
-					background-color: #d60000; /* Green */
-				}
-
-					.choose-droppoint.unchose:hover {
-						opacity: 1;
-					}
+			.choose-droppoint.unchoose:hover {
+				opacity: 1;
+			}
 
 			.dp-opening-hours table {
 				margin-top: 6px;
@@ -499,11 +499,18 @@
 				}
 			},
 
+			observers: [
+                "chosenChanged(droppointData.chosen)"
+			],
+
 
 			ready: function () {
 
 				var self = this;
 				this.initData();
+				if (!this.droppointData) {
+				    debugger;
+				}
 				if (this.buttonType === "none")
 				{
 					this.isTickButton = false;
@@ -562,19 +569,30 @@
 
 			//Global event handler
 			onDroppointChanged: function (e) {
-				this.render();
+			    var dp = e.detail;
+			    if (dp.droppointId == this.droppointData.droppointId) {
+			        return;
+			    }
+			    else if (e.detail.chosen) {
+			        this.set("droppointData.chosen", false);
+			    }
+				
 			},
 
 			//Local event fired
-			chosenChanged: function (e) {
-				if (typeof (this.droppointData.chosen) === "null") return;
+			chosenChanged: function () {
+			    //if (typeof (this.droppointData.chosen) === "null") return;
+			    this.render();
 				//Send global event
-				this.fire("droppoint-changed", this.droppointData);
+				//this.fire("droppoint-changed", this.droppointData);
 			},
 
 			render: function () {
-				this.initData();
-				if (this.droppointData.chosen) {
+			    //this.initData();
+			    if (!this.droppointData) {
+			        return;
+			    }
+				else if (this.droppointData.chosen) {
 					this.buttonClass = "chosen";
 					this.buttonText = "Chosen";
 				}
@@ -595,8 +613,8 @@
 					this.buttonText = "Choose";
 				}
 				else {
-					this.buttonClass = "unchose";
-					this.buttonText = "Unchose";
+					this.buttonClass = "unchoose";
+					this.buttonText = "Unchoose";
 				}
 			},
 
@@ -617,8 +635,9 @@
 			},
 
 			toggleChooseDropPoint: function () {
-				this.set("droppointData.chosen", !this.droppointData.chosen);
-				this.chosenChanged();
+			    this.set("droppointData.chosen", !this.droppointData.chosen);
+			    this.fire("droppoint-changed", this.droppointData);
+				//this.chosenChanged();
 			},
 
 			_getUtcTime: function (d) {
