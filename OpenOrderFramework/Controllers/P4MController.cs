@@ -507,8 +507,8 @@ namespace OpenOrderFramework.Controllers
             "{" +
               "\"Request\": {" +
                " \"DateRange\": {" +
-                  "\"DateFrom\": \"2016-08-16\"," +
-                  "\"DateTo\": \"2016-08-31\"" +
+                  "\"DateFrom\": \"2016-08-22\"," +
+                  "\"DateTo\": \"2016-09-05\"" +
                 "}," +
                 "\"Order\": {" +
                   "\"Transit\": {" +
