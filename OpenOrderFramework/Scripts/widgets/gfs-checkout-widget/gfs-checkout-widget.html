@@ -652,7 +652,7 @@
                         <div id="droppoint-delivery-options">
                             <h4>{{dropPointDeliveryTitle}}</h4>
                             <ul class="separated">
-                                <template is="dom-repeat" items="{{_selectedDroppoints}}" sort="sortServices">
+                                <template is="dom-repeat" items="{{_selectedDroppointDeliveries}}" sort="sortServices">
 
                                     <li class="delivery-place">
                                         <input type="radio"
@@ -983,10 +983,6 @@
                 "droppoint-changed": "_droppointChanged"
             },
 
-            observers: [
-                'droppointOpenChanged(_droppointOpened)'
-            ],
-
             // METHODS
 
             // This function is called as soon as the widget is ready
@@ -1136,6 +1132,8 @@
                     this._makeMap(); //eee
                     this._showDropPointsView();
                     this._findAllDeliveryDroppoints();
+                    this._dropPoints = this._processDroppointList(this._dropPoints);
+
                 }
                 if (this.useCalendar) {
                     this._makeCalendar();
@@ -1271,8 +1269,19 @@
 
 			_processDroppointList: function(dropPointList)
 			{
-                //Ensure that droppoint data is formatted correctly
-			    return dropPointList.map(function (item) { item.collectionPoint = true; return item; })	
+			    //Ensure that droppoint data is formatted correctly
+			    var self = this;
+			    var result = dropPointList.map(
+                    function (item) {
+                        item.collectionPoint = true;
+                        item.deliveries = self._findDropPointDeliveries(item.providerId);
+                        return item;
+                    }
+                 );
+			    result = result.filter(function (item) {
+			        return !self._dropPoints.find(function (dp) { dp.droppointId == item.droppointId });///zzzzzzzzz
+			    });
+			    return result;
 			},
             
             // find the earliest of each service
@@ -1754,8 +1763,9 @@
 
                 this._selectedDropPoint = changedDroppoint;
                 this._fixMapMarker();
-                var deliveries = this._findDropPointDeliveries(this._selectedDropPoint.providerId);
-                this._selectedDroppoints = deliveries;
+               
+                var deliveries = this._selectedDropPoint.deliveries; 
+                this._selectedDroppointDeliveries = deliveries; //TODO: just use _selectedDroppoint.deliveries
             },
 
             _droppointById: function (providerId, droppointId) {
@@ -1884,11 +1894,11 @@
 
             _findDropPointDeliveries: function(providerId) {
                 var self = this;
-                var droppointIndex = providerId;
-                if (typeof(this._deliveryDroppoints[droppointIndex]) !== "undefined") {
+                //var droppointIndex = providerId;
+                if (typeof (this._deliveryDroppoints[providerId]) !== "undefined") {
                     var results = [];
-                    for (var service in this._deliveryDroppoints[droppointIndex]) {
-                        var item = this._deliveryDroppoints[droppointIndex][service];
+                    for (var service in this._deliveryDroppoints[providerId]) {
+                        var item = this._deliveryDroppoints[providerId][service];
                         var obj = {
                             id: item.service.id,
                             methodTitle: item.service.methodTitle,
@@ -1913,7 +1923,7 @@
                 }
             },
 
-            _processDeliveryArray: function(obj) {
+            _processDeliveryArray: function (obj) {
                 var self = this;
                 obj.forEach(function(day) {
                     day.rates.forEach(function(service) {
