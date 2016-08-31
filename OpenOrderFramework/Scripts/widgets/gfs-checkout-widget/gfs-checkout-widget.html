@@ -89,18 +89,34 @@
                 float: left;
             }
 
-            #mainMapArea.showPreferredDroppoints #preferredDroppoints {
+
+            #mainMapArea.showPreferredDroppoints .preferredDroppoints {
                 width: 37%;
                 float: right;
-            }
-
-            #preferredDroppoints {
                 height: 400px; /* same as map */
-                overflow-y: scroll;
+                overflow-y: scroll;     
+                overflow-x: hidden;     
             }
 
-            #preferredDroppoints h3 {
-                margin-top: -4px;
+            #mainDropPointListArea #dropPointList {
+                width: 60%;
+                float: left;
+            }
+
+            #mainDropPointListArea .preferredDroppoints {
+                width: 37%;
+                float: right;   
+                overflow-x: hidden;          
+            }
+
+            .preferredDroppoints h3 {
+                margin-top: -4px 10px;
+                font-size: 20px;
+            }
+
+            #mainDropPointListArea .preferredDroppoints h3 {
+                margin-top: 4px 10px;
+                font-size: 20px;
             }
 
             #locateme {
@@ -191,6 +207,8 @@
                 font-size: 11px;
                 /*font-family: 'gotham_bookregular';*/
                 font-weight: bold;
+                height: 280px;
+                overflow-y: hidden;
             }
 
             a.droppoint_info:hover {
@@ -244,11 +262,7 @@
 
 
             /* mp customization */
-            #dropPointListContainer h3 {
-                margin: 20px 0 10px;
-                font-size: 20px;
-                border-bottom: 1px solid #ccc;
-            }
+
 
             .dp-card-margin {
                 margin: 0 20px 0 0;
@@ -641,7 +655,7 @@
                                     <paper-spinner active id="map-spinner"></paper-spinner>
                                 </div>
                             </div>
-                            <div id="preferredDroppoints">
+                            <div class="preferredDroppoints">
                                 <h3>My Collection Points</h3>
                                 <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                     <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
@@ -661,9 +675,21 @@
                             <div id="list-loading" class="loading">
                                 <paper-spinner active id="list-spinner"></paper-spinner>
                             </div>
-                            <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
-                                <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
-                            </template>
+                            <div id="mainDropPointListArea">
+                                <div id="dropPointList">
+                                    <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
+                                        <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                    </template>
+                                </div>
+
+                                <div class="preferredDroppoints">
+                                    <h3>My Collection Points</h3>
+                                    <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
+                                        <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                    </template>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>

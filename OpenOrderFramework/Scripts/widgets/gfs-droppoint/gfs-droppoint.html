@@ -237,8 +237,12 @@
             }
 
             .dp-large-card .dp-opening-hours {
-                width: 200px;
+                width: 280px;
                 padding-left: 10px;
+            }
+
+            .dp-large-card .dp-header {
+                width: 130px;
             }
 
             label {
@@ -403,8 +407,8 @@
                                                class="radio droppoint-delivery-selection" />
                                         <label for$="{{item.id}}">
                                             <span class="gfsmethodname">{{item.methodTitle}}</span>
-                                            <p class="price">{{currencySymbol}}{{item.price}}</p>
-                                            <p>{{item.deliveryDateRange}}</p>
+                                            <div class="price">{{currencySymbol}}{{item.price}}</div>
+                                            <div>{{item.deliveryDateRange}}</div><br />
                                         </label>
                                     </li>
                                 </template>
@@ -561,14 +565,19 @@
 
 			//Global event handler
 			onDroppointChanged: function (e) {
+			    console.log("gfs-droppoint: onDroppointChanged()");
 			    var dp = e.detail;
 			    if (dp.droppointId == this.droppointData.droppointId) {
+			        if (!this.droppointData.chosen) {
+			            this.droppointData.chosen = true;
+			            this.render();
+			        }
 			        return;
 			    }
 			    else if (e.detail.chosen) {
 			        this.set("droppointData.chosen", false);
 			    }
-				
+                				
 			},
 
 			//Local event fired
@@ -635,7 +644,7 @@
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    this.fire("droppoint-changed", this.droppointData);
 			    if (this.droppointData.chosen) {
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);			    			       
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	//TODO: This is wrong -- it should be in the event listener     			       
 			    }
 				//this.chosenChanged();
 			},
