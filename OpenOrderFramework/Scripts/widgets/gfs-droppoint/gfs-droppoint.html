@@ -18,7 +18,8 @@
 			}
 
 			li {
-				display: block;
+				display: flex;
+                flex-direction: row;
 			}
 
 			tr {
@@ -39,12 +40,6 @@
 				float: none;
 			}
 
-			.content-container-cols {
-				display: flex;
-				margin: auto;
-				width: 100%;
-			}
-
 			.no-button button {
 				display: none;
 			}
@@ -58,6 +53,15 @@
 			}
 
 			.dp-card {
+				padding: 10px;
+				margin: 10px;
+				background-color: #FAFAFA;
+				border-radius: 3px;
+				box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+				border: 1px solid #FAFAFA;
+			}
+
+            .dp-large-card {
 				padding: 10px;
 				margin: 10px;
 				background-color: #FAFAFA;
@@ -127,7 +131,7 @@
 				text-align: center;
 				text-decoration: none;
 				font-size: 16px;
-				float: right;
+				/*float: right;*/
 				cursor: pointer;
 				transition: opacity 300ms ease-in-out 
 			}
@@ -189,14 +193,14 @@
 			}
 
 			.open-late {
-				background-image: url('/bower_components/gfs-droppoint/images/opensign.png');
+				background-image: url('./images/opensign.png');
 				background-repeat: no-repeat;
 				background-size: 26px 26px;
 				width: 32px;
 			}
 
 			.parking {
-				background-image: url('/bower_components/gfs-droppoint/images/parking.png');
+				background-image: url('./images/parking.png');
 				background-repeat: no-repeat;
 				background-size: 32px 32px;
 				width: 32px;
@@ -223,14 +227,42 @@
             .dp-mini-card {
 			}
 
+            .dp-large-card {
+                width: auto;
+            }
+
+            .dp-large-card .content {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .dp-large-card .dp-opening-hours {
+                width: 200px;
+                padding-left: 10px;
+            }
+
+            label {
+                display: block;
+                margin-top: 4px;
+                padding-top: 2px;
+                padding-left: 4px;
+            }
+            /*
 			.dp-card:nth-child(2n+1) {
 				margin-right: 0;
 			}
-
-			.dp-card .content .dp-details {
+            
+			.dp-card .content .dp-details  {
 				width: 43%;
 				margin: 0 10px 0 0;
 			}
+
+            .dp-large-card .content .dp-details  {
+				width: 43%;
+				margin: 0 10px 0 0;
+			}
+            */
+
 
 			/* opening hours table style */
 			td.dp-day-time-slots {
@@ -241,10 +273,13 @@
 				font-size: 13px;
 			}
 
+            /*
 			.dp-day-time-slot:nth-child(2n) {
 				margin: 5px 0;
 				position: relative
 			}
+            */
+
 
 			.multi-times {
 				line-height: 20px
@@ -272,91 +307,10 @@
 				max-width: 200px;
 			}
 
+            input[type="radio"] {
+                display: inline-block;
+            }
 
-			@media (max-width: 976px) {
-				.dp-card {
-					min-width: 330px;
-					width: 100%;
-					margin: 10px 0;
-					display: block;
-				}
-
-					.dp-card .content {
-						display: block;
-					}
-
-				.dp-details {
-					float: left;
-				}
-
-				.dp-opening-hours {
-					float: left;
-				}
-
-				.dp-card-margin {
-					margin-right: 20px;
-				}
-
-				.dp-card .content .dp-details {
-					width: 120px;
-				}
-
-				.actions {
-					clear: both;
-				}
-			}
-
-			@media (max-width: 667px) {
-				.dp-card {
-					min-width: 286px;
-					max-width: 286px;
-				}
-
-				.dp-card .content .dp-details {
-					width: 95px;
-				}
-			}
-
-			@media (max-width: 375px) {
-				.dp-card {
-					min-width: 305px;
-				}
-			}
-
-			@media (max-width: 340px) {
-				.dp-card {
-					min-width: 250px;
-					margin: 10px 0;
-					display: block;
-				}
-
-                .dp-header {
-                    display: flex;
-                    flex-direction: row;
-                }
-
-				.dp-details {
-					float: left;
-				}
-
-				.dp-opening-hours {
-					float: left;
-				}
-
-				.dp-card-margin {
-					margin-right: 10px;
-				}
-
-				.dp-card .content .dp-details {
-					width: 80px;
-					/*margin-right: 18px;*/
-				}
-
-				#dp-address, #dp-distance, .dp-small-heading,
-				.dp-day-name, .dp-day-time-slot {
-					font-size: 11px;
-				}
-			}
 		</style>
 
 
@@ -432,11 +386,37 @@
 							<div class="parking"></div>
 						</div>-->
 					</div>
+
 				</template>
-			</div>
+                <template is="dom-if" if="{{showShippingOptions}}">
+                    <template is="dom-if" if="{{droppointData.chosen}}">
+                        <div class="shippingOptions">
+                            <div class="dp-small-heading">Collection options</div>
+                            <ul>
+                                <template is="dom-repeat" items="{{droppointData.deliveries}}" xsort="sortServices">
+                                    <li class="delivery-place">
+                                        <input type="radio"
+                                               name="shipping_method"
+                                               value="{{item.id}}"
+                                               id="dp-{{item.id}}"
+                                               on-click="onSelectOption"
+                                               class="radio droppoint-delivery-selection" />
+                                        <label for$="{{item.id}}">
+                                            <span class="gfsmethodname">{{item.methodTitle}}</span>
+                                            <p class="price">{{currencySymbol}}{{item.price}}</p>
+                                            <p>{{item.deliveryDateRange}}</p>
+                                        </label>
+                                    </li>
+                                </template>
+                            </ul>
+
+                        </div>
+                    </template>
+                </template>
+            </div>
 			<div class="actions">
 				<template is="dom-if" if="{{isStandardButton}}">
-					<div on-tap="toggleChooseDropPoint" on-mouseover="onHovered" on-mouseout="onUnHovered" class$="button choose-droppoint {{buttonClass}}">{{buttonText}}</div>
+					<div on-click="toggleChooseDropPoint" on-mouseover="onHovered" on-mouseout="onUnHovered" class$="button choose-droppoint {{buttonClass}}">{{buttonText}}</div>
 				</template>
 			</div>
 		</div>
@@ -469,9 +449,17 @@
 					type: Object,
 					value: false
 				},
+				showShippingOptions: {
+				    type: Object,
+                    value: false
+				},
 				containerClass: {
 					type: String,
 					value: "content-container"
+				},
+				currencySymbol: {
+				    type: String,
+				    value: "£"
 				},
 				/*chosen: {
                     type: Boolean,
@@ -540,7 +528,7 @@
 					var buildWeekCollection = [];
 					this.droppointData.weekCollectionSlots = [];
 					if (!this.droppointData.collectionSlots) this.droppointData.collectionSlots = [];
-
+					//console.log("Collection slots:", this.droppointData.collectionSlots.length);
 					this.droppointData.collectionSlots.forEach(function (collectionSlot) {
 						dayCount++;
 						if (dayCount <= 7) {
@@ -559,8 +547,12 @@
 							    //self.droppointData.weekCollectionSlots.push(collectionSlot);
 							    buildWeekCollection.push(collectionSlot);
 							}
+
 						}
 					});
+					if (buildWeekCollection.length == 0) {
+					    debugger;
+					}
 					this.set('_weekCollection', buildWeekCollection);
 					this.streetAddress = this.droppointData.geoLocation.addressLines[0] + ", " + this.droppointData.geoLocation.town + ", " + this.droppointData.geoLocation.postCode
 				}
@@ -634,11 +626,33 @@
 				}
 			},
 
+			selectThis: function () {
+			    console.log('selected');
+			    this.fire("droppoint-changed", this.droppointData);
+			},
+
 			toggleChooseDropPoint: function () {
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    this.fire("droppoint-changed", this.droppointData);
+			    if (this.droppointData.chosen) {
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);			    			       
+			    }
 				//this.chosenChanged();
 			},
+
+			onSelectOption: function(e) {
+			    this.fire('select-delivery-option', e.target.value); //TODO: Change to e.target.id -- no need to pass DOM element
+			},
+
+			autoSelectOption: function() {
+			    if (this.droppointData.deliveries.length) {
+			        this.$$('#dp-' + this.droppointData.deliveries[0].id).click();//checked = true;
+			    }
+			    else {
+			        console.error("No delivery options available");
+			    }
+			},
+
 
 			_getUtcTime: function (d) {
 				var utc = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());

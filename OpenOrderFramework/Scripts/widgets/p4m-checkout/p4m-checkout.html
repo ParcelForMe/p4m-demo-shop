@@ -35,12 +35,12 @@
                         <paper-tab>Addresses</paper-tab>
                     </paper-tabs>
                     <iron-pages selected="{{selectedTab}}" on-iron-select="onSelectTab">                   
-                        <iron-page name="cartPage">                       
+                        <iron-page id="cartPage">                       
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
-                        <iron-page name="deliveryPage">
+                        <iron-page id="deliveryPage">
 
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints-list="onGfsShowDroppointsAsList" on-show-droppoints-map="onGfsShowDroppointsAsMap" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -48,10 +48,10 @@
                             <template is="dom-if" if="{{useGfsCheckout}}">
                             </template>
                         </iron-page>
-                        <iron-page name="cardPage">
+                        <iron-page id="cardPage">
                             <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
                         </iron-page>
-                        <iron-page name="addressPage">
+                        <iron-page id="addressPage">
                             <p4m-address-list id="addressList" address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
                         </iron-page>
                     </iron-pages>                 
@@ -131,6 +131,9 @@
         }
         .smallSummary #summaryPanel.p4m-panel {
             width: 25%;
+        }
+        .price {
+            color: darkgreen;
         }
 
         
@@ -384,7 +387,8 @@
                             "Phone": collectPointAddress.phone,
                             "Latitude": collectPointAddress.coordinates.latitude,
                             "Longitude": collectPointAddress.coordinates.longitude,
-                            "DropPointProviderId": collectPointAddress.DropPointProviderId,
+                            //"DropPointProviderId": collectPointAddress.DropPointProviderId, //TODO! This looks wrong!
+                           
                             "DropPointId": collectPointId,
                             "CollectPrefOrder": prefOrder
                         },
@@ -409,7 +413,7 @@
                 }
             },
 
-            toggleDetailExpansion: function(expand) {             
+            toggleDetailExpansion: function (expand) {
                 if (expand) {
                     this.$.panelContainer.classList.add('smallSummary');
                 }
@@ -512,7 +516,12 @@
 
             onSelectTab: function (e) {
                 console.log(e.detail);
-                this.toggleDetailExpansion(false);
+                if (e.detail.item && e.detail.item.id !== "deliveryPage") {
+                    this.toggleDetailExpansion(false);
+                }
+                else {
+                    this.$.gfsCheckoutWidget.broadcastState();
+                }
             },
 
             onGfsServiceChanged: function (e) {
@@ -520,7 +529,11 @@
                 this.updateShipping(e.detail);
             },
 
-            onGfsShowDroppoints: function (e) {
+            onGfsShowDroppointsAsList: function(e) {
+                this.toggleDetailExpansion(false);
+            },
+
+            onGfsShowDroppointsAsMap: function (e) {
                 this.toggleDetailExpansion(true);
             },
 

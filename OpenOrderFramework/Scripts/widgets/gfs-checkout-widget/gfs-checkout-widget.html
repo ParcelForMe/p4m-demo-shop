@@ -156,6 +156,15 @@
                 margin: 0 0 20px;
             }
 
+            #mapTools, #listTools {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #viewAsList, #viewAsMap {
+                margin-top: 19px;
+            }
+
             .toggle-label {
                 display: inline-block;
                 font-size: 18px;
@@ -199,8 +208,9 @@
 
             .cardList {
                 display: flex;
-                flex-wrap: wrap;
-                height: 730px;
+                flex-direction: column;
+                xflex-wrap: wrap;
+                height: 630px;
                 overflow-x: hidden;
                 overflow-y: scroll;
             }
@@ -317,7 +327,7 @@
                 box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
                 /*box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 4px -3px rgba(0, 0, 0, 0.2)*/
             }
-
+            /*
             .droppoint-margin {
                 margin-right: 20px;
                 position: relative;
@@ -326,6 +336,7 @@
             .droppoint-margin:nth-child(2n+1) {
                 margin-right: 0;
             }
+            */
 
             #gfsMapCanvas {
                 margin: 0 0 20px;
@@ -404,10 +415,12 @@
                 transition-duration: 0.5s;
             }
 
-            .gfs-button.small-button {
-                width: 100px;
-                padding: 5px 10px 5px 10px;
-            }
+            /*
+                .gfs-button.small-button {
+                    width: 100px;
+                    padding: 5px 10px 5px 10px;
+                }
+            */
 
             .gfs-button.search-button {
                 width: 100px;
@@ -581,26 +594,27 @@
                     <div class="gfs-button" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
                 </div>
                 <div class="page" id="pageDroppoints" opened="{{_droppointOpened}}">
-                    <div class="gfs-button small-button" on-click="showPage_Standard">Back</div>
+                   
                     <div class="header" style="display:none">
                         <input name="deliveryTypePanel" id="dropPointDeliveriesOption" type="radio" value="{{defaultDelivery}}" /><label for="dropPointDeliveriesOption"><h3>{{dropPointTitle}}</h3></label>
                     </div>
-                    <div id="toggleDropPointsViewControls">
-                        <template is="dom-if" if="{{_showingDroppointsMap}}">
-                            <a href="#" on-tap="_toggleDroppointView">View as a list</a>
-                        </template>
-                        <template is="dom-if" if="{{_showingDroppointsList}}">
-                            <a href="#" on-tap="_toggleDroppointView">View as a map</a>
-                        </template>
 
-                    </div>
 
                     <div class="gfsDropPoint" id="mapContainer">
-                        <div class="search-postcode-wrap">
-                            <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
-                            <div type="submit" id="droppointSubmit" class="gfs-button search-button" on-click="_findPostcode">Find</div>
-                            <div id="wrongPostoce"></div>
+                        <div id="mapTools">
+                            <div class="search-postcode-wrap">
+                                <div class="gfs-button small-button" on-click="showPage_Standard">< Back</div>
+                                <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
+                                <div type="submit" id="droppointSubmit" class="gfs-button search-button" on-click="_findPostcode">Find</div>
+                                <div id="wrongPostoce"></div>
+                            </div>
+
+                            <div id="toggleDropPointsViewControls"> 
+                                <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a list</a>                               
+                            </div>
+                            
                         </div>
+
 
 
                         <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
@@ -612,10 +626,10 @@
                             </div>
                         </div>
                         <div class="hidden">
-                            <div id="droppoint_info" on-click="_showDropPointDetails">
-                                <gfs-droppoint id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" button-type="tick"></gfs-droppoint>
+                            <div id="droppoint_info">
+                                <gfs-droppoint id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}"  on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" button-type="tick"></gfs-droppoint>
                                 <div id="droppoint_detail_link">
-                                    <a class="droppoint_info"> View Opening Times </a>
+                                    <a class="droppoint_info" on-click="_showDropPointDetails"> View Opening Times </a>
                                 </div>
                             </div>
                         </div>
@@ -630,7 +644,7 @@
                             <div id="preferredDroppoints">
                                 <h3>My Collection Points</h3>
                                 <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
+                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                 </template>
                             </div>
                         </div>
@@ -638,37 +652,18 @@
 
                     <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
                     <div id="dropPointListContainer" class="hidden">
-                        <h4>Drop Points</h4>
+                        <div id="listTools">
+                            <div class="gfs-button small-button" on-click="showPage_Standard">< Back</div>
+                            <a href="#" id="viewAsMap" on-tap="_toggleDroppointView">View as a map</a>
+                        </div>
+                                         
                         <div class="cardList">
                             <div id="list-loading" class="loading">
                                 <paper-spinner active id="list-spinner"></paper-spinner>
                             </div>
                             <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
-                                <gfs-droppoint show-opening-hours="true" show-distance="true" container-class="dp-card" button-type="standard" droppoint-data="{{item}}" class="droppoint-margin"></gfs-droppoint>
+                                <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                             </template>
-                        </div>
-                    </div>
-                    <div>
-                        <div id="droppoint-delivery-options">
-                            <h4>{{dropPointDeliveryTitle}}</h4>
-                            <ul class="separated">
-                                <template is="dom-repeat" items="{{_selectedDroppointDeliveries}}" sort="sortServices">
-
-                                    <li class="delivery-place">
-                                        <input type="radio"
-                                               name="shipping_method"
-                                               value="{{item.id}}"
-                                               id="{{item.id}}"
-                                               on-click="updateDeliveryOptionsEvent"
-                                               class="radio droppoint-delivery-selection" />
-                                        <label for$="{{item.id}}">
-                                            <span class="gfsmethodname">{{item.methodTitle}}</span>
-                                            <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                            <span>{{item.deliveryDateRange}}</span>
-                                        </label>
-                                    </li>
-                                </template>
-                            </ul>
                         </div>
                     </div>
                 </div>
@@ -908,6 +903,11 @@
                     value: "Choose"
                 },
 
+                _showingDroppoints: {
+                    type: Object,
+                    value: false
+                },
+
                 _showingDroppointsMap: {
                     type: Object,
                     value: true
@@ -1031,12 +1031,12 @@
             },
 
             _handlePostResponse: function(e) {
-                console.log("Followup GET", new Date().getTime());
+               // console.log("Followup GET", new Date().getTime());
                 this._sessionId = e.detail.response.substring(e.detail.response.lastIndexOf("/") + 1);
             	this.$.ajaxGet.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
                 this.$.ajaxGet.headers = this._computeHeader();
 
-                console.log('sessionID', this._sessionId);
+                //console.log('sessionID', this._sessionId);
                 this.$.ajaxGet.generateRequest();
             },
 
@@ -1068,6 +1068,8 @@
             },
 
             _handleError: function (e) {
+                console.error("GFS Checkout Error", e);
+                console.warn("Using default shipping");
                 //zzz
             	// hide all services except standard
             	this.$$("#calendarDeliveriesOption").parentNode.classList.add("hidden");
@@ -1125,15 +1127,14 @@
             },
 
             _delayedInit: function() {
-                console.log("_delayedInit", new Date().getTime());
+                //console.log("_delayedInit", new Date().getTime());
                 this._processInputData();
 
                 if (this.useDropPoints) {
                     this._makeMap(); //eee
-                    this._showDropPointsView();
+                    //this._showDropPointsView();
                     this._findAllDeliveryDroppoints();
-                    this._dropPoints = this._processDroppointList(this._dropPoints);
-
+                    this._dropPoints = this._dropPoints.concat(this._processDroppointList(this._dropPoints));
                 }
                 if (this.useCalendar) {
                     this._makeCalendar();
@@ -1141,7 +1142,7 @@
 
                 this._checkForServices(this.defaultDelivery);
 
-                console.log("_delayedInit end", new Date().getTime());
+                //console.log("_delayedInit end", new Date().getTime());
 				//this._preselect();
             },
 
@@ -1274,13 +1275,15 @@
 			    var result = dropPointList.map(
                     function (item) {
                         item.collectionPoint = true;
+
+                        //TODO: This often seems to return delivery method IDs associated with the wrong provider?
                         item.deliveries = self._findDropPointDeliveries(item.providerId);
                         return item;
                     }
                  );
 			    result = result.filter(function (item) {
-			        return !self._dropPoints.find(function (dp) { dp.droppointId == item.droppointId });///zzzzzzzzz
-			    });
+			        return !self._dropPoints.find(function (dp) { return dp.droppointId == item.droppointId });
+			    }); 
 			    return result;
 			},
             
@@ -1341,6 +1344,9 @@
                     return rate.id == id
                 });
                 if (resultList.length) {
+                    if (resultList.length > 1) {
+                        console.warn("getDeliveryRateById(): Multiple matches");
+                    }
                     return resultList[0];
                 } else return null;
             },
@@ -1666,8 +1672,9 @@
                     this.$.mapContainer.classList.remove('hidden');
                     //this._makeMap();
                     this._loadDroppointMarkers(this._dropPoints);
-                    this._fixMapMarker();
-
+                    this._fixMapMarker();                       
+                    this.fire('show-droppoints-map');
+                    
                     //This little hack fixes the grey map problem
                     window.setTimeout(function () {
                         google.maps.event.trigger(self._map, 'resize');
@@ -1676,6 +1683,7 @@
                 else {
                     this.$.dropPointListContainer.classList.remove('hidden');
                     this.$.mapContainer.classList.add('hidden');
+                    this.fire('show-droppoints-list');
                 }
 
             },
@@ -1762,10 +1770,7 @@
                         this._unselectDropPoint();
 
                 this._selectedDropPoint = changedDroppoint;
-                this._fixMapMarker();
-               
-                var deliveries = this._selectedDropPoint.deliveries; 
-                this._selectedDroppointDeliveries = deliveries; //TODO: just use _selectedDroppoint.deliveries
+                this._fixMapMarker();            
             },
 
             _droppointById: function (providerId, droppointId) {
@@ -1885,11 +1890,11 @@
             },
 
             _formatDayDefiniteDate: function(deliveryDate) {
-                return '(Est. arrival: ' + moment(deliveryDate).format("ddd, Do MMMM") + ')';
+                return '(Est. arrival: ' + moment(deliveryDate).format("ddd, Do MMM") + ')';
             },
 
             _formatNonDayDefiniteDate: function(startDate, endDate) {
-                return '(Est. arrival: ' + moment(startDate).format("ddd, Do MMMM") + ' - ' + moment(endDate).format("ddd, Do MMMM") + ')';
+                return '(Est. arrival: ' + moment(startDate).format("ddd, Do MMM") + ' - ' + moment(endDate).format("d, Do MMM") + ')';
             },
 
             _findDropPointDeliveries: function(providerId) {
@@ -1923,12 +1928,14 @@
                 }
             },
 
+            //Make a lookup for droppoint provider, allowing all shipping methods for that provider to be returned
             _processDeliveryArray: function (obj) {
                 var self = this;
                 obj.forEach(function(day) {
                     day.rates.forEach(function(service) {
                         if (service.serviceType.type === "dmStandardDropPoint") {
-                            service.serviceType.droppointProviders.forEach(function(provider) {
+                            service.serviceType.droppointProviders.forEach(function (provider) {
+                                //console.log('PROVIDER:', provider.id, provider.name);
                                 if (typeof(self._deliveryDroppoints[provider.id]) === "undefined")
                                     self._deliveryDroppoints[provider.id] = [];
                                 if (typeof(self._deliveryDroppoints[provider.id][service.methodTitle]) === "undefined") {
@@ -2214,31 +2221,50 @@
                 }
             },
 
-			updateDeliveryOptionsEvent: function(e) {
+            updateDeliveryOptionsEvent: function (e) {
                 if (e.target.checked) {                    
                     this.updateDeliveryOptions(e.target.id);
                 }
-			},
+            },
+
+            onUpdateDroppointDeliveryOptions: function(e) {
+                this.updateDeliveryOptions(e.detail);
+            },
 
 			showPage_Standard: function () {
-			    //this.$.pages.selectIndex(0);
+			    //this.$.pages.selectIndex(0); //This method interferes with Google Map
+			    this.showingDroppoints = false;
 			    this.$.pageStandard.classList.remove("hidden")
 			    this.$.pageDroppoints.classList.add("hidden")
 			    this.fire('show-standard');
 			},
 
 			showPage_Droppoints: function () {
-			    //this.$.pages.selectIndex(1);
+			    //this.$.pages.selectIndex(1); //This method interferes with Google Map
+			    this.showingDroppoints = true;
 			    this.$.pageStandard.classList.add("hidden")
 			    this.$.pageDroppoints.classList.remove("hidden")
 			    this.$.dropPointDeliveriesOption.checked = "checked";
 			    this._showDropPointsView();
-			    this.fire('show-droppoints');
+			    //this.fire('show-droppoints');
+			},
+
+			showView_DroppointsList: function() {
 
 			},
 
 			_onSelectPreferredDroppoint: function (e) {
 			    console.log("_onSelectPreferredDroppoint()", e.detail);
+			},
+
+			broadcastState: function () {
+			    //fire events relating to UI state
+			    if (this.showingDroppoints) {
+			        this.showPage_Droppoints();
+			    }
+			    else {
+			        this.showPage_Standard();
+			    }
 			}
 
         });
