@@ -270,7 +270,7 @@
                     //If we have selected a droppoint, let GFS Checkout know.
                     var selectedDropPoint = this.getAddressById(this.cartData.AddressId);
                     if (selectedDropPoint) {
-                        this.$.gfsCheckoutWidget.chooseDropPoint(selectedDropPoint.DropPointId);
+                        this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
                     }                 
                 } 
             },

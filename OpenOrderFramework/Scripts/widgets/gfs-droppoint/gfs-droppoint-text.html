@@ -1,0 +1,86 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+<dom-module id="gfs-droppoint-text">
+
+    <template>
+        <div id="container">
+            {{_text}}
+        </div>
+    </template>
+
+    <style>
+        #container {
+            margin: 10px;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "gfs-droppoint-text",
+
+            properties: {
+                selectedDroppoint: {
+                    type: Object
+                },
+                droppointList: {
+                    type: Array,
+                    value: []
+                },
+                myDroppointList: {
+                    type: Array,
+                    value: []
+                },
+                _text: {
+                    type: String,
+                    notify: true
+                }
+            },
+
+            observers: [
+                "updateUi(selectedDroppoint.*)",
+                 "updateUi(droppointList.*)",
+                 "updateUi(myDroppointList.*)"
+            ],
+
+            ready: function()
+            {
+                this.updateUi();
+            },
+
+            updateUi: function () {
+
+                if (this.selectedDroppoint) {
+                    //No droppoint selected, so auto-select the closest preferred/closest one.
+                    this._text = this.selectedDroppoint.providerName + " - " + this.selectedDroppoint.geoLocation.addressLines[0];
+                }
+                else {
+                    this._text = "Select a droppoint";
+                    var closest;
+                    if (this.autoSuggest) {
+                        if (this.myDroppointList && this.myDroppointList.length) {
+                            closest = this.getClosest(this.myDroppointList);
+
+                        }
+                        else if (this.droppointList && this.droppointList.length) {
+                            closest = this.getClosest(this.droppointList);
+                        }
+                        if (closest) {
+                            this.fire('suggest-droppoint', closest);
+                        }
+                    }                 
+                }
+
+            },
+
+            getClosest: function (dpList) {
+                return dpList.reduce(function (prev, curr) {
+                    return (prev.distanceInMeters < curr.distanceInMeters) ? prev : curr;
+                });
+            }
+
+
+
+        });
+    </script>
+</dom-module>
