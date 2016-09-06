@@ -4,7 +4,7 @@
 
     <template>
         <div id="container">
-            {{_text}}
+            <a id="textLink" on-click="onClick">{{_text}}</a>
         </div>
     </template>
 
@@ -52,11 +52,15 @@
 
                 if (this.selectedDroppoint) {
                     //No droppoint selected, so auto-select the closest preferred/closest one.
-                    this._text = this.selectedDroppoint.providerName + " - " + this.selectedDroppoint.geoLocation.addressLines[0];
+                    this._text = "Selected collection point: " + this.selectedDroppoint.providerName + " - " + this.selectedDroppoint.geoLocation.addressLines[0];
                 }
                 else {
                     this._text = "Select a droppoint";                
                 }
+            },
+
+            onClick: function () {
+                this.fire('select');
             }
 
         });

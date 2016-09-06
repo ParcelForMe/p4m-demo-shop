@@ -630,7 +630,7 @@
                             
                         </div>
                         <div id="dropPointText">
-                            <gfs-droppoint-text selected-droppoint="{{_selectedDropPoint}}"></gfs-droppoint-text>
+                            <gfs-droppoint-text selected-droppoint="{{_selectedDropPoint}}" on-select="_fixMapMarker"></gfs-droppoint-text>
                         </div>
 
                         <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
