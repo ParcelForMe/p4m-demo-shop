@@ -630,7 +630,7 @@
                             
                         </div>
                         <div id="dropPointText">
-                            <gfs-droppoint-text auto-suggest="true" on-suggest-droppoint="_chooseDroppointEvent" selected-droppoint="{{_selectedDropPoint}}" droppoint-list="{{_dropPoints}}" my-droppoint-list="{{_preferredDroppoints}}"></gfs-droppoint-text>
+                            <gfs-droppoint-text selected-droppoint="{{_selectedDropPoint}}"></gfs-droppoint-text>
                         </div>
 
                         <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
@@ -872,6 +872,11 @@
                 _droppointOpened: {
                     type: Boolean,
                     value: false
+                },
+
+                _autoChooseCollectionPoint: {
+                    type: Object,
+                    value: true
                 },
 
                 _selectedDropPoint: {
@@ -1220,6 +1225,7 @@
 
                 var deliveryDroppointsSize = Object.keys(this._deliveryDroppoints).length;
                 if (((defaultDelivery === 'CollectionPoint') || (this._data.dayDefinite.length === 0)) && (deliveryDroppointsSize !== 0)) {
+                    this._autoChooseCollectionPoint = true;
                     if ((this._data.standardRates.length === 0) && (this._data.dayDefinite.length === 0)) {
                         this.$$("#standardDeliveriesOption").parentNode.classList.add("hidden");
                         this.$$("#calendarDeliveriesOption").parentNode.classList.add("hidden");
@@ -1239,6 +1245,12 @@
             sortByDistance: function (a, b) {
                 if (a === b) return 0;
                 return a.distanceInMeters < b.distanceInMeters ? -1 : 1;
+            },
+
+            getClosestDroppoint: function (dpList) {
+                return dpList.reduce(function (prev, curr) {
+                    return (prev.distanceMeters < curr.distanceInMeters) ? prev : curr;
+                });
             },
 
             sortServices: function (a, b) {
@@ -2291,6 +2303,24 @@
 
 			_onSelectPreferredDroppoint: function (e) {
 			    console.log("_onSelectPreferredDroppoint()", e.detail);
+			},
+
+			_doAutoChooseDroppoint: function () {
+                //Removing this until we have a droppoint API
+                /*
+			    if (!this._selectedDropPoint) {
+			        var closest = null;
+			        if (this._preferredDroppoints && this._preferredDroppoints.length) {
+			            closest = this.getClosestDroppoint(this._preferredDroppoints);
+			        }
+			        else if (this._dropPoints && this._dropPoints.length) {
+			            closest = this.getClosestDroppoint(this._dropPoints);
+			        }
+			        if (closest) {
+			            this.chooseDroppoint(closest);
+			        }
+			    }
+                */
 			},
 
 			broadcastState: function () {

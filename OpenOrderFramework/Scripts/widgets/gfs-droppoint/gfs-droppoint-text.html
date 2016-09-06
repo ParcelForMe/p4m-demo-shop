@@ -55,31 +55,9 @@
                     this._text = this.selectedDroppoint.providerName + " - " + this.selectedDroppoint.geoLocation.addressLines[0];
                 }
                 else {
-                    this._text = "Select a droppoint";
-                    var closest;
-                    if (this.autoSuggest) {
-                        if (this.myDroppointList && this.myDroppointList.length) {
-                            closest = this.getClosest(this.myDroppointList);
-
-                        }
-                        else if (this.droppointList && this.droppointList.length) {
-                            closest = this.getClosest(this.droppointList);
-                        }
-                        if (closest) {
-                            this.fire('suggest-droppoint', closest);
-                        }
-                    }                 
+                    this._text = "Select a droppoint";                
                 }
-
-            },
-
-            getClosest: function (dpList) {
-                return dpList.reduce(function (prev, curr) {
-                    return (prev.distanceInMeters < curr.distanceInMeters) ? prev : curr;
-                });
             }
-
-
 
         });
     </script>
