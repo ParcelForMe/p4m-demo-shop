@@ -567,6 +567,9 @@
 			onDroppointChanged: function (e) {
 			    console.log("gfs-droppoint: onDroppointChanged()");
 			    var dp = e.detail;
+			    if (!dp.droppointId) {
+			        debugger;
+			    }
 			    if (dp.droppointId == this.droppointData.droppointId) {
 			        if (!this.droppointData.chosen) {
 			            this.droppointData.chosen = true;
@@ -583,14 +586,25 @@
 			//Local event fired
 			chosenChanged: function () {
 			    //if (typeof (this.droppointData.chosen) === "null") return;
-			    this.render();
+			    if (!this.droppointData) {
+			        return;
+			    }
+			    if (this.droppointData.chosen) {
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
+			        this.render();
+			        // this.autoSelectOption();		       
+			    }
+			    else {
+			        this.render();
+			    }
 				//Send global event
 				//this.fire("droppoint-changed", this.droppointData);
 			},
 
 			render: function () {
 			    //this.initData();
-			    if (!this.droppointData) {
+			    if (!this.droppointData) {;
+                    console.error("No droppointData")
 			        return;
 			    }
 				else if (this.droppointData.chosen) {
@@ -643,9 +657,9 @@
 			toggleChooseDropPoint: function () {
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    this.fire("droppoint-changed", this.droppointData);
-			    if (this.droppointData.chosen) {
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	//TODO: This is wrong -- it should be in the event listener     			       
-			    }
+			    //if (this.droppointData.chosen) {
+			    //    window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	//TODO: This is wrong -- it should be in the event listener     			       
+			    //}
 				//this.chosenChanged();
 			},
 
