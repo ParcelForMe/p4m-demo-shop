@@ -270,6 +270,7 @@
                     //If we have selected a droppoint, let GFS Checkout know.
                     var selectedDropPoint = this.getAddressById(this.cartData.AddressId);
                     if (selectedDropPoint) {
+                        debugger;
                         this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
                     }                 
                 } 
@@ -408,7 +409,7 @@
                     });
                 }
                 else {
-                    self.cartData.AddressId = collectPointAddress.Id;
+                    self.cartData.AddressId = existingDropPoint.Id; //collectPointAddress.Id;
                     callback(existingDropPoint);
                 }
             },
