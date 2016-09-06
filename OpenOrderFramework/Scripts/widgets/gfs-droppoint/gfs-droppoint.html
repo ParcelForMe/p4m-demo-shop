@@ -666,8 +666,7 @@
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    //this.fire("droppoint-changed", this.droppointData);
 			    if (this.droppointData.chosen) {
-
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 500);	//TODO: This is wrong -- it should be in the event listener     			       
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	       
 			    }
 			    this.fire("droppoint-changed", this.droppointData);
 				//this.chosenChanged();
@@ -679,7 +678,9 @@
 
 			autoSelectOption: function() {
 			    if (this.droppointData.deliveries.length) {
-			        this.$$('#dp-' + this.droppointData.deliveries[0].id).click();//checked = true;
+			        console.log("Selecting option", '#dp-' + this.droppointData.deliveries[0].id);
+			        document.getElementById('dp-' + this.droppointData.deliveries[0].id).click();
+			        //this.$$('#dp-' + this.droppointData.deliveries[0].id).click();//checked = true;
 			    }
 			    else {
 			        console.error("No delivery options available");
