@@ -565,19 +565,23 @@
 
 			//Global event handler
 			onDroppointChanged: function (e) {
-			    console.log("gfs-droppoint: onDroppointChanged()");
+			    
 			    var dp = e.detail;
 			    if (!dp.droppointId) {
 			        debugger;
 			    }
+                //If the droppoint chosen was this one, make sure this "chosen" value reflects the other one
 			    if (dp.droppointId == this.droppointData.droppointId) {
-			        if (!this.droppointData.chosen) {
-			            this.droppointData.chosen = true;
+			        console.log("gfs-droppoint: onDroppointChanged()");
+			        this.droppointData.chosen = dp.chosen;
+			        //if (!this.droppointData.chosen) {
+			        //    this.droppointData.chosen = true;
 			            this.render();
-			        }
+			        //}
 			        return;
 			    }
-			    else if (e.detail.chosen) {
+                //If it's another one and it's been chosen, unchoose me
+			    else if (dp.chosen) {
 			        this.set("droppointData.chosen", false);
 			    }
                 				
@@ -590,15 +594,19 @@
 			        return;
 			    }
 			    if (this.droppointData.chosen) {
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
+			        //window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
 			        this.render();
-			        // this.autoSelectOption();		       
+			        //this.fire("droppoint-chosen", this.droppointData);
+			       
+     
 			    }
 			    else {
 			        this.render();
 			    }
 				//Send global event
-				//this.fire("droppoint-changed", this.droppointData);
+			    //
+			   // this.fire("droppoint-changed", this.droppointData);
+			    //this.fire("droppoint-chosen", this.droppointData);
 			},
 
 			render: function () {
@@ -656,10 +664,12 @@
 
 			toggleChooseDropPoint: function () {
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
+			    //this.fire("droppoint-changed", this.droppointData);
+			    if (this.droppointData.chosen) {
+
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 500);	//TODO: This is wrong -- it should be in the event listener     			       
+			    }
 			    this.fire("droppoint-changed", this.droppointData);
-			    //if (this.droppointData.chosen) {
-			    //    window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	//TODO: This is wrong -- it should be in the event listener     			       
-			    //}
 				//this.chosenChanged();
 			},
 
