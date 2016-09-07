@@ -17,9 +17,8 @@
                 <p>In the box below enter the <a href="#">Check Digits</a> on the reverse of your payment card and click Buy.</p>
                 <p4m-card id="card" selected-card-id={{selectedCard.Id}} on-cvv="onCvv" show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
             </template>
-            <template is="dom-if" if="{{isNoCardSelected()}}">
+            <template is="dom-if" if="{{_noCardSelected}}">
                 You have not yet selected a payment method. <a on-click="requestPaymentMethod">Click here to select one.</a>
-
             </template>
                      
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
@@ -128,6 +127,10 @@
                 _state: {
                     type: String,
                     notify: true
+                },
+                _noCardSelected: {
+                    type: Object,
+                    value: true
                 }
  
             },
@@ -140,13 +143,6 @@
             ready: function ()
             {
                 this.load();
-            },
-
-            isNoSelectedCard: function() {
-                return (this.selectedCard === null);
-            },
-            isSelectedCard: function () {
-                return !(this.selectedCard === null);
             },
 
             onCvv: function (e) {
@@ -168,6 +164,7 @@
             },
 
             buyNow: function () {
+                this.errorMsg = "";
                 if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
                     this._state = States.PURCHASING;
                     this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.selectedCard.cvv, cartTotal: this.cartData.Total }, null, this.onPurchase.bind(this));
@@ -279,14 +276,17 @@
                 this.updateUi();
             },
 
-            isNoCardSelected: function() {
-                return this.selectedCard?false:true;
-            },
-
             updateUi: function () {
                 
-                //If no payment methods, prompt to create one
-
+                //If no payment methods, prompt to create one    
+                if (this.selectedCard) {
+                    this._isCardSelected = true;
+                    this._noCardSelected = false;
+                }
+                else {
+                    this._isCardSelected = false;
+                    this._noCardSelected = true;
+                }
         
                 if (!this._loggedIn || !this.cartData) {                    
                     this.showAsNotValid();
