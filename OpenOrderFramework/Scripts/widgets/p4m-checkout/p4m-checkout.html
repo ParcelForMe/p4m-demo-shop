@@ -49,7 +49,7 @@
                             </template>
                         </iron-page>
                         <iron-page id="cardPage">
-                            <p4m-card-list consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
+                            <p4m-card-list id="cardList" consumer-data="{{consumerData}}" cart-data="{{cartData}}" on-selected="onSelectPaymentMethod" on-gotnewcard="onGotNewCard"></p4m-card-list>
                         </iron-page>
                         <iron-page id="addressPage">
                             <p4m-address-list id="addressList" address-list-data="{{consumerData.Addresses}}" cart-data="{{cartData}}" on-select="onSelectAddress" on-add="onAddAddress" on-update="onUpdateAddress"></p4m-address-list>
@@ -59,7 +59,7 @@
                 <div id="summaryPanel" class="p4m-panel">
                     <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
                     <hr />
-                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
+                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" on-request-payment-method="goToPaymentMethods" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
                     <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>  
                     <hr />    
@@ -146,6 +146,7 @@
             console.log('p4m: selectedServiceChanged', e);
         });*/
 
+
         Polymer({
             is: "p4m-checkout",
 
@@ -204,6 +205,7 @@
 
             ready: function()
             {
+                this.Tabs = { "ORDER": 0, "DELIVERY": 1, "PAYMENT": 2, "ADDRESS": 3 };
                 this._notUseGfsCheckout = !this.useGfsCheckout;
 
                 if (!this.sessionId) {
@@ -270,7 +272,6 @@
                     //If we have selected a droppoint, let GFS Checkout know.
                     var selectedDropPoint = this.getAddressById(this.cartData.AddressId);
                     if (selectedDropPoint) {
-                        debugger;
                         this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
                     }                 
                 } 
@@ -545,6 +546,11 @@
             getAddressById(id) {
                 var foundItem = this.consumerData.Addresses.find(function(item) { return item.Id == id });
                 return foundItem;
+            },
+
+            goToPaymentMethods: function () {
+                this.selectedTab = this.Tabs.PAYMENT;
+                this.$.cardList.addNewCard();
             }
 
 

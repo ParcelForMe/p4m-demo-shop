@@ -17,6 +17,10 @@
                 <p>In the box below enter the <a href="#">Check Digits</a> on the reverse of your payment card and click Buy.</p>
                 <p4m-card id="card" selected-card-id={{selectedCard.Id}} on-cvv="onCvv" show-toggle-btn="false" show-cvv="true" card-data="{{selectedCard}}"></p4m-card>
             </template>
+            <template is="dom-if" if="{{isNoCardSelected()}}">
+                You have not yet selected a payment method. <a on-click="requestPaymentMethod">Click here to select one.</a>
+
+            </template>
                      
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
             <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">{{paypalText}}</div>
@@ -125,6 +129,7 @@
                     type: String,
                     notify: true
                 }
+ 
             },
             observers: [
                 "onCartDataChange(cartData.*)",
@@ -274,7 +279,14 @@
                 this.updateUi();
             },
 
+            isNoCardSelected: function() {
+                return this.selectedCard?false:true;
+            },
+
             updateUi: function () {
+                
+                //If no payment methods, prompt to create one
+
         
                 if (!this._loggedIn || !this.cartData) {                    
                     this.showAsNotValid();
@@ -379,6 +391,10 @@
 
             hideOverlay: function () {
                 this.$.overlay.close();
+            },
+
+            requestPaymentMethod: function () {
+                this.fire('request-payment-method');
             }
         });
     </script>
