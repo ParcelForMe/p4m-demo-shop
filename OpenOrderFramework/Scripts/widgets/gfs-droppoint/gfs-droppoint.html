@@ -451,7 +451,7 @@
 				},
 				showDistance: {
 					type: Object,
-					value: false
+					value: true
 				},
 				showShippingOptions: {
 				    type: Object,
@@ -525,7 +525,7 @@
 					this.droppointChosen = false;
 				}
 				if (this.droppointData.collectionSlots) { // && this.droppointData.collectionSlots) {
-					this.droppointData.distanceInKm = (Math.round(this.droppointData.DistanceInMeters / 100)) / 10;
+					this.droppointData.distanceInKm = (Math.round(this.droppointData.distanceInMeters / 100)) / 10;
 
 					var dayCount = 0;
 					var self = this;
