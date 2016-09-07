@@ -9,6 +9,9 @@
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
                 We'll deliver your order to your <span class="p4m-label">{{addressTypeStr}}: {{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}. Your order will be sent via {{deliveryMethodStr}} delivery</span>.
             </template>
+            <template is="dom-if" if="{{isLoading}}">
+                <p>Getting your delivery details now...</p>
+            </template>
         </div>
     </template>
 
@@ -44,6 +47,10 @@
                 },
                 deliveryMethodStr: {
                     type: String
+                },
+                isLoading: {
+                    type: Object,
+                    value: true
                 }
 
             },
@@ -62,6 +69,7 @@
             updateUi: function()
             {
                 if (this.cartData && this.consumerData) {
+                    this.isLoading = false;
                     var deliveryAddr = this._addressById(this.cartData.AddressId);
                     this.deliveryAddressStr = this._addressToStr(deliveryAddr);
                     this.addressTypeStr = this._addressType(deliveryAddr);
@@ -70,7 +78,7 @@
                     this.deliveryMethodStr = this.cartData.ServiceName;
                 }
                 else {
-
+                    this.isLoading = true;
                 }
             },
 
