@@ -1465,6 +1465,7 @@
                 //var postcode = document.getElementById('shipping:postcode').value; //Improve selection method
 
                 self._map = new google.maps.Map(self.$.gfsMapCanvas, mapOptions);
+                window.map = self._map;
 
                 //=== Home marker
                 geocoder = new google.maps.Geocoder();
@@ -1487,6 +1488,7 @@
                         marker = new google.maps.Marker(homeMarkerConfig);
                         self._map.setCenter(homeMarkerConfig.position);
                         self._loadDroppointMarkers();
+                        self._resetMap(self._map);
                     } else {
 
                         console.log('Google Maps API ERROR - Geocode was not successful for the following reason: ' + status);
@@ -1505,6 +1507,7 @@
                     // remove the listener
                     google.maps.event.clearListeners(self._map, 'bounds_changed');
                 });
+
                 
             },
 
@@ -1715,19 +1718,28 @@
                     //this._makeMap();
                     this._loadDroppointMarkers(this._dropPoints);
                     this._fixMapMarker();                       
-                    this.fire('show-droppoints-map');
-                    
-                    //This little hack fixes the grey map problem
-                    window.setTimeout(function () {
-                        google.maps.event.trigger(self._map, 'resize');
-                    }, 100);
+                    this.fire('show-droppoints-map');                                
+                    this._resetMap(this._map);
                 }
                 else {
                     this.$.dropPointListContainer.classList.remove('hidden');
                     this.$.mapContainer.classList.add('hidden');
                     this.fire('show-droppoints-list');
+                    this._resetMap(this._map);
                 }
 
+            },
+
+            _resetMap: function (map) {
+                debugger;
+                var self = this;
+                if (map) {
+                    window.setTimeout(function () {
+                        google.maps.event.trigger(map, 'resize');
+                    }, 100);
+                }
+
+                
             },
 
             _hideDropPointDetails: function() {
@@ -1736,6 +1748,10 @@
 
             _showPreferredDroppoints: function () {
                 this.$.mainMapArea.classList.add("showPreferredDroppoints");
+                var self = this;
+                this._resetMap(this._map);
+               // alert('done');
+                //self._map.checkResize();
             },
 
             _getHomeIcon: function() {
