@@ -218,6 +218,11 @@
 				filter: invert(1);
 			}
 
+            #dp-minor-info {
+                display: flex;
+                flex-direction: row;
+            }
+
 
 			/* MP customization */
 			.dp-card {
@@ -296,9 +301,13 @@
                 float: left;
 			}
 
-			#dp-address, .dp-distance {
+			#dp-address, #dp-distance {
 				font-size: 13px;
 			}
+
+            #dp-distance {
+                margin-right: 10px;
+            }
 
 			/* clear floats */
 			.clear-fl {
@@ -316,6 +325,24 @@
             input[type="radio"] {
                 display: inline-block;
             }
+
+            span.gfsmethodname {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #dp-body {
+                width: 100%;
+                overflow: hidden;
+                padding: 0px;
+                margin: 0px;
+            }
+
+            
+  
+
+            
+
 
 		</style>
 
@@ -336,87 +363,97 @@
                         <template is="dom-if" if="{{isTickButton}}">
                             <div class$="b-tick {{buttonClass}}" on-click="toggleChooseDropPoint"></div>
                         </template>
-                    </div>
-
-					<div id="dp-address">
-                                        
-						<template is="dom-repeat" items="{{droppointData.geoLocation.addressLines}}">
-							{{item}}
-							<br />
-						</template>
-						
-						{{droppointData.geoLocation.town}}, {{droppointData.geoLocation.postCode}}
-						
-					</div>
-					<template is="dom-if" if="{{showDistance}}">
-						<div class="dp-small-heading">Distance</div>
-						<div id="dp-distance">
-							<i class="fa fa-road"></i>{{droppointData.localizedDistance}}
-						</div>
-					</template>
-
-				</div>
-
-
-				<template is="dom-if" if="{{showOpeningHours}}">
-
-					<div class="dp-opening-hours">
-						<div class="dp-small-heading">Opening Hours</div>
-						<table>
-							<template is="dom-repeat" items="{{_weekCollection}}">
-								<tr>
-									<td class="dp-day-name"><ul><li>{{item.day}}</li></ul></td>
-									<td class="dp-day-time-slots">
-										<ul class="testMe">
-											<template is="dom-repeat" items={{item.timeSlots}}>
-												<li class="dp-day-time-slot">{{item.fromTime}} - {{item.toTime}}</li>
-											</template>
-										</ul>
-									</td>
-								</tr>
-							</template>
-						</table>
-
-						<!--<div class="special-badges">
-							<div class="open-late">
-								<div class="badge-text">LATE</div>
-							</div>
-							<div class="open-late">
-								<div class="badge-text">SAT</div>
-							</div>
-							<div class="open-late">
-								<div class="badge-text">SUN</div>
-							</div>
-							<div class="parking"></div>
-						</div>-->
-					</div>
-
-				</template>
-                <template is="dom-if" if="{{showShippingOptions}}">
-                    <template is="dom-if" if="{{droppointData.chosen}}">
-                        <div class="shippingOptions">
-                            <div class="dp-small-heading">Collection options</div>
-                            <ul>
-                                <template is="dom-repeat" items="{{droppointData.deliveries}}" xsort="sortServices">
-                                    <li class="delivery-place">
-                                        <input type="radio"
-                                               name="shipping_method"
-                                               value="{{item.id}}"
-                                               id="dp-{{item.id}}"
-                                               on-click="onSelectOption"
-                                               class="radio droppoint-delivery-selection" />
-                                        <label for$="{{item.id}}">
-                                            <span class="gfsmethodname">{{item.methodTitle}}</span>
-                                            <div class="price">{{currencySymbol}}{{item.price}}</div>
-                                            <div>{{item.deliveryDateRange}}</div><br />
-                                        </label>
-                                    </li>
-                                </template>
-                            </ul>
+                        <div id="dp-address">
+                            <template is="dom-repeat" items="{{droppointData.geoLocation.addressLines}}">
+                                {{item}}
+                                <br />
+                            </template>
+                            {{droppointData.geoLocation.town}}, {{droppointData.geoLocation.postCode}}
 
                         </div>
-                    </template>
-                </template>
+
+                    </div>
+
+                    <div id="dp-body">
+                        <div id="dp-minor-info">
+                            <template is="dom-if" if="{{showDistance}}">                                                          
+                                <div id="dp-distance">
+                                    <div class="dp-small-heading">Distance</div>
+                                    <i class="fa fa-road"></i>{{droppointData.localizedDistance}}
+                                </div>
+                            </template>
+
+                            <template is="dom-if" if="{{showOpeningHoursLink}}">
+                              
+                                <div id="opening-hours-link">
+                                    <div class="dp-small-heading">Opening Hours</div>
+                                    <a class="droppoint_info" on-click="_openingHoursLinkClick"> View Opening Hours </a>
+                                </div>
+                            </template>
+                        </div>
+
+                        <template is="dom-if" if="{{showOpeningHours}}">
+
+                            <div class="dp-opening-hours">
+                                <div class="dp-small-heading">Opening Hours</div>
+                                <table>
+                                    <template is="dom-repeat" items="{{_weekCollection}}">
+                                        <tr>
+                                            <td class="dp-day-name"><ul><li>{{item.day}}</li></ul></td>
+                                            <td class="dp-day-time-slots">
+                                                <ul class="testMe">
+                                                    <template is="dom-repeat" items={{item.timeSlots}}>
+                                                        <li class="dp-day-time-slot">{{item.fromTime}} - {{item.toTime}}</li>
+                                                    </template>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </table>
+
+                                <!--<div class="special-badges">
+                                    <div class="open-late">
+                                        <div class="badge-text">LATE</div>
+                                    </div>
+                                    <div class="open-late">
+                                        <div class="badge-text">SAT</div>
+                                    </div>
+                                    <div class="open-late">
+                                        <div class="badge-text">SUN</div>
+                                    </div>
+                                    <div class="parking"></div>
+                                </div>-->
+                            </div>
+
+                        </template>
+                        <template is="dom-if" if="{{showShippingOptions}}">
+                            <template is="dom-if" if="{{droppointData.chosen}}">
+                                <div class="shippingOptions">
+                                    <div class="dp-small-heading">Collection options</div>
+                                    <ul>
+                                        <template is="dom-repeat" items="{{droppointData.deliveries}}" xsort="sortServices">
+                                            <li class="delivery-place">
+                                                <input type="radio"
+                                                       name="shipping_method"
+                                                       value="{{item.id}}"
+                                                       id="dp-{{item.id}}"
+                                                       on-click="onSelectOption"
+                                                       class="radio droppoint-delivery-selection" />
+                                                <label for$="{{item.id}}">
+                                                    <span class="gfsmethodname"><div class="price">{{currencySymbol}}{{item.price}}</div>&nbsp;{{item.methodTitle}}</span>
+                                                    <div>{{item.deliveryDateRange}}</div>
+                                                </label>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                        </template>
+                    </div>
+
+
+                </div>
             </div>
 			<div class="actions">
 				<template is="dom-if" if="{{isStandardButton}}">
@@ -448,6 +485,10 @@
 				showOpeningHours: {
 					type: Object,
 					value: false
+				},
+				showOpeningHoursLink: {
+				    type: Object,
+				    value: false
 				},
 				showDistance: {
 					type: Object,
@@ -700,8 +741,9 @@
 				return hours + ':' + minutes + ampm;
 			},
 
-			_listenForChoose: function (e) {
-
+			_openingHoursLinkClick: function (e) {
+			    console.log("Clicked opening hours link");
+			    this.fire('opening-hours-link-click', e);
 			}
 
 		});
