@@ -1,5 +1,6 @@
 ﻿<script src="../webcomponentsjs/webcomponents.min.js"></script>
 <link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../local-image/local-image.html" />
 
 <dom-module id="gfs-droppoint">
 
@@ -329,10 +330,8 @@
 				<div class="dp-details">
                     <div class="dp-header">
                         <div class="dp-icon">
-                            <img src="{{droppointData.providerLogo}}" class="imageicon" height="45" />
-                            <template is="dom-if" if="{{droppointData.providerName}}">
-                                <b class="dpProviderName">{{droppointData.providerName}}</b>
-                            </template>  
+                            <local-image img-src="{{droppointData.providerName}}.png" local-folder="gfs-droppoint/images" class="imageicon" height="45"></local-image>
+                            <b class="dpProviderName">{{droppointData.providerName}}</b>
                         </div>
                         <template is="dom-if" if="{{isTickButton}}">
                             <div class$="b-tick {{buttonClass}}" on-click="toggleChooseDropPoint"></div>
