@@ -22,7 +22,7 @@
             </template>
                      
             <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
-            <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">{{paypalText}}</div>
+            <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">&nbsp;{{paypalText}}</div>
             <p class="p4m-error">{{errorMsg}}</p>   
       
         </div>
@@ -48,6 +48,14 @@
         }
         #p4BuyNowButton.disabled {
             cursor: not-allowed;
+        }
+
+        #p4mPaypalButton {
+            background-image: url(https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png);
+            background-color: #E0E0E0;
+            background-repeat: no-repeat;
+            background-position: center; 
+
         }
 
 
@@ -83,7 +91,7 @@
                 },
                 paypalText: {
                     type: String,
-                    value: "Pay with Paypal"
+                    value: ""
                 },
 
                 btnMsgNotPurchased: {
