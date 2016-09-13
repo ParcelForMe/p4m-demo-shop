@@ -531,8 +531,9 @@
         <iron-ajax id="ajaxGetDroppoints"
                    method="GET"
                    handle-as="json"
-                   content-type="application/json"
+                   content-type="application/json"                
                    on-response="_handleGetDroppointsResponse"
+                   on-error="_handleGetDroppointsError"
                    debounce-duration="300">
         </iron-ajax>
 
@@ -1145,6 +1146,7 @@
                 this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
 
                 this.fire('selectedservicechanged', this.selectedServiceDetails);
+                this._resetMap();
 
             },
 
@@ -1163,6 +1165,11 @@
 
                 //TODO: Replace this with a method or event; we want to avoid referencing the View from logic code
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
+            },
+
+            _handleGetDroppointsError: function (e) {
+                this._resetMap()
+                this._loadDroppointMarkers(this._data.droppoints);
             },
 
             _delayedInit: function() {
@@ -1697,7 +1704,7 @@
                     }
                     // remove the listener
                     // TODO: Understand why we're removing the listener
-                    google.maps.event.clearListeners(self._map, 'bounds_changed');
+                    //google.maps.event.clearListeners(self._map, 'bounds_changed');
     
                 }
             },
@@ -1721,7 +1728,7 @@
                     this.$.mapContainer.classList.remove('hidden');
                     //this._makeMap();
                     this._loadDroppointMarkers(this._dropPoints);
-                    this._fixMapMarker();                       
+                    //this._fixMapMarker();                       
                     this.fire('show-droppoints-map');                                
                     this._resetMap(this._map);
                 }
@@ -1823,6 +1830,7 @@
                         this._loadDroppointMarkers([this._selectedDropPoint]);
                         this._currentMarker = this._selectedDropPoint.marker; //this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     }
+                    console.log("### Opening info box");
                     this._infoWindow.open(this._map, this._currentMarker);
 
                     this.$.dropPointRadio.setAttribute('checked', 'true');
