@@ -615,7 +615,7 @@
                 //If the droppoint chosen was this one, make sure this "chosen" value reflects the other one
 			    if (dp.droppointId == this.droppointData.droppointId) {
 			        console.log("gfs-droppoint: onDroppointChanged()");
-			        this.droppointData.chosen = dp.chosen;
+			        this.set('droppointData.chosen',dp.chosen);
 			        //if (!this.droppointData.chosen) {
 			        //    this.droppointData.chosen = true;
 			        this.initData();
