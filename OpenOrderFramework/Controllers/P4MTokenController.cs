@@ -152,13 +152,17 @@ namespace OpenOrderFramework.Controllers
             // If not local ID or Email then create a new user and store the new local ID
             var consumerResult = await GetConsumerAsync(token);
             if (consumerResult == null || !consumerResult.Success)
-                throw new Exception(consumerResult.Error);
+                throw new Exception(consumerResult.Error ?? "Could not retrieve your details");
             var consumer = consumerResult.Consumer;
 
             this.Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
             this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
             this.Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
             this.Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
+            this.Response.Cookies["p4mDefaultPostCode"].Value = consumer.PrefDeliveryAddress?.PostCode;
+            this.Response.Cookies["p4mDefaultPostCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
+            this.Response.Cookies["p4mDefaultCountryCode"].Value = consumer.PrefDeliveryAddress?.CountryCode;
+            this.Response.Cookies["p4mDefaultCountryCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
 
             // is there a logged in user already?
             string authUserId = null;
@@ -346,6 +350,10 @@ namespace OpenOrderFramework.Controllers
             response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow;
             response.Cookies["p4mLocalLogin"].Value = string.Empty;
             response.Cookies["p4mLocalLogin"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mDefaultPostCode"].Value = string.Empty;
+            response.Cookies["p4mDefaultPostCode"].Expires = DateTime.UtcNow;
+            response.Cookies["p4mDefaultCountry"].Value = string.Empty;
+            response.Cookies["p4mDefaultCountry"].Expires = DateTime.UtcNow;
         }
 
         void GetTempState(out string state, out string nonce)
