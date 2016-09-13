@@ -63,7 +63,7 @@ namespace OpenOrderFramework.Controllers
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
 
-            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson.Result);
+            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
 
             // Return the view
             return View("P4MCheckout");
@@ -225,7 +225,7 @@ namespace OpenOrderFramework.Controllers
             // ViewBag.InitialAddress = "";
 
             // define initial post data
-            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson.Result);
+            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
             return View("P4MDelivery");
         }
 
@@ -499,7 +499,57 @@ namespace OpenOrderFramework.Controllers
             return order.OrderId;
         }
 
-        public async Task<String> GetGfsCheckoutPost()
+        // TODO: Build more details into the request!
+        public string GetGfsCheckoutPost()
+        {
+            var localCart = ShoppingCart.GetCart(HttpContext);
+
+            var checkoutRequest = new
+            {
+                Request = new
+                {
+                    DateRange = new
+                    {
+                        DateFrom = String.Format("{0:yyyy-MM-dd}", DateTime.Now),
+                        DateTo = String.Format("{0:yyyy-MM-dd}", DateTime.Now.AddDays(14))
+                    },
+                    Order = new
+                    {
+                        Transit = new
+                        {
+                            Recipient = new
+                            {
+                                Location = new
+                                {
+                                    CountryCode = new
+                                    {
+                                        Code = "GB",
+                                        Encoding = "ccISO_3166_1_Alpha2"
+                                    },
+                                    Postcode = "SO40 7JF"
+                                },
+                            }
+                        },
+                        Value = new
+                        {
+                            CurrencyCode = "GBP",
+                            Value = localCart.GetTotal()
+                        }
+                    },
+                    RequestedDeliveryTypes = new string[] { "dmDropPoint", "dmStandard" },
+                    Session = new  // TODO: Remove this when the Open ID connection is in place
+                    {
+                        APIKeyId = "CL-4CE92613-89A6-4248-A573-A9A7333E6A06"
+                    }
+                }
+            };
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest);
+
+            //return Convert.ToBase64String(Encoding.ASCII.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest)));
+        }
+
+        public string OldGetGfsCheckoutPost()
         {
 
             var localCart = ShoppingCart.GetCart(HttpContext);
