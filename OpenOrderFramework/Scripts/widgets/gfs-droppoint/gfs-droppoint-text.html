@@ -4,7 +4,13 @@
 
     <template>
         <div id="container">
-            <a id="textLink" on-click="onClick">{{_text}}</a>
+            <template is="dom-if" if="{{_showAsLink}}">
+                <a id="textLink" on-click="onClick">{{_text}}</a>
+            </template>
+            <template is="dom-if" if="{{_showAsText}}">
+                <div id="textLink">{{_text}}</div>
+            </template>
+           
         </div>
     </template>
 
@@ -31,6 +37,18 @@
                     type: Array,
                     value: []
                 },
+                showAsLink: {
+                    type: Object,
+                    value: false
+                },
+                _showAsText: {
+                    type: Object,
+                    value: true
+                },
+                _showAsLink: {
+                    type: Object,
+                    value: false
+                },
                 _text: {
                     type: String,
                     notify: true
@@ -45,17 +63,23 @@
 
             ready: function()
             {
+                
                 this.updateUi();
             },
 
             updateUi: function () {
-
+                this._showAsText = !this.showAsLink;
+                this._showAsLink = this.showAsLink;
                 if (this.selectedDroppoint) {
                     //No droppoint selected, so auto-select the closest preferred/closest one.
                     this._text = "Selected collection point: " + this.selectedDroppoint.providerName + " - " + this.selectedDroppoint.geoLocation.addressLines[0];
                 }
                 else {
-                    this._text = "Select a droppoint";                
+                    if (this.showAsLink) {
+                        this._showAsText = true;
+                        this._showAsLink = false;
+                    }
+                    this._text = "Select a droppoint below";                
                 }
             },
 
