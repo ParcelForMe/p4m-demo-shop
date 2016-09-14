@@ -1160,9 +1160,9 @@
             _handleGetDroppointsResponse: function(e) {
                 //New droppoint data
                 this._data = e.detail.response;
-                this._data.droppoints = this._processDroppointList(this._data.droppoints);
+                //this._data.droppoints = this._processDroppointList(this._data.droppoints);
                 this._dropPoints = this._dropPoints.concat(this._data.droppoints);
-                this._processPreferredDroppoints(); //Replaces non-native objects with native GFS ones where possible, for data binding
+                this._processAllDroppoints();
                 this._findAllDeliveryDroppoints();
                 this._loadDroppointMarkers(this._data.droppoints);
 
@@ -1183,7 +1183,7 @@
                     this._makeMap(); //eee
                     //this._showDropPointsView();
                     this._findAllDeliveryDroppoints();
-                    this._dropPoints = this._dropPoints.concat(this._processDroppointList(this._dropPoints));
+                    this._processAllDroppoints();
                 }
                 if (this.useCalendar) {
                     this._makeCalendar();
@@ -1313,6 +1313,19 @@
                 }
             },
 
+            _processAllDroppoints: function () {
+                this._removeDupDropPoints();
+                this._addDropPointDeliveries();
+                this._processPreferredDroppoints();
+            },
+
+            _removeDupDropPoints: function () {
+                var self = this;
+                this._dropPoints = this._dropPoints.filter(function (item) {
+                    return !self._dropPoints.find(function (dp) { return dp !== item && dp.droppointId == item.droppointId });
+                }); 
+            },
+
             _processPreferredDroppoints: function()
             {
                 //Now replace preferred items with real data
@@ -1326,11 +1339,10 @@
                 });
             },
 
-            _processDroppointList: function(dropPointList)
+            _addDropPointDeliveries: function()
             {
-                //Ensure that droppoint data is formatted correctly
                 var self = this;
-                var result = dropPointList.map(
+                this._dropPoints.forEach(
                     function (item) {
                         item.collectionPoint = true;
 
@@ -1338,11 +1350,7 @@
                         item.deliveries = self._findDropPointDeliveries(item.providerId);
                         return item;
                     }
-                 );
-                result = result.filter(function (item) {
-                    return !self._dropPoints.find(function (dp) { return dp.droppointId == item.droppointId });
-                }); 
-                return result;
+                );
             },
             
             // find the earliest of each service
@@ -1786,7 +1794,7 @@
                 //Select the drop point, if it is known.
                 var dp = this._droppointById(null, dropPointId);
                 if (dp) {
-                    this._selectedDropPoint = dp;
+                    this.set(this._selectedDropPoint, dp);
                     //this.set('_selectedDropPoint.chosen', true);
                     this.fire("droppoint-changed", dp);
                 }
@@ -1849,7 +1857,7 @@
                     if (changedDroppoint.droppointId !== this._selectedDropPoint.droppointId)
                         this._unselectDropPoint();
 
-                this._selectedDropPoint = changedDroppoint;
+                this.set("_selectedDropPoint", changedDroppoint);
                 this._fixMapMarker();            
             },
 
