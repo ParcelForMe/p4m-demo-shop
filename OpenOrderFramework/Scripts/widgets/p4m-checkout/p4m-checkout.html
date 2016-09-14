@@ -40,7 +40,7 @@
                         </iron-page>
                         <iron-page id="deliveryPage">
 
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints-list="onGfsShowDroppointsAsList" on-show-droppoints-map="onGfsShowDroppointsAsMap" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}"></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints-list="onGfsShowDroppointsAsList" on-show-droppoints-map="onGfsShowDroppointsAsMap" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -72,6 +72,8 @@
         </div>
 
         <polymer-cookie id="sessionCookie" name="CartId"></polymer-cookie>
+        <polymer-cookie id="p4mDefaultPostCode" name="p4mDefaultPostCode"></polymer-cookie>
+        <polymer-cookie id="p4mDefaultCountry" name="p4mDefaultCountry"></polymer-cookie>
     </template>
 
     <style>
@@ -355,7 +357,7 @@
                     self.cartData.ServiceName = data.service;
                     self.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
                     if (data.collectionPoint) {
-                        self.selectCollectPoint(data.carrier, data.collectionPoint, data.deliveryAddress, function () {
+                        self.selectCollectPoint(data.provider, data.providerId, data.collectionPoint, data.deliveryAddress, function () {
                             self.updateP4mCart();
                         });
                     }
@@ -366,7 +368,7 @@
             },
 
 
-            selectCollectPoint: function (carrier, collectPointId, collectPointAddress, callback) {
+            selectCollectPoint: function (providerName, providerId, collectPointId, collectPointAddress, callback) {
                 //Make API call to add invisible address
                 var self = this;
                 var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
@@ -377,7 +379,7 @@
                     {
                         "Address": {
                             "AddressType": "Collect",
-                            "Label": carrier,
+                            "Label": providerName,
                             "CompanyName": directions,
                             "Street1": collectPointAddress.addressLines[0] || "",
                             "Street2": collectPointAddress.addressLines[1] || "",
@@ -389,8 +391,7 @@
                             "Phone": collectPointAddress.phone,
                             "Latitude": collectPointAddress.coordinates.latitude,
                             "Longitude": collectPointAddress.coordinates.longitude,
-                            //"DropPointProviderId": collectPointAddress.DropPointProviderId, //TODO! This looks wrong!
-                           
+                            "DropPointProviderId": providerId,              
                             "DropPointId": collectPointId,
                             "CollectPrefOrder": prefOrder
                         },

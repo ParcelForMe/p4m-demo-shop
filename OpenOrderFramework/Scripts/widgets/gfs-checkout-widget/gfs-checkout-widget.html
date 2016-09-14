@@ -2277,6 +2277,8 @@
                 //TODO: Use data model to record state, not UI elements
                 if (this.$.dropPointDeliveriesOption.checked == true) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
+                    this.selectedServiceDetails.providerId = this._selectedDropPoint.providerId;
+                    this.selectedServiceDetails.provider = this._selectedDropPoint.providerName;
                     this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
                 } else {
                     this.selectedServiceDetails.collectionPoint = null;
