@@ -130,7 +130,6 @@
             },
 
             onConsumerData: function (consumer) {
-                console.log("New card got consumer: ", consumer);
                 this.set('payerExist',(consumer.PaymentMethods.length > 0) ? "1" : "0");
             },
 
