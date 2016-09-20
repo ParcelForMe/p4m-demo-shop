@@ -358,7 +358,7 @@
 		</style>
 
 
-		<div class$="{{containerClass}}">
+		<div class$="{{containerClass}}" on-click="_onClick">
 			<template is="dom-if" if="{{title}}">
 				<h3>{{title}}</h3>
 			</template>
@@ -375,6 +375,7 @@
                             <div class$="b-tick {{buttonClass}}" on-click="toggleChooseDropPoint"></div>
                         </template>
                         <div id="dp-address">
+                            ({{droppointData.droppointId}})
                             <template is="dom-repeat" items="{{droppointData.geoLocation.addressLines}}">
                                 {{item}}
                                 <br />
@@ -507,6 +508,10 @@
 				    type: String,
 				    value: "£"
 				},
+				scrollIntoViewOnChoose: {
+				    type: Boolean,
+                    value: false
+				},
 				/*chosen: {
                     type: Boolean,
                     value: false,
@@ -522,6 +527,10 @@
 				buttonText: {
 					type: String,
 					value: "Choose"
+				},
+				disableUnchoose: {
+				    type: Boolean,
+				    value: false
 				},
 				streetAddress: {
 					type: String,
@@ -615,12 +624,17 @@
                 //If the droppoint chosen was this one, make sure this "chosen" value reflects the other one
 			    if (dp.droppointId == this.droppointData.droppointId) {
 			        console.log("gfs-droppoint: onDroppointChanged()");
-			        this.set('droppointData.chosen',dp.chosen);
+			        this.set('droppointData.chosen', dp.chosen);
+			        //if (this.droppointData.chosen) {
+			        //   window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	       
+			        //}
+			        
 			        //if (!this.droppointData.chosen) {
 			        //    this.droppointData.chosen = true;
 			        this.initData();
 			        this.render();
 			        //}
+
 			        return;
 			    }
                 //If it's another one and it's been chosen, unchoose me
@@ -637,9 +651,13 @@
 			        return;
 			    }
 			    if (this.droppointData.chosen) {
-			        //window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
+			        //this.autoSelectOption();
+			        //window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 10000);
 			        this.render();
 			        //this.fire("droppoint-chosen", this.droppointData);
+			        if (this.scrollIntoViewOnChoose) {
+			            this.scrollIntoView(false);
+			        }
 			       
      
 			    }
@@ -706,27 +724,32 @@
 			},
 
 			toggleChooseDropPoint: function () {
+			    if (this.disableUnchoose && this.droppointData.chosen) {
+			        return;
+			    }
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    //this.fire("droppoint-changed", this.droppointData);
 			    if (this.droppointData.chosen) {
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	       
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);
 			    }
 			    this.fire("droppoint-changed", this.droppointData);
 				//this.chosenChanged();
 			},
 
 			onSelectOption: function(e) {
-			    this.fire('select-delivery-option', e.target.value); //TODO: Change to e.target.id -- no need to pass DOM element
+			    this.fire('select-delivery-option', e.target.value);
 			},
 
 			autoSelectOption: function() {
-			    if (this.droppointData.deliveries.length) {
+			    if (this.droppointData.deliveries) {
 			        console.log("Selecting option", '#dp-' + this.droppointData.deliveries[0].id);
 			        document.getElementById('dp-' + this.droppointData.deliveries[0].id).click();
 			        //this.$$('#dp-' + this.droppointData.deliveries[0].id).click();//checked = true;
 			    }
 			    else {
 			        console.error("No delivery options available");
+			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
+
 			    }
 			},
 
@@ -746,7 +769,9 @@
 			_openingHoursLinkClick: function (e) {
 			    console.log("Clicked opening hours link");
 			    this.fire('opening-hours-link-click', e);
-			}
+			},
+
+			_onClick: function () { }
 
 		});
 	</script>
