@@ -1322,10 +1322,25 @@
 
             _removeDupDropPoints: function () {
                 var self = this;
+                var uniques = [];
+                for (var j = 0; j < this._dropPoints.length; j++) {
+                    var dp = this._dropPoints[j];
+                    if (!uniques.find(function(item) {
+                        return item.droppointId == dp.droppointId;
+                    })) {
+                        uniques.push(dp);
+                    }
+                }
+                this.set('_dropPoints', uniques);
+                /*
                 this._dropPoints = this._dropPoints.filter(function (item, filterIndex) {
-                    //return true;
-                    return !self._dropPoints.find(function (dp, findIndex) { return filterIndex !== findIndex && dp.droppointId == item.droppointId });
-                }); 
+                  
+                    if (self._dropPoints.find(function (dp, findIndex) { return filterIndex !== findIndex && dp.droppointId == item.droppointId })) {
+                        console.warn("Removing", item.droppointId, filterIndex);
+                        return false;
+                    }
+                    else return true;
+                }); */
             },
 
             _processPreferredDroppoints: function()
