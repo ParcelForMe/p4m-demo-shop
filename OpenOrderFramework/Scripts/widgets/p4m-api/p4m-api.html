@@ -320,7 +320,12 @@
                     httpRequest.onreadystatechange = (function () {
                         if (httpRequest.readyState === XMLHttpRequest.DONE) {
                             try {
-                                intermediateCallback(JSON.parse(httpRequest.responseText));
+                                if (httpRequest.status === 401) {
+                                    var loginWidget = document.getElementsByTagName("p4m-login")[0];
+                                    loginWidget.logout();
+                                }
+                                else
+                                    intermediateCallback(JSON.parse(httpRequest.responseText));
                             }
                             catch (e) {
                                 console.error(e.stack);
@@ -362,10 +367,10 @@
             },
 
             _handleResponse: function (apiRequest, finalCallback, responseData) {
-
+                console.log("API response: ", responseData);
                 if (!responseData.Success) {
                     var err = responseData.Error || responseData.Message;
-                    if (err.indexOf("denied") > -1) {
+                    if (responseData.status == 401 || err.indexOf("denied") > -1) {
                         var loginWidget = document.getElementsByTagName("p4m-login")[0];
                         loginWidget.logout();
                         finalCallback(responseData);
