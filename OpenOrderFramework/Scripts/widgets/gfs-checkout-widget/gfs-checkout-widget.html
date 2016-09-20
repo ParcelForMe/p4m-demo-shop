@@ -648,7 +648,7 @@
                                 <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
                                     <img src="./images/x.png" alt="close" />
                                 </div>
-                                <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" container-class="overlay" show-distance="true" show-opening-hours="true"></gfs-droppoint>
+                                <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" on-click="_hideDropPointDetails" container-class="overlay" show-distance="true" show-opening-hours="true"></gfs-droppoint>
                             </div>
                         </div>
                         <div class="hidden">
@@ -1794,7 +1794,7 @@
                 //Select the drop point, if it is known.
                 var dp = this._droppointById(null, dropPointId);
                 if (dp) {
-                    this.set(this._selectedDropPoint, dp);
+                    this.set("_selectedDropPoint", dp);
                     //this.set('_selectedDropPoint.chosen', true);
                     this.fire("droppoint-changed", dp);
                 }
