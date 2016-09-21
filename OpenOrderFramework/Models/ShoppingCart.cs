@@ -36,7 +36,7 @@ namespace OpenOrderFramework.Models
 
         public void CalcTax(decimal taxPercent = 20M)
         {
-            var itemsTotal = Items.Sum(d => d.Count * d.Item.Price);
+            decimal itemsTotal = Items == null ? 0 : Items.Sum(d => d.Count * d.Item.Price);
             this.Discount = 0;
             foreach(var discount in this.Discounts)
             {

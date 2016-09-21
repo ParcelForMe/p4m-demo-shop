@@ -8,9 +8,9 @@
             <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
             <polymer-cookie id="p4mAvatarCookie" name="p4mAvatarUrl"></polymer-cookie>
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
-            <div id="profileName">{{_profileName}}</div>
             <img id="profileImage" src$="{{_profilePicUrl}}" />  
             <paper-spinner id="spinner"></paper-spinner>         
+            <div id="profileName">{{_profileName}}</div>
         </div>
     </template>
 
@@ -41,6 +41,9 @@
         #spinner {
             width: 50px;
             height: 50px;
+            position: absolute;
+            top: 0;
+            left: 4px;
         }
         .hidden {
             display: none;
