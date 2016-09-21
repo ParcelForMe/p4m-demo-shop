@@ -666,7 +666,7 @@
                             </div>
                             <div class="preferredDroppoints">
                                 <h3>My Collection Points</h3>
-                                <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
+                                <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                     <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                 </template>
                             </div>
@@ -689,14 +689,14 @@
                             </div>
                             <div id="mainDropPointListArea">
                                 <div id="dropPointList">
-                                    <template id="dropPointList" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
+                                    <template id="dropPointListTemplate" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
                                         <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" disable-unchoose="true" scroll-into-view-on-choose="true" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                     </template>
                                 </div>
 
                                 <div class="preferredDroppoints">
                                     <h3>My Collection Points</h3>
-                                    <template id="dropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
+                                    <template id="listPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                         <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" disable-unchoose="true" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                     </template>
                                 </div>
@@ -1826,6 +1826,7 @@
                         this._infoWindow.close();
                     }
                     this._hideDropPointDetails();
+                    this._selectedDropPoint.chosen = false;
                     this._selectedDropPoint = null;
                 }
             },
@@ -1875,6 +1876,8 @@
                         this._unselectDropPoint();
 
                 this.set("_selectedDropPoint", changedDroppoint);
+                this.$.dropPointListTemplate.render(); //Re-sort the list of drop point cards
+                //this.$.listPreferredDropPointList.render(); //Re-sort the preferred list
                 this._fixMapMarker();            
             },
 
