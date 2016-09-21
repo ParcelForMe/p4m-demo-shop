@@ -1107,6 +1107,7 @@
                     this._data = JSON.parse(unencoded);
                 }
                 this._dropPoints = this._data.droppoints;
+                this._requestDroppointList(this._preferredDroppoints);
 
                 window.setTimeout(this._delayedInit.bind(this), 0);
             },
@@ -1309,9 +1310,10 @@
                 this._preferredDroppoints = droppointList;//.filter(function (item) { return true });
                 this._processPreferredDroppoints();
 
-                if (this._preferredDroppoints.length > 0) {
+                if (this._preferredDroppoints.length > 0) {             
                     this._showPreferredDroppoints();
                 }
+               
             },
 
             _processAllDroppoints: function () {
@@ -1719,22 +1721,36 @@
 
                     // console.log('Boxes to request:', JSON.stringify(boxes));
                     // self._drawBoxes(boxes, 'green');
-
+                    
                     if (boxes.length > 0) {
                         console.log("Requesting", boxes.length, "regions");
                         self.$.regionManager.addRegion([northEast, southWest]);
-                        self.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + self._sessionId + "&regions=" + JSON.stringify(boxes);
-                        self.$.ajaxGetDroppoints.headers = self._computeHeader();
-                        self.$.ajaxGetDroppoints.generateRequest();
+                        self._requestDroppointsByGeoBoxes(boxes);
                     }
                     else {
                         console.log("Not requesting any regions");
-                    }
-                    // remove the listener
-                    // TODO: Understand why we're removing the listener
-                    //google.maps.event.clearListeners(self._map, 'bounds_changed');
-    
+                    }    
                 }
+            },
+
+            _requestDroppointsByGeoBoxes: function (boxes) {
+                //TODO: Make an API component for this
+                this.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId + "&regions=" + JSON.stringify(boxes);
+                this.$.ajaxGetDroppoints.headers = this._computeHeader();
+                this.$.ajaxGetDroppoints.generateRequest();
+            },
+
+            _requestDroppointList: function (droppointList) {
+                //NOTE: This is temporary code, to be replaced by a dedicated API endpoint
+                if (droppointList.length === 0) return;
+                var self = this;
+                
+                //Make array of geoBoxes, tightly encompassing each droppoint
+                var boxes = [];
+                droppointList.forEach(function (dp) {
+                    boxes.push([[dp.geoLocation.coordinates.longitude - 0.000001, dp.geoLocation.coordinates.latitude - 0.000001], [dp.geoLocation.coordinates.longitude + 0.000001, dp.geoLocation.coordinates.latitude + 0.000001]]);
+                });
+                this._requestDroppointsByGeoBoxes(boxes);
             },
 
             _showDropPointDetails: function() {
