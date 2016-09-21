@@ -1701,10 +1701,9 @@
             _reloadDroppoints: function() {
                 if (this._sessionId) {
                     console.log('reloadDroppoints()');
-                    var self = this;
 
                     //Get viewport rectangle
-                    var bounds = self._map.getBounds();
+                    var bounds = this._map.getBounds();
                     if (!bounds) {
                         console.error("Failed to get map bounds");
                         return;
@@ -1715,7 +1714,7 @@
 
                     var boxes = [];
 
-                    self.$.regionManager.getUncoveredRectangles(viewPort).forEach(function(rect) {
+                    this.$.regionManager.getUncoveredRectangles(viewPort).forEach(function (rect) {
                         boxes.push(rect.toGeoBox());
                     });
 
@@ -1723,13 +1722,14 @@
                     // self._drawBoxes(boxes, 'green');
                     
                     if (boxes.length > 0) {
-                        console.log("Requesting", boxes.length, "regions");
-                        self.$.regionManager.addRegion([northEast, southWest]);
-                        self._requestDroppointsByGeoBoxes(boxes);
+                        //console.log("Requesting", boxes.length, "regions");
+                        this.$.regionManager.addRegion([northEast, southWest]);
+                        this._requestDroppointsByGeoBoxes(boxes);
                     }
                     else {
                         console.log("Not requesting any regions");
-                    }    
+                    }
+                    this._resetMap(this._map);
                 }
             },
 
