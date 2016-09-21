@@ -96,18 +96,25 @@
                 float: right;
                 height: 400px; /* same as map */
                 overflow-y: scroll;     
-                overflow-x: hidden;     
+                overflow-x: hidden;
+                display: block;  
             }
 
-            #mainDropPointListArea #dropPointList {
+            #mainDropPointListArea.showPreferredDroppoints #dropPointList {
                 width: 60%;
                 float: left;
+               
             }
 
             #mainDropPointListArea .preferredDroppoints {
+               display: none;          
+            }
+
+            #mainDropPointListArea.showPreferredDroppoints .preferredDroppoints {
                 width: 37%;
                 float: right;   
-                overflow-x: hidden;          
+                overflow-x: hidden;    
+                display: block;        
             }
 
             .preferredDroppoints h3 {
@@ -440,6 +447,11 @@
                 transition-duration: 0.5s;
             }
 
+            .gfs-button.disabled {
+                background-color: rgba(200, 200, 200, 0.5);
+                cursor: not-allowed;
+            }
+
             /*
                 .gfs-button.small-button {
                     width: 100px;
@@ -616,7 +628,7 @@
                     </iron-collapse>
 
 
-                    <div class="gfs-button" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
+                    <div class="gfs-button" id="droppointsBtn" on-click="showPage_Droppoints">Choose a Click and Collect option</div>
                 </div>
                 <div class="page" id="pageDroppoints" opened="{{_droppointOpened}}">
                    
@@ -1062,7 +1074,7 @@
                             this.$.calendarPanel.opened = true;
                             break;
                         case 'CollectionPoint':
-                            this.showPage_Droppoints();
+                            this.showPage_Droppoints();                       
                             break;
                     }
                 }
@@ -1182,18 +1194,14 @@
                 this._processInputData();
 
                 if (this.useDropPoints) {
-                    this._makeMap(); //eee
-                    //this._showDropPointsView();
+                    this._makeMap();
                     this._findAllDeliveryDroppoints();
                     this._processAllDroppoints();
                 }
                 if (this.useCalendar) {
                     this._makeCalendar();
                 }
-
                 this._checkForServices(this.defaultDelivery);
-
-                //console.log("_delayedInit end", new Date().getTime());
                 //this._preselect();
             },
 
@@ -1802,6 +1810,7 @@
 
             _showPreferredDroppoints: function () {
                 this.$.mainMapArea.classList.add("showPreferredDroppoints");
+                this.$.mainDropPointListArea.classList.add("showPreferredDroppoints");
                 var self = this;
                 this._resetMap(this._map);
                // alert('done');
@@ -2367,12 +2376,15 @@
 
 			showPage_Droppoints: function () {
 			    //this.$.pages.selectIndex(1); //This method interferes with Google Map
-			    this.showingDroppoints = true;
-			    this.$.pageStandard.classList.add("hidden")
-			    this.$.pageDroppoints.classList.remove("hidden")
-			    this.$.dropPointDeliveriesOption.checked = "checked";
-			    this._showDropPointsView();
-			    //this.fire('show-droppoints');
+			    if (this._map) {
+			        this.showingDroppoints = true;
+			        this.$.pageStandard.classList.add("hidden")
+			        this.$.pageDroppoints.classList.remove("hidden")
+			        this.$.dropPointDeliveriesOption.checked = "checked";
+			        this._showDropPointsView();
+			        //this.fire('show-droppoints');
+			    }
+
 			},
 
 			showView_DroppointsList: function() {
