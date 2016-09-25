@@ -679,7 +679,7 @@
                             <div class="preferredDroppoints">
                                 <h3>My Collection Points</h3>
                                 <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                    <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" on-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                 </template>
                             </div>
                         </div>
@@ -2393,6 +2393,10 @@
 
 			_onSelectPreferredDroppoint: function (e) {
 			    console.log("_onSelectPreferredDroppoint()", e.detail);
+			},
+
+			_onClickDroppoint: function(e) {
+			    this.selectDropPoint(e.detail);
 			},
 
 			_doAutoChooseDroppoint: function () {
