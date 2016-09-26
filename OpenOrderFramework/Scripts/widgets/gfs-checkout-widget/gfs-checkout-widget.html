@@ -2191,8 +2191,7 @@
 				this.selectedServiceDetails.checked = cheapestMethod.selected;
 				this.selectedServiceDetails.currencySymbol = this.currencySymbol;
 
-			    //TODO: Use data model to record state instead
-				if (this.$.dropPointDeliveriesOption.checked == true) {
+                if (this._selectedDropPoint) {
 					this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
 					this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
 				} else {
@@ -2331,7 +2330,7 @@
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
 
                 //TODO: Use data model to record state, not UI elements
-                if (this.$.dropPointDeliveriesOption.checked == true) {
+                if (this._selectedDropPoint) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
                     this.selectedServiceDetails.providerId = this._selectedDropPoint.providerId;
                     this.selectedServiceDetails.provider = this._selectedDropPoint.providerName;
