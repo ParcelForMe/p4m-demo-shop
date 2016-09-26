@@ -34,13 +34,13 @@
                         <paper-tab>Payment Options</paper-tab>
                         <paper-tab>Addresses</paper-tab>
                     </paper-tabs>
-                    <iron-pages selected="{{selectedTab}}" on-iron-select="onSelectTab">                   
+                    <iron-pages id="p4mPages" selected="{{selectedTab}}" on-iron-select="_onSelectTab">                   
                         <iron-page id="cartPage">                       
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
 
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints-list="onGfsShowDroppointsAsList" on-show-droppoints-map="onGfsShowDroppointsAsMap" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -517,9 +517,8 @@
                 });
             },
 
-            onSelectTab: function (e) {
-                console.log(e.detail);
-                if (e.detail.item && e.detail.item.id !== "deliveryPage") {
+           _onSelectTab: function (e) {
+               if (e.detail.item && e.detail.item.tagName.toLowerCase() == "iron-page" && e.detail.item.id !== "deliveryPage" && e.detail.item.id !== "pageDroppoints") {
                     this.toggleDetailExpansion(false);
                 }
                 else {
@@ -532,11 +531,7 @@
                 this.updateShipping(e.detail);
             },
 
-            onGfsShowDroppointsAsList: function(e) {
-                this.toggleDetailExpansion(true);
-            },
-
-            onGfsShowDroppointsAsMap: function (e) {
+            onGfsShowDroppoints: function (e) {
                 this.toggleDetailExpansion(true);
             },
 

@@ -4,7 +4,8 @@ gfs-checkout span.price {
 }
 
 gfs-checkout brick-calendar {
-	width:100%;
+	width:90%;
+    margin-left: 25px;
 	border: none;
 }
 
