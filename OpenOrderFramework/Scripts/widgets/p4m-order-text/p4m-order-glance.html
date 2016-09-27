@@ -6,7 +6,7 @@
     <template>
         <div id="container">
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                Delivering to: {{deliveryAddressStr}} {{deliveryDatePrefixStr}} {{deliveryDateStr}}, via {{deliveryMethodStr}}.
+                Delivering to: <a href="#">{{deliveryAddressStr}} {{deliveryDatePrefixStr}} {{deliveryDateStr}}, via {{deliveryMethodStr}}.</a>
             </template>
             <template is="dom-if" if="{{isLoading}}">
                 <p>...</p>
