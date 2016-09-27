@@ -89,4 +89,8 @@ gfs-checkout ul.separated li {
 
 .smallSummary p4m-order-summary .p4m-row .detail-col {
     display: none!important;
-}  
+} 
+
+.smallSummary .card-logo {
+    display: none!important;
+} 
