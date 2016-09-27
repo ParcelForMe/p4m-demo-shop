@@ -1,0 +1,136 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+<script src="../../Lib/momentjs/min/moment.min.js"></script>
+
+<dom-module id="p4m-order-glance">
+
+    <template>
+        <div id="container">
+            <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
+                Delivering to: {{deliveryAddressStr}} {{deliveryDatePrefixStr}} {{deliveryDateStr}}, via {{deliveryMethodStr}}.
+            </template>
+            <template is="dom-if" if="{{isLoading}}">
+                <p>...</p>
+            </template>
+        </div>
+    </template>
+
+    <style>
+        #container {
+            margin: 10px;
+        }
+    </style>
+
+    <script>
+    //
+        Polymer({
+            is: "p4m-order-glance",
+
+            properties: {
+                consumerData: {
+                    type: Object
+                },
+                cartData: {
+                    type: Object
+                },
+                deliveryAddressStr: {
+                    type: String,
+                    value: "Please select an address"
+                },
+                deliveryDateStr: {
+                    type: String
+                },
+                deliveryMethodStr: {
+                    type: String
+                },
+                isLoading: {
+                    type: Object,
+                    value: true
+                }
+
+            },
+
+            observers: [
+                "updateUi(consumerData.*)",
+                "updateUi(cartData.*)"
+            ],
+
+            ready: function()
+            {
+                this.updateUi();
+            },
+
+
+            updateUi: function()
+            {
+                if (this.cartData && this.consumerData) {
+                    this.isLoading = false;
+                    var deliveryAddr = this._addressById(this.cartData.AddressId);
+                    this.deliveryAddressStr = this._addressToStr(deliveryAddr);
+                    this.addressTypeStr = this._addressType(deliveryAddr);
+                    this.deliveryDatePrefixStr = this._expectedDeliveryDatePrefixStr(this.cartData.ExpDeliveryDate);
+                    this.deliveryDateStr = this._expectedDeliveryDateStr(this.cartData.ExpDeliveryDate);
+                    this.deliveryMethodStr = this.cartData.ServiceName;
+                }
+                else {
+                    this.isLoading = true;
+                }
+            },
+
+            _addressById: function(id) {
+                var foundAddress = null;
+                for (var i = 0; i < this.consumerData.Addresses.length; i++) {
+                    var address = this.consumerData.Addresses[i];
+                    if (address.Id == this.cartData.AddressId) {
+                        foundAddress = address;
+                        break;
+                    }
+                }
+                return foundAddress;
+            },
+
+            _addressToStr: function (address) {
+                if (address) {
+                    return address.Street1; /*+ " " + address.Street2;*/
+                }
+                else {
+                    return "";
+                }
+
+            },
+
+            _addressType: function (address) {
+                if (address && address.AddressType) {
+                    if (address.AddressType === "Collect") {
+                        return "preferred collection point";
+                    }
+                    else {
+                        return "preferred delivery address";
+                    }
+                }
+            },
+
+
+            _expectedDeliveryDateStr: function (dateStr) {
+                if (dateStr) {
+                    return moment(new Date(dateStr)).format('dddd Do MMMM YYYY');
+                }
+                else {
+                    return "Please select a delivery method to continue";
+                }
+
+            },
+
+            _expectedDeliveryDatePrefixStr: function (dateStr) {
+                if (dateStr) {
+                    return " by ";
+                }
+                else {
+                    return ". ";
+                }
+
+            }
+
+
+        });
+    </script>
+</dom-module>
