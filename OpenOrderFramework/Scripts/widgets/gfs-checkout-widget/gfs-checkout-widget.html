@@ -4,7 +4,6 @@
 <link rel="import" href="../../Lib/iron-list/iron-list.html" />
 <link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
-<link rel="import" href="../gfs-droppoint/gfs-droppoint-text.html" />
 <link rel="import" href="../../Lib/gfs-delivery-address/gfs-delivery-address.html" />
 <link rel="import" href="../../Lib/gfs-checkout-widget/map-region-manager/map-region-manager.html" />
 <link rel="import" href="../../Lib/paper-toggle-button/paper-toggle-button.html" />
@@ -686,9 +685,6 @@
                                 <div class="gfs-button small-button" on-click="showPage_Standard">< Back</div>
                                 <a href="#" id="viewAsMap" on-tap="_toggleDroppointView">View as a map</a>
                             </div>
-                            <div id="dropPointText">
-                                <gfs-droppoint-text selected-droppoint="{{_selectedDropPoint}}"></gfs-droppoint-text>
-                            </div>
 
                             <div class="cardList">
                                 <div id="list-loading" class="loading">
@@ -696,7 +692,7 @@
                                 </div>
                                 <div id="mainDropPointListArea">
                                     <div id="dropPointList">
-                                        <template id="dropPointListTemplate" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance">
+                                        <template id="dropPointListTemplate" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance" filter="filterToMap">
                                             <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" disable-unchoose="true" scroll-into-view-on-choose="true" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                         </template>
                                     </div>
@@ -1284,6 +1280,29 @@
                 else return a.distanceInMeters < b.distanceInMeters ? -1 : 1;
             },
 
+            filterToMap: function (item) {
+                if (this._map) {
+
+                    if (this._mapViewPort) {
+
+                        var sw = { longitude: this._mapViewPort[1][0], latitude: this._mapViewPort[1][1] };
+                        var ne = { longitude: this._mapViewPort[0][0], latitude: this._mapViewPort[0][1] };
+
+                        if ((item.geoLocation.coordinates.latitude > sw.latitude && item.geoLocation.coordinates.latitude < ne.latitude)
+                            && (item.geoLocation.coordinates.longitude > sw.longitude && item.geoLocation.coordinates.longitude < ne.longitude)) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }                      
+                    }
+                    else return true;
+                }
+                else {
+                    return true;
+                }              
+            },
+
             getClosestDroppoint: function (dpList) {
                 return dpList.reduce(function (prev, curr) {
                     return (prev.distanceMeters < curr.distanceInMeters) ? prev : curr;
@@ -1351,15 +1370,6 @@
                     }
                 }
                 this.set('_dropPoints', uniques);
-                /*
-                this._dropPoints = this._dropPoints.filter(function (item, filterIndex) {
-                  
-                    if (self._dropPoints.find(function (dp, findIndex) { return filterIndex !== findIndex && dp.droppointId == item.droppointId })) {
-                        console.warn("Removing", item.droppointId, filterIndex);
-                        return false;
-                    }
-                    else return true;
-                }); */
             },
 
             _processPreferredDroppoints: function()
@@ -1556,18 +1566,16 @@
                     }
                 });
 
+                //TODO: Take a close look at this. Do we need it?
                 google.maps.event.addListener(self._map, 'bounds_changed', function() {
                     // initialise region manager
-                    var bounds = self._map.getBounds();
-                    var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
-                    var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
-                    self.$.regionManager.addRegion([northEast, southWest]);
-                    console.log("initalise region manager" + bounds);
-                    // remove the listener
-                    google.maps.event.clearListeners(self._map, 'bounds_changed');
-                });
-
-                
+                    self._updateMapViewPort();
+                    if (self._mapViewPort) {
+                        self.$.regionManager.addRegion(self._mapViewPort);
+                        // remove the listener
+                        google.maps.event.clearListeners(self._map, 'bounds_changed');
+                    }
+                });             
             },
 
             _loadDroppointMarkers: function (dropPointsArray) {
@@ -1716,37 +1724,43 @@
                 });
             },
 
+            _updateMapViewPort: function() {
+                var bounds = this._map.getBounds();
+                if (!bounds) {
+                    console.error("Failed to get map bounds");
+                    return;
+                }          
+                var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
+                var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
+                if (northEast[0] === southWest[0] && northEast[1] === southWest[1]) return;
+                this._mapViewPort = [northEast, southWest];
+            },
+
             _reloadDroppoints: function() {
                 if (this._sessionId) {
                     console.log('reloadDroppoints()');
 
                     //Get viewport rectangle
-                    var bounds = this._map.getBounds();
-                    if (!bounds) {
-                        console.error("Failed to get map bounds");
-                        return;
-                    }
-                    var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
-                    var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
-                    var viewPort = [northEast, southWest];
+                    this._updateMapViewPort();
 
                     var boxes = [];
 
-                    this.$.regionManager.getUncoveredRectangles(viewPort).forEach(function (rect) {
+                    this.$.regionManager.getUncoveredRectangles(this._mapViewPort).forEach(function (rect) {
                         boxes.push(rect.toGeoBox());
                     });
 
                     // console.log('Boxes to request:', JSON.stringify(boxes));
                     // self._drawBoxes(boxes, 'green');
                     
-                    if (boxes.length > 0) {
-                        //console.log("Requesting", boxes.length, "regions");
-                        this.$.regionManager.addRegion([northEast, southWest]);
+                    if (boxes.length > 0 && this._mapViewPort) {
+                        this.$.regionManager.addRegion(this._mapViewPort);
                         this._requestDroppointsByGeoBoxes(boxes);
                     }
                     else {
                         console.log("Not requesting any regions");
                     }
+
+                    this.$.dropPointListTemplate.render();
                     this._resetMap(this._map);
                 }
             },
@@ -1809,9 +1823,7 @@
                     window.setTimeout(function () {
                         google.maps.event.trigger(map, 'resize');
                     }, 100);
-                }
-
-                
+                }           
             },
 
             _hideDropPointDetails: function() {
@@ -1823,8 +1835,6 @@
                 this.$.mainDropPointListArea.classList.add("showPreferredDroppoints");
                 var self = this;
                 this._resetMap(this._map);
-               // alert('done');
-                //self._map.checkResize();
             },
 
             _getHomeIcon: function() {
