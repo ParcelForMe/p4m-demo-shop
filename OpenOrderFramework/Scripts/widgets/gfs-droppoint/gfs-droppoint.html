@@ -363,7 +363,7 @@
 				<h3>{{title}}</h3>
 			</template>
 
-			<div class="content">
+			<div class="content" on-click="_onClick">
 
 				<div class="dp-details">
                     <div class="dp-header">
@@ -372,7 +372,7 @@
                             <b class="dpProviderName">{{droppointData.providerName}}</b>
                         </div>
                         <template is="dom-if" if="{{isTickButton}}">
-                            <div class$="b-tick {{buttonClass}}" on-click="toggleChooseDropPoint"></div>
+                            <div class$="b-tick {{buttonClass}}"></div>
                         </template>
                         <div id="dp-address">
                             ({{droppointData.droppointId}})
@@ -433,20 +433,23 @@
                 </div>
             </div>
             <template is="dom-if" if="{{showShippingOptions}}">
-                <template is="dom-if" if="{{droppointData.chosen}}">
+                <template id="shippingOptionsIfTemplate" is="dom-if" if="{{droppointData.chosen}}">
                     <div class="shippingOptions">
                         <div class="dp-small-heading">Collection options</div>
                         <ul>
-                            <template is="dom-repeat" items="{{droppointData.deliveries}}" xsort="sortServices">
+                            <template id="shippingOptionsTemplate" is="dom-repeat" items="{{droppointData.deliveries}}" xsort="sortServices">
                                 <li class="delivery-place">
+
                                     <input type="radio"
-                                           name="shipping_method"
-                                           value="{{item.id}}"
-                                           id="dp-{{item.id}}"
-                                           on-click="onSelectOption"
-                                           class="radio droppoint-delivery-selection" />
-                                    <label for$="{{item.id}}">
-                                        <span class="gfsmethodname"><div class="price">{{currencySymbol}}{{item.price}}</div>&nbsp;{{item.methodTitle}}</span>
+                                            name="shipping_method_{{_id}}"
+                                            checked="{{item.selected}}"
+                                            value="{{item.id}}"
+                                            id="dp-{{item.id}}"
+                                            on-click="onClickOption"
+                                            class="radio droppoint-delivery-selection" />
+
+                                    <label for$="dp-{{item.id}}">
+                                        <span class="gfsmethodname"><span class="price">{{currencySymbol}}{{item.price}}</span>&nbsp;{{item.methodTitle}}</span>
                                         <div>{{item.deliveryDateRange}}</div>
                                     </label>
                                 </li>
@@ -468,84 +471,91 @@
 
 	<script>
 
-		Polymer({
-			is: "gfs-droppoint",
+        Polymer({
+            is: "gfs-droppoint",
 
-			properties: {
-				title: {
-					type: String
-				},
+            properties: {
+                title: {
+                    type: String
+                },
 
-				droppointData: {
-					type: Object,
-					value: {}
-				},
-				buttonType: {
-					type: String,
-					value: "standard"
-				},
-				showOpeningHours: {
-					type: Object,
-					value: false
-				},
-				showOpeningHoursLink: {
-				    type: Object,
-				    value: false
-				},
-				showDistance: {
-					type: Object,
-					value: true
-				},
-				showShippingOptions: {
-				    type: Object,
+                droppointData: {
+                    type: Object,
+                    value: {}
+                },
+                buttonType: {
+                    type: String,
+                    value: "standard"
+                },
+                showOpeningHours: {
+                    type: Object,
                     value: false
-				},
-				containerClass: {
-					type: String,
-					value: "content-container"
-				},
-				currencySymbol: {
-				    type: String,
-				    value: "£"
-				},
-				scrollIntoViewOnChoose: {
-				    type: Boolean,
+                },
+                showOpeningHoursLink: {
+                    type: Object,
                     value: false
-				},
-				/*chosen: {
+                },
+                showDistance: {
+                    type: Object,
+                    value: true
+                },
+                showShippingOptions: {
+                    type: Object,
+                    value: false
+                },
+                containerClass: {
+                    type: String,
+                    value: "content-container"
+                },
+                currencySymbol: {
+                    type: String,
+                    value: "£"
+                },
+                scrollIntoViewOnChoose: {
+                    type: Boolean,
+                    value: false
+                },
+                /*chosen: {
                     type: Boolean,
                     value: false,
                     notify: true
                 },*/
-				droppointId: {
-					type: String
-				},
-				buttonClass: {
-					type: String,
-					value: "unchosen"
-				},
-				buttonText: {
-					type: String,
-					value: "Choose"
-				},
-				disableUnchoose: {
-				    type: Boolean,
-				    value: false
-				},
-				streetAddress: {
-					type: String,
-					notify: true
-				},
-				_weekCollection: {
-				    type: Object,
-				    notify: true
-				}
-			},
+                droppointId: {
+                    type: String
+                },
+                buttonClass: {
+                    type: String,
+                    value: "unchosen"
+                },
+                buttonText: {
+                    type: String,
+                    value: "Choose"
+                },
+                disableUnchoose: {
+                    type: Boolean,
+                    value: false
+                },
+                streetAddress: {
+                    type: String,
+                    notify: true
+                },
+                _weekCollection: {
+                    type: Object,
+                    notify: true
+                },
+                _id: {
+                    type: String,
+                    value: Math.floor(Math.random() * 99999) + (new Date().getDate()).toString()
+                }
+            },
 
-			observers: [
+            observers: [
                 "chosenChanged(droppointData.chosen)"
-			],
-
+                //"_onShippingOptionSelected(droppointData.deliveries.*.selected)"
+            ],
+            listeners: {
+               // "select-delivery-option": "_onShippingOptionsChanged"
+            },
 
 			ready: function () {
 
@@ -563,14 +573,14 @@
 					this.isStandardButton = !this.isTickButton;
 				}
 
-				// window.addEventListener('droppointChosen', this.onDroppointChosen.bind(this), false);
-				// window.addEventListener('droppointUnchosen', this.onDroppointUnchosen.bind(this), false);
+                //Window-level listener, to ensure that we get our peers
 				window.addEventListener('droppoint-changed', this.onDroppointChanged.bind(this), false);
 
 			},
 
 			initData: function () {
-				//this.chosen = this.droppointData.chosen;
+			    //this.chosen = this.droppointData.chosen;
+			    this._id = Math.floor(Math.random() * 99999) + (new Date().getDate()).toString()
 				this.droppointId = this.droppointData.droppointId || "";
 				if (typeof (this.droppointData.chosen) === "undefined") {
 					this.droppointChosen = false;
@@ -624,16 +634,16 @@
                 //If the droppoint chosen was this one, make sure this "chosen" value reflects the other one
 			    if (dp.droppointId == this.droppointData.droppointId) {
 			        console.log("gfs-droppoint: onDroppointChanged()");
-			        this.set('droppointData.chosen', dp.chosen);
-			        //if (this.droppointData.chosen) {
-			        //   window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);	       
-			        //}
-			        
-			        //if (!this.droppointData.chosen) {
-			        //    this.droppointData.chosen = true;
+			        if (this.droppointData.chosen !== dp.chosen) {
+			            this.set('droppointData.chosen', dp.chosen);
+			        }
 			        this.initData();
 			        this.render();
-			        //}
+
+			        if (this.droppointData.chosen) {
+			            //console.log("ABOUT TO SELECT AN OPTION");
+			            //this.autoSelectOption();
+			        }
 
 			        return;
 			    }
@@ -644,14 +654,14 @@
                 				
 			},
 
-			//Local event fired
+			//Local observer
 			chosenChanged: function () {
 			    //if (typeof (this.droppointData.chosen) === "null") return;
 			    if (!this.droppointData) {
 			        return;
 			    }
 			    if (this.droppointData.chosen) {
-			        //this.autoSelectOption();
+			        this.autoSelectOption();
 			        //window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 10000);
 			        this.render();
 			        //this.fire("droppoint-chosen", this.droppointData);
@@ -664,10 +674,6 @@
 			    else {
 			        this.render();
 			    }
-				//Send global event
-			    //
-			   // this.fire("droppoint-changed", this.droppointData);
-			    //this.fire("droppoint-chosen", this.droppointData);
 			},
 
 			render: function () {
@@ -719,8 +725,8 @@
 			},
 
 			selectThis: function () {
-			    console.log('selected');
-			    this.fire("droppoint-changed", this.droppointData);
+			    //console.log('selected');
+			    //this.fire("droppoint-changed", this.droppointData);
 			},
 
 			toggleChooseDropPoint: function () {
@@ -730,27 +736,42 @@
 			    this.set("droppointData.chosen", !this.droppointData.chosen);
 			    //this.fire("droppoint-changed", this.droppointData);
 			    if (this.droppointData.chosen) {
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 100);
+			        this.autoSelectOption();
 			    }
 			    this.fire("droppoint-changed", this.droppointData);
-				//this.chosenChanged();
 			},
 
-			onSelectOption: function(e) {
-			    this.fire('select-delivery-option', e.target.value);
+			onClickOption: function (e) {
+			    this.selectOption(e.target.value);		   
+			},
+
+            //Select a shipping option by ID
+            //Fire on-select-delivery-option to be received by parent
+            //Set deliveries[n].selected, which will trigger an observer here (and possibly higher up too?)
+			selectOption: function (shippingOptionId) {            
+			    for (var i=0; i< this.droppointData.deliveries.length; i++) {
+			        var item = this.droppointData.deliveries[i];
+			        if (item.id === shippingOptionId) {
+			            console.log("Setting selected to true");
+			        }
+			        this.set("droppointData.deliveries." + i + ".selected", item.id === shippingOptionId);
+			        this.fire('select-delivery-option', shippingOptionId);
+			    }
 			},
 
 			autoSelectOption: function() {
-			    if (this.droppointData.deliveries) {
+			    if (this.droppointData.deliveries) {		        
 			        console.log("Selecting option", '#dp-' + this.droppointData.deliveries[0].id);
-			        document.getElementById('dp-' + this.droppointData.deliveries[0].id).click();
-			        //this.$$('#dp-' + this.droppointData.deliveries[0].id).click();//checked = true;
+			        this.selectOption(this.droppointData.deliveries[0].id);
 			    }
 			    else {
 			        console.error("No delivery options available");
-			        window.setTimeout((function () { this.autoSelectOption(); }).bind(this), 1000);
-
 			    }
+			},
+
+			_onShippingOptionsChanged: function() {
+			    console.log("Detected data change");
+			    this._onShippingOptionSelected();
 			},
 
 
@@ -767,11 +788,20 @@
 			},
 
 			_openingHoursLinkClick: function (e) {
-			    console.log("Clicked opening hours link");
 			    this.fire('opening-hours-link-click', e);
 			},
 
-			_onClick: function () { }
+			_isSelected: function (shippingOption) {
+			    //console.log(shippingOption);
+			    return shippingOption.selected;
+			},
+
+			_onClick: function () {
+			    this.toggleChooseDropPoint();
+			    this.fire('droppoint-click', this.droppointData.droppointId);
+			}
+
+
 
 		});
 	</script>
