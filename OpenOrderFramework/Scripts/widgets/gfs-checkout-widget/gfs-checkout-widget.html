@@ -674,7 +674,7 @@
                                 <div class="preferredDroppoints">
                                     <h3>My Collection Points</h3>
                                     <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                        <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" on-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                        <gfs-droppoint xon-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                     </template>
                                 </div>
                             </div>
@@ -1220,6 +1220,13 @@
 
             _checkForServices: function (defaultDelivery) {
                 //Preselect delivery option based on default delivery method
+                if ((defaultDelivery === 'Standard') && (this._data.standardRates.length !== 0)) {
+                    this.showPage_Standard();
+                    this._preselectForStandard();
+                }
+                else if (this._data.standardRates.length === 0) {
+                    this.$$("#standardDeliveriesOption").parentNode.classList.add("hidden");
+                }
 
                 //Commented out
                 //TODO: Hide options when there are no services available
@@ -1837,6 +1844,7 @@
 
             selectDropPoint: function(dropPointId) {
                 //Select the drop point, if it is known.
+                debugger;
                 var dp = this._droppointById(null, dropPointId);
                 if (dp) {
                     this.set("_selectedDropPoint", dp);
@@ -2330,7 +2338,6 @@
                 this.selectedServiceDetails.checked = true;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;
 
-                //TODO: Use data model to record state, not UI elements
                 if (this._selectedDropPoint) {
                     this.selectedServiceDetails.collectionPoint = this._selectedDropPoint.droppointId;
                     this.selectedServiceDetails.providerId = this._selectedDropPoint.providerId;
