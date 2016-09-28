@@ -191,6 +191,7 @@
 			}
 
 			.b-tick.unchosen {
+                display: none;
 				background-image: url('./images/tick.png');
 				background-position: -6px 0;
 				background-repeat: no-repeat;
@@ -363,7 +364,7 @@
 				<h3>{{title}}</h3>
 			</template>
 
-			<div class="content" on-click="_onClick">
+			<div class="content">
 
 				<div class="dp-details">
                     <div class="dp-header">
@@ -512,6 +513,10 @@
                     value: "£"
                 },
                 scrollIntoViewOnChoose: {
+                    type: Boolean,
+                    value: false
+                },
+                clickToChoose: {
                     type: Boolean,
                     value: false
                 },
@@ -797,8 +802,11 @@
 			},
 
 			_onClick: function () {
-			    this.toggleChooseDropPoint();
-			    this.fire('droppoint-click', this.droppointData.droppointId);
+			    if (this.clickToChoose) {
+			        this.toggleChooseDropPoint();
+			        this.fire('droppoint-click', this.droppointData.droppointId);
+			    }
+
 			}
 
 

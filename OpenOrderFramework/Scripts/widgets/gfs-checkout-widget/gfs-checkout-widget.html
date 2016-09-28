@@ -655,12 +655,12 @@
                                     <div id="droppoint_overlay_close" on-click="_hideDropPointDetails">
                                         <img src="./images/x.png" alt="close" />
                                     </div>
-                                    <gfs-droppoint id="overlay-droppoint" droppoint-data="{{_selectedDropPoint}}" disable-unchoose="true" on-click="_hideDropPointDetails" container-class="overlay" show-distance="true" show-opening-hours="true"></gfs-droppoint>
+                                    <gfs-droppoint id="overlay-droppoint" click-to-choose="true" droppoint-data="{{_selectedDropPoint}}" disable-unchoose="true" on-click="_hideDropPointDetails" container-class="overlay" show-distance="true" show-opening-hours="true"></gfs-droppoint>
                                 </div>
                             </div>
                             <div class="hidden">
                                 <div id="droppoint_info" class="noscroll">
-                                    <gfs-droppoint show-opening-hours-link="true" on-opening-hours-link-click="_showDropPointDetails" disable-unchoose="true" id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" button-type="tick"></gfs-droppoint>
+                                    <gfs-droppoint show-opening-hours-link="true" click-to-choose="true" on-opening-hours-link-click="_showDropPointDetails" disable-unchoose="true" id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" button-type="tick"></gfs-droppoint>
                                 </div>
                             </div>
                             <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
@@ -674,7 +674,7 @@
                                 <div class="preferredDroppoints">
                                     <h3>My Collection Points</h3>
                                     <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                        <gfs-droppoint xon-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                        <gfs-droppoint click-to-choose="true" xon-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                     </template>
                                 </div>
                             </div>
@@ -1844,11 +1844,10 @@
 
             selectDropPoint: function(dropPointId) {
                 //Select the drop point, if it is known.
-                debugger;
                 var dp = this._droppointById(null, dropPointId);
                 if (dp) {
                     this.set("_selectedDropPoint", dp);
-                    //this.set('_selectedDropPoint.chosen', true);
+                    this.set('_selectedDropPoint.chosen', true);
                     this.fire("droppoint-changed", dp);
                 }
                 else {
