@@ -42,7 +42,7 @@
                         </iron-page>
                         <iron-page id="deliveryPage">
                             <p4m-order-glance cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-glance>
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -283,7 +283,12 @@
                     var selectedDropPoint = this.getAddressById(this.cartData.AddressId);
                     if (selectedDropPoint) {
                         this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
-                    }                 
+                    }
+
+                    var p4mConsumerAddresses = this.consumerData.Addresses        
+                        .filter(function (item, i) { return (i < 3 && item.AddressType == "Address") })
+                        .map(p4mAddressToGfsDroppoint);
+                    this.$.gfsCheckoutWidget.setConsumerAddresses(p4mConsumerAddresses);
                 } 
             },
 
@@ -584,6 +589,26 @@
                 providerId: item.DropPointProviderId,
                 providerLogo: "https://s-media-cache-ak0.pinimg.com/avatars/pelithepenguin_1453991623_140.jpg",
                 providerName: item.Label                        
+            };
+            return gfsAddress;
+
+        }
+
+        function p4mAddressToGfsDroppoint(item) {
+            var gfsAddress = {
+                geoLocation: {
+                    postCode: item.PostCode,
+                    addressLines: [item.Street1],
+                    town: item.City,
+                    coordinates: {
+                        latitude: item.Latitude,
+                        longitude: item.Longitude
+                    },
+                    countryCode: item.CountryCode,
+                    county: "",
+                    directions: ""
+                },
+                providerName: item.Label
             };
             return gfsAddress;
 

@@ -4,6 +4,7 @@
 <link rel="import" href="../../Lib/iron-list/iron-list.html" />
 <link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
+<link rel="import" href="../gfs-droppoint/gfs-location-button.html" />
 <link rel="import" href="../../Lib/gfs-delivery-address/gfs-delivery-address.html" />
 <link rel="import" href="../../Lib/gfs-checkout-widget/map-region-manager/map-region-manager.html" />
 <link rel="import" href="../../Lib/paper-toggle-button/paper-toggle-button.html" />
@@ -16,13 +17,13 @@
 <script src="../../Lib/momentjs/min/moment.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI&libraries=places"></script>
 <link href="css/custom.css" rel="stylesheet" />
+<link href="../gfs-shared/gfs.css" rel="stylesheet" />
 
 <dom-module id="gfs-checkout">
     <!--<link rel="import" type="css" href="custom.css">-->
 
     <template>
         <style>
-
 
             h3 {
                 margin-left: 0px;
@@ -434,7 +435,7 @@
                 height: 41px;
             }
 
-            #wrongPostoce { /* TODO: Check if this is a typo */
+            #wrongPostcode { 
                 color: #d60000;
             }
 
@@ -443,39 +444,9 @@
                 --paper-toast-color: white;
             }
 
-            .gfs-button {
-                margin: 10px;
-                padding: 10px;
-                background-color: rgba(200, 200, 200, 1.0);
-                color: #000000;
-                border-radius: 4px;
-                text-align: center;
-                cursor: pointer; 
-                min-width: 100px;
-            }
-
-            .gfs-button:hover {
-                background-color: rgba(68, 144, 68, 1.0);
-                color: #FFFFFF;
-                transition-duration: 0.5s;
-            }
-
-            .gfs-button.disabled {
-                background-color: rgba(200, 200, 200, 0.5);
-                cursor: not-allowed;
-            }
-
-            /*
-                .gfs-button.small-button {
-                    width: 100px;
-                    padding: 5px 10px 5px 10px;
-                }
-            */
-
             .gfs-button.search-button {
                 width: 100px;
                 margin-left: 0px;
-
                 border-bottom-left-radius: 0px;
                 border-top-left-radius: 0px;
             }   
@@ -637,10 +608,16 @@
                         <div class="gfsDropPoint" id="mapContainer">
                             <div id="mapTools">
                                 <div class="search-postcode-wrap">
-                                    <div class="gfs-button small-button" on-click="showPage_Standard">< Back</div>
                                     <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
                                     <div type="submit" id="droppointSubmit" class="gfs-button search-button" on-click="_findPostcode">Find</div>
-                                    <div id="wrongPostoce"></div>
+                                    <div id="wrongPostcode"></div>
+                                </div>
+
+                                <div class="consumer-addresses">
+                                    <template is="dom-repeat" items="{{_consumerAddresses}}">
+                                        <gfs-location-button on-click="_onClickConsumerAddress" google-api-key="AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI" address-data="{{item}}" on-locate="panToLocation"></gfs-location-button>
+                                    </template>
+                                    
                                 </div>
 
                                 <div id="toggleDropPointsViewControls">
@@ -682,8 +659,13 @@
                         <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
                         <div id="dropPointListContainer" class="hidden">
                             <div id="listTools">
-                                <div class="gfs-button small-button" on-click="showPage_Standard">< Back</div>
                                 <a href="#" id="viewAsMap" on-tap="_toggleDroppointView">View as a map</a>
+                                <div class="consumer-addresses">
+                                    <template is="dom-repeat" items="{{_consumerAddresses}}">
+                                        <gfs-location-button on-click="_onClickConsumerAddress" google-api-key="AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI" address-data="{{item}}" on-locate="panToLocation"></gfs-location-button>
+                                    </template>
+
+                                </div>
                             </div>
 
                             <div class="cardList">
@@ -932,6 +914,12 @@
                     value: []
                 },
 
+                _consumerAddresses: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+
                 _map: {
                     type: Object
                 },
@@ -1163,7 +1151,7 @@
                 this.fire("close-checkout-complete", e.detail.response);
             },
 
-            _handleGetDroppointsResponse: function(e) {
+            _handleGetDroppointsResponse: function (e) {
                 //New droppoint data
                 this._data = e.detail.response;
                 //this._data.droppoints = this._processDroppointList(this._data.droppoints);
@@ -1174,6 +1162,10 @@
 
                 //TODO: Replace this with a method or event; we want to avoid referencing the View from logic code
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
+            },
+
+            _handleGetLocationResponse: function(e) {
+                console.log(e);
             },
 
             _handleGetDroppointsError: function (e) {
@@ -1285,14 +1277,16 @@
 
                     if (this._mapViewPort) {
 
-                        var sw = { longitude: this._mapViewPort[1][0], latitude: this._mapViewPort[1][1] };
-                        var ne = { longitude: this._mapViewPort[0][0], latitude: this._mapViewPort[0][1] };
+
+                        var sw = { longitude: this._mapViewPort[0][0], latitude: this._mapViewPort[0][1] };
+                        var ne = { longitude: this._mapViewPort[1][0], latitude: this._mapViewPort[1][1] };
 
                         if ((item.geoLocation.coordinates.latitude > sw.latitude && item.geoLocation.coordinates.latitude < ne.latitude)
                             && (item.geoLocation.coordinates.longitude > sw.longitude && item.geoLocation.coordinates.longitude < ne.longitude)) {
                             return true;
                         }
                         else {
+                            console.log("FAIL");
                             return false;
                         }                      
                     }
@@ -1342,7 +1336,6 @@
 
 
             setPreferredDroppoints: function (droppointList) {
-                var self = this;
                 this._preferredDroppoints = droppointList;//.filter(function (item) { return true });
                 this._processPreferredDroppoints();
 
@@ -1350,6 +1343,10 @@
                     this._showPreferredDroppoints();
                 }
                
+            },
+
+            setConsumerAddresses: function(addressList) {
+                this.set('_consumerAddresses', addressList);
             },
 
             _processAllDroppoints: function () {
@@ -1567,15 +1564,33 @@
                 });
 
                 //TODO: Take a close look at this. Do we need it?
-                google.maps.event.addListener(self._map, 'bounds_changed', function() {
+                /*google.maps.event.addListener(self._map, 'bounds_changed', function() {
                     // initialise region manager
                     self._updateMapViewPort();
                     if (self._mapViewPort) {
                         self.$.regionManager.addRegion(self._mapViewPort);
-                        // remove the listener
+                        // remove the listener?
                         google.maps.event.clearListeners(self._map, 'bounds_changed');
                     }
-                });             
+                });*/
+
+                // 'idle' event is triggered when the user stopped zooming/dragging;
+                google.maps.event.addListener(self._map, 'idle', function (event) {
+                    //console.log(JSON.stringify(event));
+                    console.log('MAP EVENT idle');
+                    self._mapMoved();
+                });
+
+                google.maps.event.addListener(self._map, 'click', function (event) {
+                    console.log('MAP EVENT click');
+                    self._unselectDropPoint();
+                });
+
+                google.maps.event.addListener(self._map, 'center_changed', function (event) {
+                    console.log('MAP EVENT center_changed');
+                    self._unselectDropPoint();
+                });
+
             },
 
             _loadDroppointMarkers: function (dropPointsArray) {
@@ -1605,16 +1620,8 @@
 					    pointItem.marker = marker;
 					}
 				);
+                this.$.dropPointListTemplate.render();
 
-                google.maps.event.addListener(self._map, 'click', function(event) {
-                    self._unselectDropPoint();
-                });
-
-                // 'idle' event is triggered when the user stopped zooming/dragging;
-                google.maps.event.addListener(self._map, 'idle', function(event) {
-                    //console.log(JSON.stringify(event));
-                    self._mapMoved();
-                });
             },
 
             _droppointIcon: function(countryCode) {
@@ -1733,7 +1740,7 @@
                 var northEast = [bounds.getNorthEast().lng(), bounds.getNorthEast().lat()];
                 var southWest = [bounds.getSouthWest().lng(), bounds.getSouthWest().lat()];
                 if (northEast[0] === southWest[0] && northEast[1] === southWest[1]) return;
-                this._mapViewPort = [northEast, southWest];
+                this._mapViewPort = [southWest, northEast];
             },
 
             _reloadDroppoints: function() {
@@ -1742,9 +1749,10 @@
 
                     //Get viewport rectangle
                     this._updateMapViewPort();
+                    if (!this._mapViewPort) return;
 
                     var boxes = [];
-
+                    
                     this.$.regionManager.getUncoveredRectangles(this._mapViewPort).forEach(function (rect) {
                         boxes.push(rect.toGeoBox());
                     });
@@ -1760,7 +1768,7 @@
                         console.log("Not requesting any regions");
                     }
 
-                    this.$.dropPointListTemplate.render();
+                    
                     this._resetMap(this._map);
                 }
             },
@@ -1769,7 +1777,7 @@
                 //TODO: Make an API component for this
                 this.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId + "&regions=" + JSON.stringify(boxes);
                 this.$.ajaxGetDroppoints.headers = this._computeHeader();
-                this.$.ajaxGetDroppoints.generateRequest();
+                this.$.ajaxGetDroppoints.generateRequest(); //Response handled in _handleGetDroppointsResponse
             },
 
             _requestDroppointList: function (droppointList) {
@@ -2214,7 +2222,7 @@
 					this.selectedServiceDetails.deliveryAddress = this._selectedDropPoint.geoLocation;
 				} else {
 					this.selectedServiceDetails.collectionPoint = null;
-					this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
+					this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location; //TODO: What is this?
 				}
 				this.fire('selectedservicechanged', this.selectedServiceDetails);
 				this.fire("getStandardSelectedService", this.selectedServiceDetails);
@@ -2275,6 +2283,7 @@
 				this.fire("getDroppointSelectedService");*/
 			},
 
+            //TODO: Review this code
             closeCheckoutRequest: function() {
 				var patchJson = this._getPatchJson();
 
@@ -2293,6 +2302,7 @@
                 }
             },
 
+            //TODO: Review this code
 			_getPatchJson: function() {
                 var actualPatch = "";
                 var selectedId = -1;
@@ -2470,6 +2480,15 @@
 			    else {
 			        //this.showPage_Standard();
 			    }
+			},
+
+			_onClickConsumerAddress: function (e) {
+			    this._map.panTo(e.currentTarget.geoLocation);
+			    this._mapViewPort = [[ e.currentTarget.geoLocation.lng - 0.01, e.currentTarget.geoLocation.lat - 0.01], [e.currentTarget.geoLocation.lng + 0.01, e.currentTarget.geoLocation.lat + 0.01]];
+			    this._requestDroppointsByGeoBoxes([this._mapViewPort]);
+			    console.log(e.currentTarget);
+			    //this._loadDroppointMarkers()
+
 			}
 
         });

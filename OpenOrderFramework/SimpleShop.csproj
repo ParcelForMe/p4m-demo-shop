@@ -725,14 +725,17 @@
     <Content Include="Scripts\widgets\gfs-checkout-widget\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\widgets\gfs-droppoint\gfs-droppoint-text.html" />
     <Content Include="Scripts\widgets\gfs-droppoint\gfs-droppoint.html" />
+    <Content Include="Scripts\widgets\gfs-droppoint\gfs-location-button.html" />
     <Content Include="Scripts\widgets\gfs-droppoint\images\opensign.png" />
     <Content Include="Scripts\widgets\gfs-droppoint\images\parking.png" />
     <Content Include="Scripts\widgets\gfs-droppoint\images\tick.png" />
     <Content Include="Scripts\widgets\gfs-droppoint\images\tick_on.png" />
+    <Content Include="Scripts\widgets\gfs-shared\gfs.css" />
     <Content Include="Scripts\widgets\local-image-widget\local-image.html" />
     <Content Include="Scripts\widgets\local-image\local-image.html" />
     <Content Include="Scripts\widgets\map-region-manager\map-region-manager.html" />
     <Content Include="Scripts\widgets\p4m-address-list\p4m-address-list.html" />
+    <Content Include="Scripts\widgets\p4m-address\p4m-address-text.html" />
     <Content Include="Scripts\widgets\p4m-address\p4m-address.html" />
     <Content Include="Scripts\widgets\p4m-ajax-block\p4m-ajax-block.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
@@ -745,6 +748,7 @@
     <Content Include="Scripts\widgets\p4m-delivery\p4m-delivery.html" />
     <Content Include="Scripts\widgets\p4m-discount-input\p4m-discount-input.html" />
     <Content Include="Scripts\widgets\p4m-discount-list\p4m-discount-list.html" />
+    <Content Include="Scripts\widgets\p4m-order-text\p4m-order-glance.html" />
     <Content Include="Scripts\widgets\p4m-wish\p4m-wish.html" />
     <Content Include="Scripts\widgets\p4m-order-text\p4m-order-text.html" />
     <Content Include="Scripts\widgets\p4m-overlay\p4m-overlay.html" />

@@ -7,7 +7,7 @@
         <div id="container">
             Thanks for ordering from us <span class="p4m-label">{{consumerData.GivenName}}</span>.
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your <span class="p4m-label">{{addressTypeStr}}: {{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}. Your order will be sent via {{deliveryMethodStr}} delivery</span>.
+                We'll deliver your order to your <span class="p4m-label">{{addressTypeStr}}: {{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via <span class="p4m-label">{{deliveryMethodStr}} delivery</span>.
             </template>
             <template is="dom-if" if="{{isLoading}}">
                 <p>Getting your delivery details now...</p>
