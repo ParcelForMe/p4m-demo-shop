@@ -650,7 +650,7 @@
                                 <div class="preferredDroppoints">
                                     <h3>My Collection Points</h3>
                                     <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                        <gfs-droppoint click-to-choose="true" xon-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                        <gfs-droppoint click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                     </template>
                                 </div>
                             </div>
@@ -675,14 +675,14 @@
                                 <div id="mainDropPointListArea">
                                     <div id="dropPointList">
                                         <template id="dropPointListTemplate" is="dom-repeat" items="{{_dropPoints}}" sort="sortByDistance" filter="filterToMap">
-                                            <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" disable-unchoose="true" scroll-into-view-on-choose="true" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                            <gfs-droppoint on-select-delivery-option="onUpdateDroppointDeliveryOptions" on-select="_onSelectPreferredDroppoint" disable-unchoose="true" scroll-into-view-on-choose="true" show-shipping-options="true" show-opening-hours="true" show-distance="true" container-class="dp-large-card" button-type="standard" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                         </template>
                                     </div>
 
                                     <div class="preferredDroppoints">
                                         <h3>My Collection Points</h3>
                                         <template id="listPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                            <gfs-droppoint on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" disable-unchoose="true" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                            <gfs-droppoint  click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" disable-unchoose="true" button-type="tick" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                         </template>
                                     </div>
                                 </div>
@@ -1274,10 +1274,7 @@
 
             filterToMap: function (item) {
                 if (this._map) {
-
                     if (this._mapViewPort) {
-
-
                         var sw = { longitude: this._mapViewPort[0][0], latitude: this._mapViewPort[0][1] };
                         var ne = { longitude: this._mapViewPort[1][0], latitude: this._mapViewPort[1][1] };
 
@@ -1286,7 +1283,6 @@
                             return true;
                         }
                         else {
-                            console.log("FAIL");
                             return false;
                         }                      
                     }
@@ -1588,7 +1584,7 @@
 
                 google.maps.event.addListener(self._map, 'center_changed', function (event) {
                     console.log('MAP EVENT center_changed');
-                    self._unselectDropPoint();
+                    //self._unselectDropPoint();
                 });
 
             },
@@ -1812,15 +1808,16 @@
                     this.$.dropPointListContainer.classList.add('hidden');
                     this.$.mapContainer.classList.remove('hidden');
                     //this._makeMap();
-                    this._loadDroppointMarkers(this._dropPoints);
-                    //this._fixMapMarker();                       
-                                          
+                    this._loadDroppointMarkers(this._dropPoints);                                                                           
                     this._resetMap(this._map);
+                    this._fixMapMarker();
+
                 }
                 else {
                     this.$.dropPointListContainer.classList.remove('hidden');
                     this.$.mapContainer.classList.add('hidden');
                     this._resetMap(this._map);
+                    this._fixMapMarker();
                 }
 
             },
@@ -1830,6 +1827,7 @@
                 if (map) {
                     window.setTimeout(function () {
                         google.maps.event.trigger(map, 'resize');
+                        
                     }, 100);
                 }           
             },
@@ -1897,7 +1895,7 @@
                 if (dp) {
                     this.selectDropPoint(droppointId);
                     this.set('_selectedDropPoint.chosen', true);
-                    this.fire("droppoint-changed", this._selectedDropPoint);
+                    //this.fire("droppoint-changed", this._selectedDropPoint);
                 }
             },
 
@@ -1913,10 +1911,13 @@
                         this._currentMarker = this._selectedDropPoint.marker; //this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     }
                     console.log("### Opening info box");
-                    this._infoWindow.open(this._map, this._currentMarker);
-
+                   
                     this.$.dropPointRadio.setAttribute('checked', 'true');
                     this._map.panTo(this._currentMarker.getPosition());
+                    var self = this;
+                    window.setTimeout(function () {
+                        self._infoWindow.open(self._map, self._currentMarker);
+                    }, 200);
                 }
             },
 
@@ -2446,10 +2447,6 @@
 
 			},
 
-			_onSelectPreferredDroppoint: function (e) {
-			    console.log("_onSelectPreferredDroppoint()", e.detail);
-			},
-
 			_onClickDroppoint: function(e) {
 			    this.selectDropPoint(e.detail);
 			},
@@ -2483,13 +2480,22 @@
 			},
 
 			_onClickConsumerAddress: function (e) {
-			    this._map.panTo(e.currentTarget.geoLocation);
-			    this._mapViewPort = [[ e.currentTarget.geoLocation.lng - 0.01, e.currentTarget.geoLocation.lat - 0.01], [e.currentTarget.geoLocation.lng + 0.01, e.currentTarget.geoLocation.lat + 0.01]];
-			    this._requestDroppointsByGeoBoxes([this._mapViewPort]);
-			    console.log(e.currentTarget);
-			    //this._loadDroppointMarkers()
+			    this._panToGeoLocation(e.currentTarget.geoLocation);
+			},
 
-			}
+			_onSelectPreferredDroppoint: function (dp) {
+			    var geoLocation = {
+			        lat: dp.currentTarget.droppointData.geoLocation.coordinates.latitude,
+			        lng: dp.currentTarget.droppointData.geoLocation.coordinates.longitude
+			    };
+			    this._panToGeoLocation(geoLocation);
+			},
+
+            _panToGeoLocation: function(geoLocation) {
+                this._map.panTo(geoLocation);
+                this._mapViewPort = [[ geoLocation.lng - 0.01,geoLocation.lat - 0.01], [geoLocation.lng + 0.01, geoLocation.lat + 0.01]];
+                this._requestDroppointsByGeoBoxes([this._mapViewPort]);
+            }
 
         });
     </script>

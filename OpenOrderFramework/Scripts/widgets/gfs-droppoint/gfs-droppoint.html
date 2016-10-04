@@ -798,6 +798,9 @@
 			    if (this.clickToChoose) {
 			        this.toggleChooseDropPoint();
 			        this.fire('droppoint-click', this.droppointData.droppointId);
+			        if (this.droppointData.chosen) {
+			            this.fire('select');
+			        }
 			    }
 
 			}
