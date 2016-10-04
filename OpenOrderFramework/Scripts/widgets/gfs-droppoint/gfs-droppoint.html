@@ -377,17 +377,17 @@
                             {{droppointData.geoLocation.town}}, {{droppointData.geoLocation.postCode}}
 
                         </div>
+                        <template is="dom-if" if="{{showDistance}}">
+                            <div id="dp-distance">
+                                <div class="dp-small-heading">Distance</div>
+                                <i class="fa fa-road"></i>{{droppointData.localizedDistance}}
+                            </div>
+                        </template>
 
                     </div>
 
                     <div id="dp-body">
                         <div id="dp-minor-info">
-                            <template is="dom-if" if="{{showDistance}}">
-                                <div id="dp-distance">
-                                    <div class="dp-small-heading">Distance</div>
-                                    <i class="fa fa-road"></i>{{droppointData.localizedDistance}}
-                                </div>
-                            </template>
 
                             <template is="dom-if" if="{{showOpeningHoursLink}}">
 
