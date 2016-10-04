@@ -16,35 +16,33 @@
                         <div class="card-heading">
                             <span class="p4m-address-label">{{addressData.Label}}</span>
                             <span class="side-action"><a href="#" on-tap="edit"><iron-icon icon="editor:mode-edit"></iron-icon></a></span>
+
                         </div>
                         <div class="card-body">
                             <div class="address-content">
                                 <div class="address-text">{{addressData.Street1}}</div>
-                                <div class="address-text">{{addressData.Street2}}</div>
-                                <div class="address-text">{{addressData.City}}</div>
-                                <div class="address-text">{{addressData.PostCode}}</div>
-                                <div class="address-text">{{addressData.State}}</div>
-                                <div class="address-text">{{addressData.Country}}</div>
-                                <div class="address-text">{{addressData.Phone}}</div>
+                                <div class="address-actions">
+                                    <div>
+                                        <template is="dom-if" if="{{isBilling}}">
+                                            <div class="address-tag">Billing Address</div>
+                                        </template>
+                                        <template is="dom-if" if="{{isDelivery}}">
+                                            <div class="address-tag">Delivery Address</div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="buttons">
+                                <div id="deliveryToggle" class="toggle-button side-action">
+                                    <div on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</div>
+                                </div>
+                                <div id="billingToggle" class="toggle-button side-action">
+                                    <div on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="address-actions">
-                            <div id="deliveryToggle" class="toggle-button">
-                                <div on-tap="markAsDelivery"><iron-icon icon="maps:local-shipping" />Delivery</div>
-                            </div>
-                            <div id="billingToggle" class="toggle-button">
-                                <div on-tap="markAsBilling"><iron-icon icon="credit-card" />Billing</div>
-                            </div>
-                            <div>
-                                <template is="dom-if" if="{{isBilling}}">
-                                    <div class="address-tag">Billing Address</div>
-                                </template>
-                                <template is="dom-if" if="{{isDelivery}}">
-                                    <div class="address-tag">Delivery Address</div>
-                                </template>
-                            </div>                           
-                        </div>
+
                     </div>
 
                 </iron-page>
@@ -109,6 +107,10 @@
             
         }
 
+        .address-content {
+            width: 500px;
+        }
+
         .toggle-button {
             margin: 4px;
             height: 50px;
@@ -116,7 +118,7 @@
             border-radius: 50px;
             -webkit-border-radius: 25px;
             -moz-border-radius: 25px;
-            background-color: #D0D0D0;
+            background-color: #C0C0C0;
             cursor: grab;
         }
 
@@ -164,8 +166,7 @@
             color: #000000;
             border-radius: 4px;
         }
-
-        
+     
         .p4m-button.p4m-primary-button {
             background-color: rgba(13, 165, 83, 0.8);
             color: #000000;
@@ -182,6 +183,16 @@
             margin: 4px;
             width: 100%;
             max-width: 100%;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: row;
         }
 
         #actions {
