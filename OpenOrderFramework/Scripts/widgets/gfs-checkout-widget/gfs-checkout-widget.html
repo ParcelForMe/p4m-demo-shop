@@ -136,11 +136,10 @@
             }
 
             #locateme {
-                bottom: 40px;
-                right: 40px;
+                xbottom: 40px;
+                xright: 40px;
                 z-index: 2;
                 position: absolute;
-                display: none;
             }
 
             #dropPointDetails {
@@ -455,51 +454,6 @@
                 --paper-tabs-selection-bar-color: blue;
             }        
 
-            @media (max-width: 493px) {
-                .header label h3 {
-                    font-size: 21px;
-                }
-
-                #locateme {
-                    width: 55px;
-                    right: 10px;
-                    bottom: 20px;
-                    display: block;
-                }
-            }
-
-            @media (max-width: 475px) {
-                .header label h3 {
-                    font-size: 19px;
-                }
-
-                .cardList {
-                    width: 100%;
-                    height: 380px;
-                    overflow-x: scroll;
-                    overflow-y: hidden;
-                    flex-direction: column;
-                }
-
-                .cardList .droppoint-margin {
-                    margin-right: 35px;
-                }
-            }
-
-            @media (max-width: 440px) {
-
-                .header label h3 {
-                    font-size: 16px;
-                }
-            }
-
-            @media (max-width: 389px) {
-                .header label {
-                    max-width: 90%;
-                    line-height: initial;
-                    vertical-align: middle;
-                }
-            }
         </style>
 
         <iron-ajax id="ajaxPost"
@@ -546,22 +500,7 @@
                 <paper-tab>Click and Collect</paper-tab>
                 <paper-tab>{{standardDeliveryTitle}}</paper-tab>
             </paper-tabs>
-            <iron-pages id="pages" selected="{{selectedTab}}"  on-iron-select="onSelectTab">
-                <iron-page id="pageStandard">
-                    <div id="standard-loading" class="loading"><paper-spinner active id="standard-spinner"></paper-spinner></div>
-                    <ul class="separated">
-                        <template is="dom-repeat" items="{{standardRates}}" sort="sortServices">
-                            <li class="gfsStd">
-                                <input name="shipping_method" on-click="updateDeliveryOptionsEvent" type="radio" checked="{{item.selected}}" value="{{item.id}}" id="{{item.id}}" class="radio standard-delivery-selection" />
-                                <label for$="{{item.id}}">
-                                    <span class="methodname">{{item.methodTitle}}</span>
-                                    <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                    <span>{{item.deliveryDateRange}}</span>
-                                </label>
-                            </li>
-                        </template>
-                    </ul>            
-                </iron-page>
+            <iron-pages id="pages" selected="{{selectedTab}}"  on-iron-select="onSelectTab">           
                 <iron-page id="pageCalendar">
                     <div id="calendar-loading" class="loading">
                         <paper-spinner active id="calendar-spinner"></paper-spinner>
@@ -605,7 +544,7 @@
                             <h3>{{dropPointTitle}}</h3>
                         </div>
 
-                        <div class="gfsDropPoint" id="mapContainer">
+                        <div id="mapContainer">
                             <div id="mapTools">
                                 <div class="search-postcode-wrap">
                                     <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
@@ -690,6 +629,21 @@
                             </div>
                         </div>
                     </div>
+                </iron-page>
+                <iron-page id="pageStandard">
+                    <div id="standard-loading" class="loading"><paper-spinner active id="standard-spinner"></paper-spinner></div>
+                    <ul class="separated">
+                        <template is="dom-repeat" items="{{standardRates}}" sort="sortServices">
+                            <li class="gfsStd">
+                                <input name="shipping_method" on-click="updateDeliveryOptionsEvent" type="radio" checked="{{item.selected}}" value="{{item.id}}" id="{{item.id}}" class="radio standard-delivery-selection" />
+                                <label for$="{{item.id}}">
+                                    <span class="methodname">{{item.methodTitle}}</span>
+                                    <span class="price">{{currencySymbol}}{{item.price}}</span>
+                                    <span>{{item.deliveryDateRange}}</span>
+                                </label>
+                            </li>
+                        </template>
+                    </ul>
                 </iron-page>
             </iron-pages>
         </div>
@@ -1656,7 +1610,7 @@
                         // check if searching for the home location
                         if ((results[0].geometry.location.lat() === marker.getPosition().lat()) && (results[0].geometry.location.lng() === marker.getPosition().lng())) {
                             self.$$("#gfsMapCanvas-loading").classList.add('hidden');
-                            self.$.errorNotification.text = "You home location is already at " + address;
+                            self.$.errorNotification.text = "Your home location is already at " + address;
                             self.$.errorNotification.fitInto = self.$.gfsMapCanvas;
                             self.$.errorNotification.open();
                         }
@@ -2412,7 +2366,7 @@
             },
 
             showPage_Calendar: function() {              
-                this.$.pages.select(1);
+                this.$.pages.select(0);
                 this.onShowPage_Calendar();              
             },
 
@@ -2422,7 +2376,7 @@
             },
 
             showPage_Standard: function () {
-                this.$.pages.select(0);
+                this.$.pages.select(2)
                 this.onShowPage_Standard();
 			},
 
@@ -2432,7 +2386,7 @@
 			},
 
             showPage_Droppoints: function () {
-                this.$.pages.select(2);
+                this.$.pages.select(1);
                 this.onShowPage_Droppoints();
             },
 
