@@ -12,7 +12,6 @@
 <link rel="import" href="../p4m-card-list/p4m-card-list.html" />
 <link rel="import" href="../p4m-delivery/p4m-delivery.html" />
 <link rel="import" href="../p4m-order-text/p4m-order-text.html" />
-<link rel="import" href="../p4m-order-text/p4m-order-glance.html" />
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 <link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
@@ -41,7 +40,6 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <p4m-order-glance cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-glance>
                             <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
@@ -387,6 +385,7 @@
 
             selectCollectPoint: function (providerName, providerId, collectPointId, collectPointAddress, callback) {
                 //Make API call to add invisible address
+                //TODO: Don't post until payment time
                 var self = this;
                 var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
                 if (!existingDropPoint) {
