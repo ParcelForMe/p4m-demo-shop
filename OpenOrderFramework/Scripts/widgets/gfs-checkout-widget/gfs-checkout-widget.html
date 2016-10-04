@@ -541,10 +541,10 @@
 
 		<div id="widgetContainer">
 
-            <paper-tabs selected="{{selectedTab}}">
-                <paper-tab>{{standardDeliveryTitle}}</paper-tab>
+            <paper-tabs selected="{{selectedTab}}">             
                 <paper-tab>{{calendarDeliveryTitle}}</paper-tab>
                 <paper-tab>Click and Collect</paper-tab>
+                <paper-tab>{{standardDeliveryTitle}}</paper-tab>
             </paper-tabs>
             <iron-pages id="pages" selected="{{selectedTab}}"  on-iron-select="onSelectTab">
                 <iron-page id="pageStandard">
