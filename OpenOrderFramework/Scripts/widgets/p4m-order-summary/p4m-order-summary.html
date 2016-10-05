@@ -8,30 +8,28 @@
     <template>
         <div id="p4mContainer">
             <h2>Order Summary</h2>
-            <div class="p4m-table">
+            <div class="p4m-table" i>
                 <div class="p4m-row">
-                    <div class="p4m-cell header-col">{{_cartItemCount}} items</div>
-                    <div class="p4m-cell detail-col">{{_cartDescription}}</div>
+                    <div class="p4m-cell detail-col">{{_cartItemCount}} {{_collectiveNoun}}: {{_cartDescription}}</div>
                     <div class="p4m-cell cost-col">{{currencySymbol}}{{_cartItemsTotalPriceString}}</div>
                 </div>
+                <template is="dom-if" id="discountTemplate" if="{{hasDiscount()}}">
+                    <div class="p4m-row">
+                        <div class="p4m-cell detail-col">{{_discountDescription}}</div>
+                        <div class="p4m-cell cost-col">{{currencySymbol}}{{_discount}}</div>
+                    </div>
+                </template>
+
                 <div class="p4m-row">
-                    <div class="p4m-cell header-col">Discount</div>
-                    <div class="p4m-cell detail-col">{{_discountDescription}}</div>
-                    <div class="p4m-cell cost-col">{{currencySymbol}}{{_discount}}</div>
-                </div>
-                <div class="p4m-row">
-                    <div class="p4m-cell header-col">Delivery</div>
-                    <div class="p4m-cell detail-col">{{cartData.ServiceName}}</div>
+                    <div class="p4m-cell detail-col">Delivery via {{cartData.ServiceName}}</div>
                     <div class="p4m-cell cost-col">{{currencySymbol}}{{_shipping}}</div>
                 </div>
                 <div class="p4m-row">
-                    <div class="p4m-cell header-col">Tax</div>
-                    <div class="p4m-cell detail-col">Total tax</div>
+                    <div class="p4m-cell detail-col">Tax</div>
                     <div class="p4m-cell cost-col">{{currencySymbol}}{{_tax}}</div>
                 </div>
                 <div class="p4m-row">
-                    <div class="p4m-cell header-col">Total</div>
-                    <div class="p4m-cell detail-col"></div>
+                    <div class="p4m-cell detail-col">Total</div>
                     <div class="p4m-cell cost-col">{{currencySymbol}}{{_total}}</div>
                 </div>
             </div>
@@ -57,16 +55,20 @@
             display: flex;
             flex-direction: row;
         }
+        
         .p4m-row .header-col {
             color: #404040;
             width: 20%;
+            display: none;
         }
+        
+
         .p4m-row .detail-col {
             width: 60%;
-            display: var(--detail-col-display, block);
+            display: block;
         }
         .p4m-cell.cost-col {
-            width: 20%; 
+            width: 40%; 
             text-align: right;         
         }
         .p4m-row .p4m-cell {
@@ -152,8 +154,12 @@
                     this._updateCartDescription();
                     this._updateDiscount();
                     this._updateCurrencyAmounts();
-                    
+                    this._updateTemplate();                   
                 }               
+            },
+
+            hasDiscount: function () {
+                return (this.cartData && this.cartData.Discounts.length);
             },
 
             _updateItemCount: function() {
@@ -165,6 +171,7 @@
                     self._cartItemsTotalPrice += Number(item.Qty) * Number(item.Price);
                 });
                 self._cartItemsTotalPriceString = self._cartItemsTotalPrice.toFixed(2);
+                self._collectiveNoun = this._cartItemCount > 1 ? "items" : "item";
             },
 
             _updateCartDescription: function() {
@@ -191,8 +198,12 @@
                 this._tax = this.cartData.Tax.toFixed(2);
                 this._discount = Number(this._discount).toFixed(2);
                 this._shipping = Number(this.cartData.ShippingAmt).toFixed(2);
-
                 this._total = Number(this.cartData.Total).toFixed(2);
+                
+            },
+
+            _updateTemplate: function() {
+                this.$.discountTemplate.render();
             },
 
             onCartDataModified: function (e) {

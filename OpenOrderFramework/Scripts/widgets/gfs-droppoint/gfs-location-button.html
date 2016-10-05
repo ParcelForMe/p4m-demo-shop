@@ -1,17 +1,12 @@
 ﻿<script src="../webcomponentsjs/webcomponents.min.js"></script>
 <link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+<link rel="import" href="../../Lib/iron-icons/maps-icons.html" />
 
 <dom-module id="gfs-location-button">
 
     <template>
-        <style>
-            .gfs-button {
-                max-width: 100px;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
- 
+        <style> 
         </style>
 
         <div>
@@ -23,7 +18,8 @@
                        timeout="10000"
                        debounce-duration="300">
             </iron-ajax>
-            <div class="gfs-button">{{addressData.providerName}}</div>
+            
+            <div class="gfs-button gfs-mini-button"><iron-icon icon="maps:place"></iron-icon>{{addressData.providerName}}</div>
         </div>
 
     </template>

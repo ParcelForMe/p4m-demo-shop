@@ -13,6 +13,7 @@
 <link rel="import" href="../../Lib/paper-button/paper-button.html" />
 <link rel="import" href="../../Lib/paper-tabs/paper-tabs.html" />
 <link rel="import" href="../../Lib/iron-pages/iron-pages.html" />
+<link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
 
 <script src="../../Lib/momentjs/min/moment.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI&libraries=places"></script>
@@ -182,7 +183,7 @@
                 clear: both;
             }
 
-            #toggleDropPointsViewControls {
+            .toggleDropPointsViewControls {
                 display: flex;
                 margin: 0 0 20px;
             }
@@ -413,6 +414,7 @@
                 --paper-tabs-selection-bar-color: blue;
             }
 
+            /*
             #gfsMapCanvas-loading {
                 background: rgba(0, 0, 0, .8);
                 width: 100%;
@@ -420,8 +422,10 @@
                 position: absolute;
                 z-index: 100;
             }
+            */
 
             .search-postcode-wrap {
+                position: relative;
                 display: flex;
                 flex-direction: row;
             }
@@ -430,8 +434,9 @@
                 display: inline-block;
                 margin-top: 10px;
                 margin-left: 10px;
+                margin-right: 2px;
                 padding: 0px 5px 0px 5px;
-                height: 41px;
+                height: 32px;
             }
 
             #wrongPostcode { 
@@ -443,16 +448,21 @@
                 --paper-toast-color: white;
             }
 
-            .gfs-button.search-button {
-                width: 100px;
-                margin-left: 0px;
-                border-bottom-left-radius: 0px;
-                border-top-left-radius: 0px;
+            .search-button {
+                position: absolute;
+                left: 200px;
+                top: 14px;
             }   
             
             paper-tab {
                 --paper-tabs-selection-bar-color: blue;
-            }        
+            }  
+            
+            .consumer-addresses {
+                display: flex;
+                flex-direction: row;
+                width: 300px;
+            }      
 
         </style>
 
@@ -538,32 +548,31 @@
  
                 </iron-page>
                 <iron-page id="pageDroppoints">
-                    <div class="page" id="pageDroppoints">
-
+                    <div id="mapTools">
                         <div class="header" style="display:none">
                             <h3>{{dropPointTitle}}</h3>
                         </div>
 
+                        <div class="search-postcode-wrap">
+                            <input type="text" id="droppointAddress" placeholder="Find area by postcode" on-keydown="_delayedPostcodeSearch" />
+                            <div type="submit" class="search-button" on-click="_findPostcode"><iron-icon icon="icons:search"></iron-icon></div>
+                        </div>
+
+                        <div class="consumer-addresses">
+                            <template is="dom-repeat" items="{{_consumerAddresses}}">
+                                <gfs-location-button on-click="_onClickConsumerAddress" google-api-key="AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI" address-data="{{item}}" on-locate="panToLocation"></gfs-location-button>
+                            </template>
+
+                        </div>
+
+                        <div class="toggleDropPointsViewControls">
+                            <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a list</a>
+                        </div>
+
+                    </div>
+                    <div class="page" id="pageDroppoints">
+
                         <div id="mapContainer">
-                            <div id="mapTools">
-                                <div class="search-postcode-wrap">
-                                    <input type="text" id="droppointAddress" placeholder="Find alternative postcode" />
-                                    <div type="submit" id="droppointSubmit" class="gfs-button search-button" on-click="_findPostcode">Find</div>
-                                    <div id="wrongPostcode"></div>
-                                </div>
-
-                                <div class="consumer-addresses">
-                                    <template is="dom-repeat" items="{{_consumerAddresses}}">
-                                        <gfs-location-button on-click="_onClickConsumerAddress" google-api-key="AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI" address-data="{{item}}" on-locate="panToLocation"></gfs-location-button>
-                                    </template>
-                                    
-                                </div>
-
-                                <div id="toggleDropPointsViewControls">
-                                    <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a list</a>
-                                </div>
-
-                            </div>
 
                             <div id="dropPointDetails" class$="{{_dropPointDetailsClass}}">
                                 <div id="droppoint_overlay" style="height: {{mapHeight}}px; display: block">
@@ -579,7 +588,9 @@
                                 </div>
                             </div>
                             <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
-                            <div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div>
+                            <!--
+                               <div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div> 
+                            -->
                             <div id="mainMapArea">
                                 <div id="gfsMapCanvas">
                                     <div class="loading">
@@ -597,15 +608,6 @@
 
                         <array-selector id="dropPointSelector" items="{{_dropPoints}}" selected="{{chosen}}" multi="false"></array-selector>
                         <div id="dropPointListContainer" class="hidden">
-                            <div id="listTools">
-                                <a href="#" id="viewAsMap" on-tap="_toggleDroppointView">View as a map</a>
-                                <div class="consumer-addresses">
-                                    <template is="dom-repeat" items="{{_consumerAddresses}}">
-                                        <gfs-location-button on-click="_onClickConsumerAddress" google-api-key="AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI" address-data="{{item}}" on-locate="panToLocation"></gfs-location-button>
-                                    </template>
-
-                                </div>
-                            </div>
 
                             <div class="cardList">
                                 <div id="list-loading" class="loading">
@@ -1038,10 +1040,11 @@
                 this.$$('#calendar-loading').classList.add('hidden');
                 this.$$('#calendar-delivery-options').classList.remove('hidden');
 
+                /*
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden');
                 if (this.$$("#map-spinner")) {
                     this.$$("#map-spinner").classList.add('hidden');
-                }
+                }*/
 
                 var useWebService = true; //false;
                 if (useWebService) {
@@ -1115,7 +1118,7 @@
                 this._loadDroppointMarkers(this._data.droppoints);
 
                 //TODO: Replace this with a method or event; we want to avoid referencing the View from logic code
-                this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
+                //this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
             },
 
             _handleGetLocationResponse: function(e) {
@@ -1295,7 +1298,8 @@
                
             },
 
-            setConsumerAddresses: function(addressList) {
+            setConsumerAddresses: function (addressList) {
+                console.log("Setting consumer addresses", addressList);
                 this.set('_consumerAddresses', addressList);
             },
 
@@ -1589,12 +1593,22 @@
                 }
             },
 
+            _delayedPostcodeSearch: function () {
+                if (this._searchTimeout) {
+                    window.clearTimeout(this._searchTimeout);
+                }
+                this._searchTimeout = window.setTimeout(this._findPostcode.bind(this), 300);
+            },
+
             // Geocode service search
             _findPostcode: function () {
+                if (this._searchTimeout) {
+                    window.clearTimeout(this._searchTimeout);
+                }
                 var self = this;
-                var address = document.getElementById("droppointAddress").value;
+                var address = this.$.droppointAddress.value;
                 self.initialAddress = address;
-                self.$$("#gfsMapCanvas-loading").classList.remove('hidden');
+                //self.$$("#gfsMapCanvas-loading").classList.remove('hidden');
 
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode({
@@ -1605,16 +1619,25 @@
                 }, function (results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
 
+                        self._panToGeoLocation({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
+                        /*
                         self._map.setCenter(results[0].geometry.location);
 
                         // check if searching for the home location
+                        
                         if ((results[0].geometry.location.lat() === marker.getPosition().lat()) && (results[0].geometry.location.lng() === marker.getPosition().lng())) {
                             self.$$("#gfsMapCanvas-loading").classList.add('hidden');
                             self.$.errorNotification.text = "Your home location is already at " + address;
                             self.$.errorNotification.fitInto = self.$.gfsMapCanvas;
                             self.$.errorNotification.open();
                         }
-
+                        */
+                        marker = new google.maps.Marker({
+                            map: self._map,
+                            icon: self._getHomeIcon(),
+                            position: results[0].geometry.location
+                        });
+                        /*
                         if (marker && marker.setPosition) {
                             marker.setPosition(results[0].geometry.location);
                         }
@@ -1624,15 +1647,17 @@
                                 icon: self._getHomeIcon(),
                                 position: results[0].geometry.location
                             });
-                        }
+                        }*/
                     }
 
                     else {
+                        /*
                         console.log('Google Maps API ERROR - Geocode was not successful for the following reason: ' + status);
                         self.$$("#gfsMapCanvas-loading").classList.add('hidden');
                         self.$.errorNotification.text = "Postcode not found";
                         self.$.errorNotification.fitInto = self.$.gfsMapCanvas;
                         self.$.errorNotification.open();
+                        */
                     }
                 });
             },
@@ -2445,7 +2470,7 @@
 			    this._panToGeoLocation(geoLocation);
 			},
 
-            _panToGeoLocation: function(geoLocation) {
+			_panToGeoLocation: function (geoLocation) {
                 this._map.panTo(geoLocation);
                 this._mapViewPort = [[ geoLocation.lng - 0.01,geoLocation.lat - 0.01], [geoLocation.lng + 0.01, geoLocation.lat + 0.01]];
                 this._requestDroppointsByGeoBoxes([this._mapViewPort]);

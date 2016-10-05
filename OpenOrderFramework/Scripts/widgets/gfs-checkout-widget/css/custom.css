@@ -82,15 +82,3 @@ gfs-checkout ul.separated li {
 .test {
     color: red;
 }
-
-.smallSummary p4m-order-summary .p4m-row .p4m-cell {
-    width: 50%!important;
-}
-
-.smallSummary p4m-order-summary .p4m-row .detail-col {
-    display: none!important;
-} 
-
-.smallSummary .card-logo {
-    display: none!important;
-} 

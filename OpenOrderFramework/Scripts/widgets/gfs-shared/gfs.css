@@ -19,3 +19,16 @@
                 background-color: rgba(200, 200, 200, 0.5);
                 cursor: not-allowed;
             }
+
+            .gfs-button.gfs-mini-button {
+                width: 90px;
+                margin-left: 2px;
+                margin-right: 2px;
+                padding-top: 4px;
+                padding-left: 0px;
+                padding-right: 2px;
+                height: 32px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
