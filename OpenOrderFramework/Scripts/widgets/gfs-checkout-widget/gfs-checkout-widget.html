@@ -554,7 +554,7 @@
                         </div>
 
                         <div class="search-postcode-wrap">
-                            <input type="text" id="droppointAddress" placeholder="Find area by postcode" on-keydown="_delayedPostcodeSearch" />
+                            <input type="text" id="droppointAddress" placeholder="Find area by postcode" on-keydown="_onPostcodeSearchKeyDown" />
                             <div type="submit" class="search-button" on-click="_findPostcode"><iron-icon icon="icons:search"></iron-icon></div>
                         </div>
 
@@ -1130,6 +1130,7 @@
                 this._loadDroppointMarkers(this._data.droppoints);
             },
 
+
             _delayedInit: function() {
                 //console.log("_delayedInit", new Date().getTime());
                 this._processInputData();
@@ -1590,6 +1591,16 @@
                         return url + '/FR/';
                     default:
                         return url + '/GB/';
+                }
+            },
+
+            _onPostcodeSearchKeyDown: function (e) {
+                //console.log(e);
+                if (e && e.key && e.key === 'Enter') {
+                    this._findPostcode();
+                }
+                else {
+                    this._delayedPostcodeSearch();
                 }
             },
 

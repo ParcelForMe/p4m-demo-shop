@@ -56,7 +56,7 @@
                         </iron-page>
                     </iron-pages>                 
                 </div>
-                <div id="summaryPanel" class="p4m-panel">
+                <div id="summaryPanel" class="p4m-panel smallSummary">
                     <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" on-request-payment-method="goToPaymentMethods" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
@@ -117,32 +117,30 @@
         }
 
         .p4m-panel#summaryPanel {
-            border-left: solid 1px #E0E0E0;
+           
         }
+
+        #detailPanel.p4m-panel {
+            width: 67%;
+        }
+        #summaryPanel.p4m-panel {
+            width: 33%;
+             border-left: solid 1px #E0E0E0;
+        }
+
         :root {
             --paper-tabs-selection-bar-color: red;
         }
         #panelContainer > div {
             transition: all 0.25s ease-in-out;
         }
-        .smallSummary #detailPanel.p4m-panel {
-            width: 75%;
-        }
-        .smallSummary #summaryPanel.p4m-panel {
-            width: 25%;
-        }
+
         .price {
             color: darkgreen;
         }    
         
    
 
-    </style>
-
-    <style is="custom-style">
-        .smallSummary {
-            --detail-col-display: none;
-        }  
     </style>
 
     <script>
@@ -267,7 +265,6 @@
 
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
-
                 if (this.$.gfsCheckoutWidget) {
                     var p4mCollectPoints = this.consumerData.Addresses //TODO: Find out why DropPointProviderId is always 0                   
                     .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude && /*item.DropPointProviderId &&*/ item.DropPointId) })
@@ -280,9 +277,11 @@
                         this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
                     }
 
-                    var p4mConsumerAddresses = this.consumerData.Addresses        
-                        .filter(function (item, i) { return (i < 3 && item.AddressType == "Address") })
+                    var p4mConsumerAddresses = this.consumerData.Addresses
+                        .filter(function (item, i) { return (item.AddressType == "Address") }) //Only addresses, not droppoints
+                        .filter(function (item, i) { return (i < 3)}) //Up to 3 addresses
                         .map(p4mAddressToGfsDroppoint);
+                        
                     this.$.gfsCheckoutWidget.setConsumerAddresses(p4mConsumerAddresses);
                 } 
             },
@@ -430,12 +429,6 @@
             },
 
             toggleDetailExpansion: function (expand) {
-                if (expand) {
-                    this.$.panelContainer.classList.add('smallSummary');
-                }
-                else {
-                    this.$.panelContainer.classList.remove('smallSummary');
-                }
             },
 
             onSelectPaymentMethod: function (e) {
@@ -530,13 +523,15 @@
                 });
             },
 
-           _onSelectTab: function (e) {
+            _onSelectTab: function (e) {
+                /*
                if (e.detail.item && e.detail.item.tagName.toLowerCase() == "iron-page" && e.detail.item.id !== "deliveryPage" && e.detail.item.id !== "pageDroppoints") {
                     this.toggleDetailExpansion(false);
                 }
                 else {
                     this.$.gfsCheckoutWidget.broadcastState();
                 }
+                */
             },
 
             onGfsServiceChanged: function (e) {
