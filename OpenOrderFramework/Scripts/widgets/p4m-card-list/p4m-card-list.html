@@ -12,19 +12,29 @@
             <iron-collapse id="newCardCollapse">
                 <p4m-new-card id="newCard" consumer-data="{{consumerData}}" on-gotnewcard="onGotNewCard"></p4m-new-card>
             </iron-collapse>
-            
-            <template is="dom-repeat" items="{{consumerData.PaymentMethods}}">
-                <p4m-card card-data="{{item}}" on-selected="onCardSelected" show-cvv="false" selected-card-id="{{selectedCardId}}"></p4m-card>
-            </template>
+            <div class="cardList">
+                <template is="dom-repeat" items="{{consumerData.PaymentMethods}}">
+                    <p4m-card card-data="{{item}}" on-selected="onCardSelected" show-cvv="false" container-class="large-logo" selected-card-id="{{selectedCardId}}"></p4m-card>
+                </template>
+            </div>
+
         </div>
 
     </template>
 
     <style>
         #container {
-            display: flex;
-            flex-direction: column;
+           /*
+                display: flex;
+                flex-direction: column;
+           */ 
             margin: 10px;
+        }
+
+        .cardList {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
         }
     </style>
 

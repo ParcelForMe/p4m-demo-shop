@@ -5,33 +5,32 @@
 <dom-module id="p4m-card">
 
     <template>
-        <div id="container" class="show-toggle-btn">
+        <div id="container" class$="show-toggle-btn {{containerClass}}">
 
             <div class="card-panel">
                  <div class="card-body">
                     <div class$="card-content {{cardData.Issuer}}">
-                        <div class="card-logo"></div>
+                        
                         <div class="card-details">
                             <div class="card-name">{{cardData.Name}}</div>
                             <div class="card-description">{{cardData.Description}}</div>
-                            <div class="card-issuer">{{cardData.Issuer}}</div>
-  
                             <input is="iron-input" type="text" id="cvvField" tabindex="code" bind-value="{{cvv}}" placeholder="Verification code" />
+                            <div class="card-logo"></div>
                            
                         </div>                        
                     </div>
                 </div>
-
                 <div class="card-actions">
-                        <div id="selectedToggle" class="toggle-button">
-                            <div on-tap="select"><iron-icon icon="credit-card" />Select</div>
-                        </div>
-                        <div>
-                            <template is="dom-if" if="{{isSelected}}">
-                                <div class="card-tag">Selected</div>
-                            </template>
-                        </div>
+                    <div id="selectedToggle" class="toggle-button">
+                        <div on-tap="select"><iron-icon icon="credit-card" />Select</div>
+                    </div>
+                    <div>
+                        <template is="dom-if" if="{{isSelected}}">
+                            <div class="card-tag">Selected</div>
+                        </template>
+                    </div>
                 </div>
+
             </div>
 
         </div>
@@ -42,10 +41,16 @@
         #container {
             display: flex;
             flex-direction: column;
+            width: 300px;
+        }
+
+        .show-actions .card-actions {
+            display: flex;
         }
 
         .card-actions {
             display: flex;
+            display: none;
             flex-direction: row;
         }
 
@@ -61,13 +66,15 @@
             display: block;
         }
 
+
         #cvvField {
             display: none;
         }
 
         .toggle-button {
             display: none;
-            margin: 8px;
+            margin-left: 8px;
+            margin-bottom: 8px;
             height: 50px;
             width: 50px;
             border-radius: 50px;
@@ -94,8 +101,8 @@
             color: #D0D0D0;
             letter-spacing: 3px;
             text-transform: uppercase;
-            padding-top: 22px;
-            padding-left: 4px;
+            padding-top: 16px;
+            padding-left: 120px;
         }
 
         .card-panel {
@@ -105,18 +112,21 @@
         }
 
         .card-body {
-            padding: 4px;
+            xpadding: 4px;
         }
 
         .card-content {
             display: flex;
             flex-direction: row;
+            padding: 6px 6px 6px 0px;
         }
 
         .card-details {
-            padding: 4px;
+            padding: 4px 4px 4px 8px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            width: 100%;
         }
 
         .card-description {
@@ -124,8 +134,19 @@
         }
 
         .card-logo {
-            height: 80px;
-            width: 128px;
+            height: 34px;
+            width: 56px;
+            background-size: 100%;
+            position: absolute;
+            bottom: 6px;
+            left: 215px;
+        }
+
+        .large-logo .card-logo {
+            height: 50px;
+            width: 80px;
+            bottom: 2px;
+            left: 200px;
         }
 
         .Visa .card-logo {
@@ -176,6 +197,15 @@
                     value: false
                 },
 
+                showActions: {
+                    type: Object,
+                    value: true
+                },
+
+                containerClass: {
+                    type: String
+                },
+
                 cvv: {
                     type: String
                 }
@@ -196,6 +226,9 @@
                 }
                 if (this.showCvv) {
                     this.$.container.classList.add('show-cvv');
+                }
+                if (this.showActions) {
+                    this.$.container.classList.add('show-actions');
                 }
             },
 
