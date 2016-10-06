@@ -58,7 +58,7 @@
                 </div>
                 <div id="summaryPanel" class="p4m-panel smallSummary">
                     <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
-                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" on-request-payment-method="goToPaymentMethods" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
+                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" on-request-payment-method="goToPaymentMethods" use-paypal="{{usePaypal}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
                     <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>    
                     <p4m-discount-list cart-data="{{cartData}}" on-discountdelete="onDiscountDelete"></p4m-discount-list>              
@@ -184,6 +184,11 @@
                 useGfsCheckout: {
                     type: Object,
                     value: false
+                },
+                usePaypal: {
+                    type: Object,
+                    value: false,
+                    notify: true
                 },
                 gfsAccessToken: {
                     type: String

@@ -105,16 +105,14 @@
                     value: null,
                     notify: true
                 },
-
                 usePaypal: {
-                    type: Boolean,
+                    type: Object,
                     value: false
                 },
                 paypalText: {
                     type: String,
                     value: ""
                 },
-
                 btnMsgNotPurchased: {
                     type: String,
                     value: "Buy now"
@@ -212,8 +210,10 @@
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
                 this._state = States.CVV_NEEDED;
-                if (this.usePaypal)
+                if (this.usePaypal) {
                     this.$.p4mPaypalButton.classList.remove("hidden");
+                }
+                    
             },
 
             onPurchase: function (e) {
