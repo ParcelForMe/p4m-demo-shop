@@ -137,10 +137,9 @@
             }
 
             #locateme {
-                xbottom: 40px;
-                xright: 40px;
                 z-index: 2;
                 position: absolute;
+                opacity: 0.5;
             }
 
             #dropPointDetails {
@@ -587,7 +586,7 @@
                                     <gfs-droppoint show-opening-hours-link="true" click-to-choose="true" on-opening-hours-link-click="_showDropPointDetails" disable-unchoose="true" id="infobox-droppoint" droppoint-data="{{_selectedDropPoint}}" on-select-delivery-option="onUpdateDroppointDeliveryOptions" show-shipping-options="true" button-type="tick"></gfs-droppoint>
                                 </div>
                             </div>
-                            <img id='locateme' on-click="_locateMe" src='./images/locateme.png' />
+                            <img id="locateme" on-click="_locateMe" src="./images/locateme.png" />
                             <!--
                                <div id="gfsMapCanvas-loading" class="loading"><paper-spinner id="search-spinner"></paper-spinner></div> 
                             -->

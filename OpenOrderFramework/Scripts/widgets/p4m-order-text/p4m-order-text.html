@@ -7,7 +7,7 @@
         <div id="container">
             Thanks for ordering from us <span class="p4m-label">{{consumerData.GivenName}}</span>.
             <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your <span class="p4m-label">{{addressTypeStr}}: {{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via <span class="p4m-label">{{deliveryMethodStr}} delivery</span>.
+                We'll deliver your order to your {{addressTypeStr}}: <span class="p4m-label">{{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via <span class="p4m-label">{{deliveryMethodStr}} delivery</span>.
             </template>
             <template is="dom-if" if="{{isLoading}}">
                 <p>Getting your delivery details now...</p>
@@ -17,7 +17,7 @@
 
     <style>
         #container {
-            margin: 10px
+            margin: 10px 18px 10px 18px;
         }
 
     </style>   
@@ -96,7 +96,7 @@
 
             _addressToStr: function (address) {
                 if (address) {
-                    return address.Street1 + " " + address.Street2 + " in " + (address.City || address.PostCode);
+                    return address.Street1;// + " " + address.Street2 + " in " + (address.City || address.PostCode);
                 }
                 else {
                     return "";
@@ -118,7 +118,7 @@
             
             _expectedDeliveryDateStr: function (dateStr) {
                 if (dateStr) {                                   
-                    return moment(new Date(dateStr)).format('dddd Do MMMM YYYY');
+                    return moment(new Date(dateStr)).format('ddd Do MMM YYYY');
                 }
                 else {
                     return "Please select a delivery method to continue";
