@@ -148,6 +148,9 @@
                 redirectUrl: {
                     type: String
                 },
+                newDropPoint: {
+                    type: Object
+                },
                 _topClass: {
                     type: String,
                     value: "active"
@@ -196,7 +199,15 @@
                 this.errorMsg = "";
                 if (this._state === States.NOT_PURCHASED || this._state === States.FAILED_PURCHASE) {
                     this._state = States.PURCHASING;
-                    this.$.localApi.call('purchase', { cartId: this.cartData.Id, cvv: this.selectedCard.cvv, cartTotal: this.cartData.Total }, null, this.onPurchase.bind(this));
+                    if (this.beforePurchase) {
+                        this.beforePurchase()
+                    }
+                    var postData = { cartId: this.cartData.Id, cvv: this.selectedCard.cvv, cartTotal: this.cartData.Total };
+                    debugger;
+                    if (this.newDropPoint) {
+                        postData.newDropPoint = this.newDropPoint;
+                    }
+                    this.$.localApi.call('purchase', postData, null, this.onPurchase.bind(this));
                 }
             },
 
@@ -329,6 +340,7 @@
                 }
                 else if (this._state == States.PURCHASED) {
                     this.showAsCompleted();
+                    this.fire("payment-complete");
                 }
                 else if (this._state == States.FAILED_PURCHASE) {
                     this.showAsFailed();
@@ -341,6 +353,7 @@
                     this.$.p4mPaypalButton.classList.add("hidden");
                 }
             },
+
 
             setLoadingState: function(loading) {
                 if (loading) {

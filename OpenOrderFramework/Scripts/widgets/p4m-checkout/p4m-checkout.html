@@ -58,14 +58,12 @@
                 </div>
                 <div id="summaryPanel" class="p4m-panel smallSummary">
                     <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
-                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" on-request-payment-method="goToPaymentMethods" use-paypal="{{usePaypal}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
+                    <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" new-drop-point="{{_queuedNewAddress}}" on-payment-complete="onPaymentComplete" on-request-payment-method="goToPaymentMethods" use-paypal="{{usePaypal}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
                     <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>    
                     <p4m-discount-list cart-data="{{cartData}}" on-discountdelete="onDiscountDelete"></p4m-discount-list>              
                 </div>
-
-            </div>
-            
+            </div>           
         </div>
 
         <polymer-cookie id="sessionCookie" name="CartId"></polymer-cookie>
@@ -388,13 +386,17 @@
                 //Make API call to add invisible address
                 //TODO: Don't post until payment time
                 var self = this;
+               
                 var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
                 if (!existingDropPoint) {
+                    self.cartData.AddressId = collectPointId;
+                 
                     var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : "";
                     var prefOrder = this.consumerData.Addresses.length || 1;
                     var postData =
                     {
                         "Address": {
+                            "Id": self.cartData.AddressId,
                             "AddressType": "Collect",
                             "Label": providerName,
                             "CompanyName": directions,
@@ -416,7 +418,9 @@
                         "isBillingAddr": false
                     };
 
-                   
+                    this._queuedNewAddress = postData.Address;
+
+                   /*
                     self.$.api.call("postAddress", null, postData, function (result) {
                         self.cartData.AddressId = result.Address.Id;
                         self.consumerData.Addresses.push(result.Address);
@@ -426,11 +430,29 @@
                             callback(result);
                         });                    
                     });
+                    */
                 }
                 else {
+                    self._queuedNewAddress = null;
                     self.cartData.AddressId = existingDropPoint.Id; //collectPointAddress.Id;
                     callback(existingDropPoint);
                 }
+            },
+
+            onPaymentComplete: function () {
+                if (this.queuedNewAddress) {
+                    var self = this;
+                    this.$.api.call("postAddress", null, this._queuedNewAddress, function (result) {
+                        self.cartData.AddressId = result.Address.Id;
+                        self.consumerData.Addresses.push(result.Address);
+                        //self.cartData.ServiceName = "Collection point";
+                        self.$.api.call('consumer', null, null, function (data) {
+                            self.onConsumerData.bind(self)(data);
+                            callback(result);
+                        });
+                    });
+                }
+
             },
 
             toggleDetailExpansion: function (expand) {
