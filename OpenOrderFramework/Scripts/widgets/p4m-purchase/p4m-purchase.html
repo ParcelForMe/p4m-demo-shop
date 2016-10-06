@@ -20,9 +20,11 @@
             <template is="dom-if" if="{{_noCardSelected}}">
                 You have not yet selected a payment method. <a on-click="requestPaymentMethod">Click here to select one.</a>
             </template>
-                     
-            <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
-            <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">&nbsp;{{paypalText}}</div>
+            <div class="button-container">
+                <div id="p4mBuyNowButton" on-tap="buyNow" class="p4m-button p4m-button-active">{{buttonText}}</div>
+                <div id="p4mPaypalButton" on-tap="buyViaPaypal" class="p4m-button p4m-button-active hidden paypal">&nbsp;{{paypalText}}</div>
+            </div>        
+
             <p class="p4m-error">{{errorMsg}}</p>   
       
         </div>
@@ -47,7 +49,18 @@
             color: red;
             font-weight: 500;
         }
-        #p4BuyNowButton.disabled {
+        .button-container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .p4m-button#p4mBuyNowButton {
+            width: 100%;
+            margin-left: 0px;
+            margin-right: 0px;
+        }
+
+        #p4mBuyNowButton.disabled {
             cursor: not-allowed;
         }
 
@@ -55,7 +68,10 @@
             background-image: url(https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png);
             background-color: #E0E0E0;
             background-repeat: no-repeat;
-            background-position: center; 
+            background-position: center;
+            min-width: 130px; 
+            margin-right: 0px;
+            margin-left: 2px;
 
         }
 
