@@ -107,7 +107,8 @@
                 },
                 usePaypal: {
                     type: Object,
-                    value: false
+                    value: false,
+                    notify: true
                 },
                 paypalText: {
                     type: String,
@@ -164,7 +165,8 @@
             observers: [
                 "onCartDataChange(cartData.*)",
                 "onStateChange(_state)",
-                "onCardSelected(selectedCard)"
+                "onCardSelected(selectedCard)",
+                "onStateChange(usePaypal)"
             ],
 
             ready: function ()
@@ -209,11 +211,7 @@
                 //Check to see if the user is logged in
                 var token = this.$.p4mTokenCookie.readCookie();
                 this._loggedIn = token !== "";
-                this._state = States.CVV_NEEDED;
-                if (this.usePaypal) {
-                    this.$.p4mPaypalButton.classList.remove("hidden");
-                }
-                    
+                this._state = States.CVV_NEEDED;                    
             },
 
             onPurchase: function (e) {
@@ -334,6 +332,13 @@
                 }
                 else if (this._state == States.FAILED_PURCHASE) {
                     this.showAsFailed();
+                }
+
+                if (this.usePaypal) {
+                    this.$.p4mPaypalButton.classList.remove("hidden");
+                }
+                else {
+                    this.$.p4mPaypalButton.classList.add("hidden");
                 }
             },
 
