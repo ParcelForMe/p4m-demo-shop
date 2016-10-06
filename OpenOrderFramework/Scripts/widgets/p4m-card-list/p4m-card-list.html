@@ -14,7 +14,7 @@
             </iron-collapse>
             <div class="cardList">
                 <template is="dom-repeat" items="{{consumerData.PaymentMethods}}">
-                    <p4m-card card-data="{{item}}" on-selected="onCardSelected" show-cvv="false" container-class="large-logo" selected-card-id="{{selectedCardId}}"></p4m-card>
+                    <p4m-card card-data="{{item}}" on-selected="onCardSelected" show-cvv="false" container-class="card-list-item" selected-card-id="{{selectedCardId}}"></p4m-card>
                 </template>
             </div>
 
@@ -28,7 +28,7 @@
                 display: flex;
                 flex-direction: column;
            */ 
-            margin: 10px;
+            margin-left: 20px;
         }
 
         .cardList {
