@@ -55,7 +55,7 @@ namespace OpenOrderFramework.Models
         public List<P4MDiscount> Discounts { get; set; }
     }
 
-    public class PurchaseMessage : P4MBaseMessage
+    public class PurchaseResultMessage : P4MBaseMessage
     {
         public string Id { get; set; }
         public string TransactionTypeCode { get; set; }
@@ -71,10 +71,10 @@ namespace OpenOrderFramework.Models
         public string P4MData { get; set; }
     }
 
-    public class PostCartMessage : P4MBaseMessage
+    public class PostPurchaseMessage : P4MBaseMessage
     {
-        public string  SessionId { get; set; }
-        public bool ClearItems { get; set; }
-        public P4MCart Cart { get; set; }
+        public string  CartId { get; set; }
+        public string CVV { get; set; }
+        public P4MAddress NewDropPoint { get; set; }
     }
 }

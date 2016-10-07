@@ -148,21 +148,7 @@
             },
             "purchase": {
                 "stub": "purchase",
-                "method": "GET",
-                "params": [
-                    {
-                        "name": "cartId",
-                        "required": true
-                    },
-                    {
-                        "name": "cvv",
-                        "required": true
-                    },
-                    {
-                        "name": "cartTotal",
-                        "required": true
-                    },
-                ]
+                "method": "POST",
             },
             "paypalSetup": {
                 "stub": "paypalSetup",
@@ -370,7 +356,7 @@
                 console.log("API response: ", responseData);
                 if (!responseData.Success) {
                     var err = responseData.Error || responseData.Message;
-                    if (responseData.status == 401 || err.indexOf("denied") > -1) {
+                    if (responseData.status == 401 || err.indexOf("expired") > -1 || err.indexOf("denied") > -1) {
                         var loginWidget = document.getElementsByTagName("p4m-login")[0];
                         loginWidget.logout();
                         finalCallback(responseData);

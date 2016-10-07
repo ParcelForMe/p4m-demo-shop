@@ -342,11 +342,11 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("p4m/purchase")]
-        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal)
+        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal, P4MAddress newDropPoint)
         {
-            var result = new PurchaseMessage();
+            var result = new PurchaseResultMessage();
             try
             {
                 if (string.IsNullOrWhiteSpace(cvv))
@@ -367,10 +367,15 @@ namespace OpenOrderFramework.Controllers
                 var client = new HttpClient();
                 client.SetBearerToken(token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
+
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv, NewDropPoint = newDropPoint };
+                var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
+                var apiResult = await client.PostAsync(P4MConstants.BaseApiAddress + "purchase", content);
+
+//                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
-                var purchaseResult = JsonConvert.DeserializeObject<PurchaseMessage>(messageString);
+                var purchaseResult = JsonConvert.DeserializeObject<PurchaseResultMessage>(messageString);
                 if (!purchaseResult.Success)
                     throw new Exception(purchaseResult.Error);
                 // if ACSUrl is blank then the purchase proceeded without 3D Secure
@@ -455,7 +460,7 @@ namespace OpenOrderFramework.Controllers
             return htmlResponse;
         }
 
-        public async Task<int> CreateLocalOrderAsync(PurchaseMessage purchase)
+        public async Task<int> CreateLocalOrderAsync(PurchaseResultMessage purchase)
         {
             Order order = null;
             // get the current user details for creating the order
@@ -591,7 +596,7 @@ namespace OpenOrderFramework.Controllers
             var cartMessage = await GetCartFromP4MAsync(cartId);
             if (cartMessage.Success)
             {
-                var purchase = new PurchaseMessage
+                var purchase = new PurchaseResultMessage
                 {
                     Cart = cartMessage.Cart,
                     BillTo = cartMessage.BillTo,
