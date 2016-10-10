@@ -301,8 +301,9 @@
                 {
                     "SessionId": this.sessionId,
                     "ClearItems": true, // are we always replacing the whole cart? or ClearItems = this.cartData.Id === null; ??
-                    "Cart": this.cartData
-                };
+                    "Cart": this.cartData,
+                    "DeliverToNewDropPoint": this._queuedNewAddress ? true : false
+                }
                 this.$.api.call('postCart', null, cartMessage, this.onRemoteCartData.bind(this));
             },
 
@@ -386,17 +387,22 @@
                 //Make API call to add invisible address
                 //TODO: Don't post until payment time
                 var self = this;
+                if (!collectPointId) {
+                    console.error("No collectPointId");
+                    callback();
+                    return;
+                }
                
                 var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
                 if (!existingDropPoint) {
-                    self.set('cartData.AddressId', collectPointId);
+                  
                  
                     var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : "";
                     var prefOrder = this.consumerData.Addresses.length || 1;
                     var postData =
                     {
                         "Address": {
-                            "Id": self.cartData.AddressId,
+                            "Id": collectPointId,
                             "AddressType": "Collect",
                             "Label": providerName,
                             "CompanyName": directions,
@@ -419,9 +425,10 @@
                     };
                     //debugger;
                     self.push('consumerData.Addresses', postData.Address);
-                   
+                    self.set('cartData.AddressId', collectPointId);
 
-                    this._queuedNewAddress = postData.Address;
+                    self._queuedNewAddress = postData.Address;
+                    callback(self._queuedNewAddress);
 
                    /*
                     self.$.api.call("postAddress", null, postData, function (result) {
@@ -437,7 +444,7 @@
                 }
                 else {
                     self._queuedNewAddress = null;
-                    self.cartData.AddressId = existingDropPoint.Id; //collectPointAddress.Id;
+                    self.set('cartData.AddressId', existingDropPoint.Id); //collectPointAddress.Id;
                     callback(existingDropPoint);
                 }
             },
@@ -539,7 +546,6 @@
 
             onUpdateAddress: function (addressElement) {
                 // here we're adding or updating an address only, not setting a default value on the consumer at this stage
-                //zzzzzzzz
                 this.$.addressList.showAsLoading();
                 var postData =
                 {
