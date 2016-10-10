@@ -204,11 +204,11 @@
                     }
                     var postData = { cartId: this.cartData.Id, cvv: this.selectedCard.cvv, cartTotal: this.cartData.Total };
                     debugger;
-                    postData.newDropPoint = null;
+                    //postData.newDropPoint = null;
                     if (this.newDropPoint) {
                         postData.newDropPoint = this.newDropPoint;
                     }
-                    this.$.localApi.call('purchase', postData, null, this.onPurchase.bind(this));
+                    this.$.localApi.call('purchase', null, postData, this.onPurchase.bind(this));
                 }
             },
 
