@@ -90,7 +90,7 @@
             border-top-right-radius: 8px;
             padding: 10px;
         }
-        .topPanel h2 {
+        .topPanel h4, .topPanel h2 {
             margin: 0px;
             letter-spacing: 3px;
             text-transform: uppercase;
@@ -389,7 +389,7 @@
                
                 var existingDropPoint = this.$.addressList.getDropPointById(collectPointId);
                 if (!existingDropPoint) {
-                    self.cartData.AddressId = collectPointId;
+                    self.set('cartData.AddressId', collectPointId);
                  
                     var directions = collectPointAddress.directions ? collectPointAddress.directions.split("]").pop() : "";
                     var prefOrder = this.consumerData.Addresses.length || 1;
@@ -417,20 +417,23 @@
                         "isPrefDeliveryAddr": false,
                         "isBillingAddr": false
                     };
+                    //debugger;
+                    self.push('consumerData.Addresses', postData.Address);
+                   
 
                     this._queuedNewAddress = postData.Address;
 
                    /*
                     self.$.api.call("postAddress", null, postData, function (result) {
-                        self.cartData.AddressId = result.Address.Id;
+                       cartData.AddressId = result.Address.Id;
                         self.consumerData.Addresses.push(result.Address);
                         //self.cartData.ServiceName = "Collection point";
                         self.$.api.call('consumer', null, null, function (data) {
                             self.onConsumerData.bind(self)(data);
                             callback(result);
                         });                    
-                    });
-                    */
+                    });*/
+                    
                 }
                 else {
                     self._queuedNewAddress = null;
