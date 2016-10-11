@@ -184,7 +184,7 @@
 
             .toggleDropPointsViewControls {
                 display: flex;
-                margin: 0 0 20px;
+                margin: 0 0 20px auto;
             }
 
             #mapTools, #listTools {
@@ -193,8 +193,12 @@
             }
 
             #viewAsList, #viewAsMap {
-                margin-top: 19px;
+                margin-top: 14px;
+                margin-bottom: 4px;               
+                margin-right: 18px;
             }
+
+
 
             .toggle-label {
                 display: inline-block;
@@ -565,7 +569,13 @@
                         </div>
 
                         <div class="toggleDropPointsViewControls">
-                            <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a list</a>
+                            <template is="dom-if" if="{{_showingDroppointsList}}">
+                                <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a map</a>
+                            </template>
+                            <template is="dom-if" if="{{_showingDroppointsMap}}">
+                                <a href="#" id="viewAsList" on-tap="_toggleDroppointView">View as a list</a>
+                            </template>
+                           
                         </div>
 
                     </div>
@@ -2213,7 +2223,7 @@
 				} else {
 					this.selectedServiceDetails.collectionPoint = null;
 					this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location; //TODO: What is this?
-				}
+                }
 				this.fire('selectedservicechanged', this.selectedServiceDetails);
 				this.fire("getStandardSelectedService", this.selectedServiceDetails);
 			},
