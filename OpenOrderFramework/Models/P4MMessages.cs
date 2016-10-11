@@ -23,6 +23,17 @@ namespace OpenOrderFramework.Models
         public bool HasOpenCart { get; set; }
     }
 
+    public class ConsumerIdMessage : P4MBaseMessage
+    {
+        public string ConsumerId { get; set; }
+    }
+
+    public class ConsumerAndCartMessage
+    {
+        public Consumer Consumer { get; set; }
+        public P4MCart Cart { get; set; }
+    }
+
     public class CartMessage : P4MBaseMessage
     {
         public P4MCart Cart { get; set; }

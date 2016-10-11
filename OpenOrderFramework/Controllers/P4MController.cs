@@ -19,6 +19,8 @@ namespace OpenOrderFramework.Controllers
     {
         ApplicationDbContext storeDB = new ApplicationDbContext();
         private ApplicationUserManager _userManager;
+        static HttpClient _httpClient = new HttpClient();
+
         public ApplicationUserManager UserManager
         {
             get
@@ -162,12 +164,11 @@ namespace OpenOrderFramework.Controllers
         async Task<P4MCart> GetOpenCartFromP4M()
         {
             // update P4M with the current cart details
-            var client = new HttpClient();
             var token = Request.Cookies["p4mToken"].Value;
-            client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.SetBearerToken(token);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var sessionId = HttpContext.Session[ShoppingCart.CartSessionKey].ToString();
-            var result = await client.GetAsync(string.Format("{0}restoreLastCart/{1}", P4MConstants.BaseApiAddress, sessionId));
+            var result = await _httpClient.GetAsync(string.Format("{0}restoreLastCart/{1}", P4MConstants.BaseApiAddress, sessionId));
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<CartMessage>(messageString);
             if (!message.Success)
@@ -364,13 +365,12 @@ namespace OpenOrderFramework.Controllers
                 }
 
                 var token = Request.Cookies["p4mToken"].Value;
-                var client = new HttpClient();
-                client.SetBearerToken(token);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                _httpClient.SetBearerToken(token);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv, NewDropPoint = newDropPoint };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
-                var apiResult = await client.PostAsync(P4MConstants.BaseApiAddress + "purchase", content);
+                var apiResult = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "purchase", content);
 
 //                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", P4MConstants.BaseApiAddress, cartId, cvv));
                 apiResult.EnsureSuccessStatusCode();
@@ -426,10 +426,9 @@ namespace OpenOrderFramework.Controllers
                 }
 
                 var token = Request.Cookies["p4mToken"].Value;
-                var client = new HttpClient();
-                client.SetBearerToken(token);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await client.GetAsync(string.Format("{0}paypalSetup/{1}", P4MConstants.BaseApiAddress, cartId));
+                _httpClient.SetBearerToken(token);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", P4MConstants.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
@@ -631,11 +630,10 @@ namespace OpenOrderFramework.Controllers
         async Task<CartMessage> GetCartFromP4MAsync(string cartId)
         {
             // update P4M with the current cart details
-            var client = new HttpClient();
             var token = Request.Cookies["p4mToken"].Value;
-            client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var apiResult = await client.GetAsync(string.Format("{0}cart/{1}?wantAddresses=true", P4MConstants.BaseApiAddress, cartId));
+            _httpClient.SetBearerToken(token);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var apiResult = await _httpClient.GetAsync(string.Format("{0}cart/{1}?wantAddresses=true", P4MConstants.BaseApiAddress, cartId));
             var messageString = await apiResult.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<CartMessage>(messageString);
             if (!result.Success)

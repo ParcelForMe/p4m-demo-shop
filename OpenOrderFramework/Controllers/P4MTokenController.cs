@@ -16,6 +16,8 @@ using OpenOrderFramework.Models;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
+using System.Net.Http.Formatting;
+using System.Linq;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -36,6 +38,7 @@ namespace OpenOrderFramework.Controllers
         public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
         //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
         //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
+        public const string BaseIdSrvAddress = BaseAddress + "/ui/";
         public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
@@ -48,6 +51,8 @@ namespace OpenOrderFramework.Controllers
 
     public class P4MTokenController : Controller
     {
+        ApplicationDbContext storeDB = new ApplicationDbContext();
+        static HttpClient _httpClient = new HttpClient();
         public P4MTokenController()
         {
         }
@@ -91,6 +96,51 @@ namespace OpenOrderFramework.Controllers
             }
         }
         
+        [HttpGet]
+        [Route("p4m/signup")]
+        public async Task<ActionResult> SignUp()
+        {
+            // if the user is logged in the we can save their details before redirecting to the SignUp controller
+            var result = new LoginMessage();
+            try
+            {
+                var authUser = AuthenticationManager.User;
+                if (authUser == null || !authUser.Identity.IsAuthenticated)
+                {
+                    result.RedirectUrl = P4MConstants.BaseIdSrvAddress + "signup";
+                    return Json(result, JsonRequestBehavior.AllowGet);
+                }
+                // user is logged in so we can send details to P4M
+                // get our client token - this can be cached
+                var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
+                var tokenResponse = await client.RequestClientCredentialsAsync("p4mRetail");
+
+                // now create a consumer from the local user details
+                var consumer = await GetConsumerFromAppUserAsync(authUser.Identity.GetUserId());
+                // we can also save their most recent cart
+                var cart = GetMostRecentCart(authUser.Identity.GetUserName());
+                // ready to send
+                _httpClient.SetBearerToken(tokenResponse.AccessToken);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var registerMessage = new ConsumerAndCartMessage { Consumer = consumer, Cart = cart };
+                var content = new ObjectContent<ConsumerAndCartMessage>(registerMessage, new JsonMediaTypeFormatter());
+                var apiResult = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "registerConsumer", content);
+                // check the result
+                apiResult.EnsureSuccessStatusCode();
+                var messageString = await apiResult.Content.ReadAsStringAsync();
+                var registerResult = JsonConvert.DeserializeObject<ConsumerIdMessage>(messageString);
+                if (!registerResult.Success)
+                    throw new Exception(registerResult.Error);
+                result.RedirectUrl = P4MConstants.BaseIdSrvAddress + "registerConsumer?consumerId=" + registerResult.ConsumerId;
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+                return View("Error");
+            }
+            return Redirect(result.RedirectUrl); 
+        }
+
         [HttpGet]
         [Route("p4m/getP4MAccessToken")]
         public async Task<ActionResult> GetToken(string code, string state)
@@ -230,6 +280,71 @@ namespace OpenOrderFramework.Controllers
             return consumerResult.HasOpenCart;
         }
 
+        async Task<Consumer> GetConsumerFromAppUserAsync(string localId)
+        {
+            ApplicationUser appUser = await UserManager.FindByIdAsync(localId);
+            var consumer = new Consumer {
+                Email = appUser.Email,
+                GivenName = appUser.FirstName,
+                FamilyName = appUser.LastName,
+                Language = "EN",
+                PreferredCurrency = "GBP"
+            };
+            var address = new P4MAddress {
+                Street1 = appUser.Address,
+                City = appUser.City,
+                State = appUser.State,
+                PostCode = appUser.PostalCode,
+                Country = appUser.Country,
+                AddressType = "Address",
+                CountryCode = "UK",
+                Label = "Home"                
+            };
+            consumer.Addresses = new List<P4MAddress> { address };
+            return consumer;
+        }
+
+        P4MCart GetMostRecentCart(string localUsername)
+        {
+            var order = storeDB.Orders.Where(o => o.Username == localUsername).OrderByDescending(o => o.OrderDate).FirstOrDefault();
+            if (order == null)
+                return null;
+            var p4mCart = new P4MCart
+            {
+                Reference = order.OrderId.ToString(),
+                SessionId = "Register",
+                Date = order.OrderDate,
+                PaymentType = "DB",
+                Currency = "GBP",
+                ShippingAmt = (double)order.Shipping,
+                Tax = (double)order.Tax,
+                Items = new List<P4MCartItem>()
+            };
+            var items = storeDB.OrderDetails.Where(i => i.OrderId == order.OrderId);
+            foreach (var cartItem in items)
+            {
+                var item = cartItem.Item;// storeDB.Items.Single(i => i.ID == cartItem.ItemId);
+                p4mCart.Items.Add(new P4MCartItem
+                {
+                    Make = item.Name,
+                    Sku = item.ID.ToString(),
+                    Desc = item.Name,
+                    Qty = cartItem.Quantity,
+                    Price = (double)item.Price,
+                    LinkToImage = item.ItemPictureUrl,
+                });
+            }
+            var discounts = storeDB.OrderDiscounts.Where(d => d.OrderId == order.OrderId);
+            foreach (var disc in discounts)
+            {
+                if (p4mCart.Discounts == null)
+                    p4mCart.Discounts = new List<P4MDiscount>();
+                p4mCart.Discounts.Add(new P4MDiscount { Code = disc.DiscountCode.ToString(), Description = disc.Description, Amount = (double)disc.Amount });
+            }
+            return p4mCart;
+        }
+
+
         async Task<ApplicationUser> GetAppUserAsync(Consumer consumer, string localId)
         {
             var address = consumer.PrefDeliveryAddress;
@@ -284,10 +399,9 @@ namespace OpenOrderFramework.Controllers
         async Task<ConsumerMessage> GetConsumerAsync(string token)
         {
             // get the consumer's details from P4M. 
-            var client = new HttpClient();
-            client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var result = await client.GetAsync(P4MConstants.BaseApiAddress + "consumer?checkHasOpenCart=true");
+            _httpClient.SetBearerToken(token);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var result = await _httpClient.GetAsync(P4MConstants.BaseApiAddress + "consumer?checkHasOpenCart=true");
             var messageString = await result.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
         }
@@ -295,11 +409,10 @@ namespace OpenOrderFramework.Controllers
         async Task SaveLocalIdAsync(string token, string id)
         {
             // get the consumer's details from P4M. 
-            var client = new HttpClient();
-            client.SetBearerToken(token);
+            _httpClient.SetBearerToken(token);
             string json = "{\"LocalId\":\""+id+"\"}";
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var result = await client.PostAsync(P4MConstants.BaseApiAddress + "consumerExtras", content);
+            var result = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "consumerExtras", content);
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<P4MBaseMessage>(messageString);
             if (!message.Success)

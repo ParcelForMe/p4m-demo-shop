@@ -749,6 +749,8 @@
     <Content Include="Scripts\widgets\p4m-discount-input\p4m-discount-input.html" />
     <Content Include="Scripts\widgets\p4m-discount-list\p4m-discount-list.html" />
     <Content Include="Scripts\widgets\p4m-order-text\p4m-order-glance.html" />
+    <Content Include="Scripts\widgets\p4m-register\logo-icon.png" />
+    <Content Include="Scripts\widgets\p4m-register\p4m-register.html" />
     <Content Include="Scripts\widgets\p4m-wish\p4m-wish.html" />
     <Content Include="Scripts\widgets\p4m-order-text\p4m-order-text.html" />
     <Content Include="Scripts\widgets\p4m-overlay\p4m-overlay.html" />
