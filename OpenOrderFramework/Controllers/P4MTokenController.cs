@@ -95,6 +95,8 @@ namespace OpenOrderFramework.Controllers
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
+
+        static TokenResponse _clientToken = null;
         
         [HttpGet]
         [Route("p4m/signup")]
@@ -108,30 +110,41 @@ namespace OpenOrderFramework.Controllers
                 if (authUser == null || !authUser.Identity.IsAuthenticated)
                 {
                     result.RedirectUrl = P4MConstants.BaseIdSrvAddress + "signup";
-                    return Json(result, JsonRequestBehavior.AllowGet);
                 }
-                // user is logged in so we can send details to P4M
-                // get our client token - this can be cached
-                var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
-                var tokenResponse = await client.RequestClientCredentialsAsync("p4mRetail");
+                else
+                {
+                    // user is logged in so we can send details to P4M
+                    if (_clientToken == null)
+                    {
+                        // get our client token - this can be cached
+                        var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
+                        _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
+                    }
 
-                // now create a consumer from the local user details
-                var consumer = await GetConsumerFromAppUserAsync(authUser.Identity.GetUserId());
-                // we can also save their most recent cart
-                var cart = GetMostRecentCart(authUser.Identity.GetUserName());
-                // ready to send
-                _httpClient.SetBearerToken(tokenResponse.AccessToken);
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var registerMessage = new ConsumerAndCartMessage { Consumer = consumer, Cart = cart };
-                var content = new ObjectContent<ConsumerAndCartMessage>(registerMessage, new JsonMediaTypeFormatter());
-                var apiResult = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "registerConsumer", content);
-                // check the result
-                apiResult.EnsureSuccessStatusCode();
-                var messageString = await apiResult.Content.ReadAsStringAsync();
-                var registerResult = JsonConvert.DeserializeObject<ConsumerIdMessage>(messageString);
-                if (!registerResult.Success)
-                    throw new Exception(registerResult.Error);
-                result.RedirectUrl = P4MConstants.BaseIdSrvAddress + "registerConsumer?consumerId=" + registerResult.ConsumerId;
+                    // now create a consumer from the local user details
+                    var consumer = await GetConsumerFromAppUserAsync(authUser.Identity.GetUserId());
+                    // we can also save their most recent cart
+                    var cart = GetMostRecentCart(authUser.Identity.GetUserName());
+                    // ready to send
+                    _httpClient.SetBearerToken(_clientToken.AccessToken);
+                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var registerMessage = new ConsumerAndCartMessage { Consumer = consumer, Cart = cart };
+                    var content = new ObjectContent<ConsumerAndCartMessage>(registerMessage, new JsonMediaTypeFormatter());
+                    var apiResult = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "registerConsumer", content);
+                    // check the result
+                    apiResult.EnsureSuccessStatusCode();
+                    var messageString = await apiResult.Content.ReadAsStringAsync();
+                    var registerResult = JsonConvert.DeserializeObject<ConsumerIdMessage>(messageString);
+                    if (!registerResult.Success)
+                    {
+                        if (registerResult.Error.Contains("registered"))
+                            result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
+                        else
+                            result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
+                    }
+                    else
+                        result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}registerConsumer?consumerId={registerResult.ConsumerId}";
+                }
             }
             catch (Exception e)
             {
