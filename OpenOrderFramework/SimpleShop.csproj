@@ -687,6 +687,7 @@
     <Content Include="Scripts\Lib\webcomponentsjs\webcomponents-lite.min.js" />
     <Content Include="Scripts\Lib\webcomponentsjs\webcomponents.js" />
     <Content Include="Scripts\Lib\webcomponentsjs\webcomponents.min.js" />
+    <Content Include="Scripts\widgets\gfs-calendar\gfs-calendar.html" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\css\custom.css" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\gfs-checkout-widget.html" />
     <Content Include="Scripts\widgets\gfs-checkout-widget\images\back_button.png" />
