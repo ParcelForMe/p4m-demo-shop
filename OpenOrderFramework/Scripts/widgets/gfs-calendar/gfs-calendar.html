@@ -1,0 +1,234 @@
+﻿
+<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+<dom-module id="gfs-calendar">
+
+    <template>
+        <div id="calendar-body">
+            <div class="calendar-col calendar-delivery-label">
+                <div class="calendar-col calendar-day-label">Days</div>               
+                <template is="dom-repeat" items="{{_deliveryLabels}}">
+                    <div class="calendar-delivery-label">{{item}}</div>
+                </template>
+            </div>
+            <template id="calendarTemplate" is="dom-repeat" items="{{_calendar}}" as="calendarItem" filter="_filterBySelectedWeek">
+                <div class="calendar-col calendar-day">
+                    <div class="calendar-day-label">{{calendarItem.data.deliveryDate}}</div>
+                    <template is="dom-repeat" items="{{calendarItem.slots}}" as="shippingOption">
+                        <div class="calendar-col calendar-delivery-option">{{shippingOption.price}}</div>                    
+                    </template>                
+                </div>
+            </template>
+        </div>
+        <div on-click="seePreviousWeek"class="gfs-button">See previous 7 days</div>
+        <div on-click="seeNextWeek"class="gfs-button">See next 7 days</div>
+
+
+    </template>
+
+    <style>
+        #calendar-body {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .calendar-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+    </style>
+
+    <script>
+
+        Polymer({
+            is: "gfs-calendar",
+            properties: {
+                dayDefiniteData: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                maxWeeks: {
+                    type: Number,
+                    value: 2
+                },
+                selectedWeek: {
+                    type: Number,
+                    value: 1
+                },
+                _buckets: {
+                    type: Array,
+                    value: []
+                },
+                _calendar: {
+                    type: Array,
+                    value: []
+                },
+                _deliveryLabels: {
+                    type: Array,
+                    value: []
+                }
+            },
+            observers: [
+                 "onDataChange(dayDefiniteData.*)",
+                 "onWeekChange(selectedWeek)"
+            ],
+            listeners: {
+
+            },
+            ready: function()
+            {
+
+            },
+
+            seeNextWeek: function() {
+                this.set('selectedWeek', this.selectedWeek + 1);
+            },
+
+            seePreviousWeek: function() {
+                this.set('selectedWeek', this.selectedWeek - 1);
+            },
+
+            _updateUi: function() {
+
+
+            },
+
+            _prepare: function() {
+                //Scan several days ahead, finding the day with the most delivery times. This will be the template.
+
+                var self = this;
+                var maxDeliveryTimes = 0;
+                var bucketTemplate;
+                var i = 0;
+
+                if (!this.dayDefiniteData.length) return;
+                this.dayDefiniteData.forEach(function (dayData) {
+                    dayData._rates = dayData.rates.filter(function (item) { return item.serviceType.type !== "dmStandardDropPoint" });
+
+                    // dayData.endTimes = [];
+                    if (dayData._rates.length > maxDeliveryTimes) {
+                        maxDeliveryTimes = dayData._rates.length;
+                        bucketTemplate = dayData._rates;
+                    }
+
+                });
+
+                //Make buckets  
+                this._buckets = [];
+
+                bucketTemplate.forEach(function (rateData) {
+                    self._buckets.push(dateToTimeMinutes(new Date(rateData.deliveryTimeTo)));
+                })
+                this._buckets = this._buckets.sort(function (a, b) { return a > b ? 1 : -1 });
+
+                //Fill buckets
+                this._calendar = [];
+                this.dayDefiniteData.forEach(function (dayData) {
+                    var today = {
+                        dayIndex: i,
+                        data: dayData,
+                        slots: Array.apply(null, Array(self._buckets.length))//.map(function (item) { return {price: "---"}}); //empty array of rate slots
+                    };
+                    i++;
+                    dayData._rates.forEach(function (rateData) {
+                        var minutes = dateToTimeMinutes(new Date(rateData.deliveryTimeTo));
+                        var bucketIndex = self._getBucket(minutes);
+                        if (bucketIndex == -1) {
+                            //stretch out the top bucket to accomodate this one
+                            self._buckets[buckets.length - 1] = minutes;
+                        }
+                        else {
+                            today.slots[bucketIndex] = rateData;
+                        }
+                    });
+                    today.slots = today.slots.map(function (item) {
+                        if (!item) item = { price: "-" }
+                        else if (!item.price) item.price = "Free";
+                        return item;
+                    });
+                    self.push("_calendar", today);
+                });
+
+
+                //Make labels
+                this._deliveryLabels = [];                
+                this._buckets.forEach(function (bucketTime) {
+                    self.push("_deliveryLabels", minutesToTimeStr(bucketTime));
+                });
+
+
+            },
+
+            _getBucket: function (boundary) {
+                var foundBucket;
+                for (var i=0; i < this._buckets.length; i++) {
+                    if (boundary <= this._buckets[i]) {
+                        foundBucket = i;
+                        break;
+                    }
+                }
+                if (typeof(foundBucket) === "undefined") {
+                    return -1;
+                }
+                else {
+                    return foundBucket;
+                }
+            },
+
+            _filterBySelectedWeek: function (item) {
+                var from = (this.selectedWeek-1) * 7;
+                var to = this.selectedWeek * 7;
+                console.log(from, to);
+                return (item.dayIndex > from && item.dayIndex < to);
+            },
+
+            onDataChange: function () {
+                this._prepare();
+            },
+
+            onWeekChange: function () {
+                this.$.calendarTemplate.render();
+            }
+            
+ // console.log("Getting bucket for", boundary);
+
+
+            /*
+            _findAllDeliveryDays: function () {
+                //Make an index of delivery days, dmStandard
+                var self = this;
+                this.dayDefiniteData.forEach(function (item) {
+                    var dateStr = self._makeDateStr(new Date(item.deliveryDate));
+                    var deliveryDate = new Date(dateStr);
+                    item.dateStr = dateStr;
+
+                    self._deliveryDays[dateStr] = item.rates.filter(function (rate) {
+                        return (rate.serviceType.type === "dmStandard");
+                    });
+
+                    if ((self._earliestDelivery == null) || deliveryDate < self._earliestDelivery) {
+                        self._earliestDelivery = self._deliveryDays[dateStr];
+                    }
+                });
+            },*/
+
+        });
+
+        function dateToTimeMinutes(date) {
+            return (date.getUTCHours() * 60) + date.getUTCMinutes();
+        }
+
+        function minutesToTimeStr(minutes) {
+            var d = new Date(minutes * 60 * 1000);
+            return d.getUTCHours() + ":" + zeroPad(d.getUTCMinutes(), 2); //.toLocaleTimeString();
+        }
+
+        function zeroPad(num, places) {
+            var zero = places - num.toString().length + 1;
+            return Array(+(zero > 0 && zero)).join("0") + num;
+        }
+
+    </script>
+</dom-module>
