@@ -15,7 +15,7 @@
                 <div class="calendar-col calendar-day">
                     <div class="calendar-cell calendar-day-label"><div>{{calendarItem.deliveryDowLabel}}</div><div>{{calendarItem.deliveryDateLabel}}</div></div>
                     <template is="dom-repeat" items="{{calendarItem.slots}}" as="shippingOption">
-                        <div class="calendar-cell calendar-delivery-option"><div>{{shippingOption.localizedPrice}}</div></div>                    
+                        <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>                    
                     </template>                
                 </div>
             </template>
@@ -70,6 +70,11 @@
         .calendar-buttons {
             display: flex;
             flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .calendar-buttons div.gfs-button {
+            min-width: 180px;
         }
 
     </style>
@@ -87,6 +92,13 @@
                 maxWeeks: {
                     type: Number,
                     value: 2
+                },
+                selectedOption: {
+                    type: Object,
+                    value: {
+                        methodId: null,
+                        date: null
+                    }
                 },
                 selectedWeek: {
                     type: Number,
@@ -227,6 +239,16 @@
 
             onWeekChange: function () {
                 this.$.calendarTemplate.render();
+            },
+
+            selectShippingOptionCell: function (e) {
+                console.log();
+                this.fire('select-shipping-option',
+                    {
+                        shippingOptionId:e.currentTarget.getAttribute('shipping-option-id'),
+                        shippingDate: new Date(e.currentTarget.getAttribute('shipping-date'))
+                    }
+               );
             }
             
  // console.log("Getting bucket for", boundary);
