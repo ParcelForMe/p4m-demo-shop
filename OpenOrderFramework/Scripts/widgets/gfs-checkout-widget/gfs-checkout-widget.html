@@ -461,12 +461,16 @@
             paper-tab {
                 --paper-tabs-selection-bar-color: blue;
             }  
-            
+                        
             .consumer-addresses {
                 display: flex;
                 flex-direction: row;
                 width: 280px;
-            }      
+            }  
+            
+            .pageContent {
+                padding: 20px 10px 10px 10px;
+            }    
 
         </style>
 
@@ -519,7 +523,7 @@
                     <div id="calendar-loading" class="loading">
                         <paper-spinner active id="calendar-spinner"></paper-spinner>
                     </div>
-                    <div class="row">
+                    <div class="pageContent">
                         <div>
 
                             <gfs-calendar day-definite-data="{{_data.dayDefinite}}"></gfs-calendar>
@@ -553,7 +557,7 @@
  
                 </iron-page>
                 <iron-page id="pageDroppoints">
-                    <div id="mapTools">
+                    <div id="mapTools" class="pageContent">
                         <div class="header" style="display:none">
                             <h3>{{dropPointTitle}}</h3>
                         </div>
