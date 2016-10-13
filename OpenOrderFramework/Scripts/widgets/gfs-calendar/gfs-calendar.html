@@ -15,14 +15,17 @@
                 <div class="calendar-col calendar-day">
                     <div class="calendar-cell calendar-day-label"><div>{{calendarItem.deliveryDowLabel}}</div><div>{{calendarItem.deliveryDateLabel}}</div></div>
                     <template is="dom-repeat" items="{{calendarItem.slots}}" as="shippingOption">
+                        <template is="dom-if" if="{{_calendarShippingOptionIsSelected(shippingOption)}}">
+                            <span class="makeFollowingSelected"></span>
+                        </template>
                         <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>                    
                     </template>                
                 </div>
             </template>
         </div>
         <div class="calendar-buttons">
-            <div on-click="seePreviousWeek" class="gfs-button">See previous 7 days</div>
-            <div on-click="seeNextWeek" class="gfs-button">See next 7 days</div>
+            <div on-click="seePreviousWeek" class$="gfs-button {{_previousWeekClass}}">See previous 7 days</div>
+            <div on-click="seeNextWeek" class$="gfs-button {{_nextWeekClass}}">See next 7 days</div>
         </div>
 
     </template>
@@ -58,9 +61,12 @@
             padding: 4px;
 
         }
-        .calendar-cell:hover {
+        .calendar-delivery-option.calendar-cell:hover {
             background-color: silver;
+        }
 
+        .calendar-delivery-option.calendar-cell.selected {
+            background-color: #f8cb37;
         }
 
         .calendar-delivery-option {
@@ -75,6 +81,10 @@
 
         .calendar-buttons div.gfs-button {
             min-width: 180px;
+        }
+
+        .concealed {
+            visibility:hidden;
         }
 
     </style>
@@ -93,12 +103,11 @@
                     type: Number,
                     value: 2
                 },
-                selectedOption: {
-                    type: Object,
-                    value: {
-                        methodId: null,
-                        date: null
-                    }
+                selectedShippingMethodId: {
+                    type: String
+                },
+                selectedShippingDate: {
+                    type: String
                 },
                 selectedWeek: {
                     type: Number,
@@ -115,6 +124,12 @@
                 _deliveryLabels: {
                     type: Array,
                     value: []
+                },
+                _nextWeekClass: {
+                    type: String
+                },
+                _previousWeekClass: {
+                    type: String
                 }
             },
             observers: [
@@ -129,16 +144,32 @@
 
             },
 
-            seeNextWeek: function() {
-                this.set('selectedWeek', this.selectedWeek + 1);
+            seeNextWeek: function () {
+                if (this.selectedWeek < this.maxWeeks) {
+                    this.set('selectedWeek', this.selectedWeek + 1);
+                }
             },
 
             seePreviousWeek: function() {
-                this.set('selectedWeek', this.selectedWeek - 1);
+                if (this.selectedWeek > 1) {
+                    this.set('selectedWeek', this.selectedWeek - 1);
+                }
             },
 
             _updateUi: function() {
-
+                if (this.selectedWeek <= 1) {
+                    this.set('_previousWeekClass', 'concealed');
+                }
+                else {
+                    this.set('_previousWeekClass', 'enabled');
+                }
+                if (this.selectedWeek >= this.maxWeeks) {
+                    this.set('_nextWeekClass', 'concealed');
+                }
+                else {
+                    this.set('_nextWeekClass', 'enabled');
+                }
+                this.$.calendarTemplate.render();
 
             },
 
@@ -182,6 +213,7 @@
                     };
                     i++;
                     dayData._rates.forEach(function (rateData) {
+                        rateData.deliveryDate = dayData.deliveryDate;
                         var minutes = dateToTimeMinutes(new Date(rateData.deliveryTimeTo));
                         var bucketIndex = self._getBucket(minutes);
                         if (bucketIndex == -1) {
@@ -207,7 +239,6 @@
                     self.push("_deliveryLabels", minutesToTimeStr(bucketTime));
                 });
 
-
             },
 
             _getBucket: function (boundary) {
@@ -228,8 +259,7 @@
 
             _filterBySelectedWeek: function (item) {
                 var from = (this.selectedWeek-1) * 7;
-                var to = this.selectedWeek * 7;
-                console.log(from, to);
+                var to = this.selectedWeek * 7;;
                 return (item.dayIndex > from && item.dayIndex < to);
             },
 
@@ -238,41 +268,28 @@
             },
 
             onWeekChange: function () {
-                this.$.calendarTemplate.render();
-            },
+                this._updateUi();
+                               
+           },
 
             selectShippingOptionCell: function (e) {
-                console.log();
+                this.selectedShippingOptionId = e.currentTarget.getAttribute('shipping-option-id');
+                this.selectedShippingDate = e.currentTarget.getAttribute('shipping-date');
                 this.fire('select-shipping-option',
                     {
-                        shippingOptionId:e.currentTarget.getAttribute('shipping-option-id'),
-                        shippingDate: new Date(e.currentTarget.getAttribute('shipping-date'))
+                        shippingOptionId: this.selectedShippingOptionId,
+                        shippingDate: this.selectedShippingDate
                     }
                );
-            }
-            
- // console.log("Getting bucket for", boundary);
+           },
 
-
-            /*
-            _findAllDeliveryDays: function () {
-                //Make an index of delivery days, dmStandard
-                var self = this;
-                this.dayDefiniteData.forEach(function (item) {
-                    var dateStr = self._makeDateStr(new Date(item.deliveryDate));
-                    var deliveryDate = new Date(dateStr);
-                    item.dateStr = dateStr;
-
-                    self._deliveryDays[dateStr] = item.rates.filter(function (rate) {
-                        return (rate.serviceType.type === "dmStandard");
-                    });
-
-                    if ((self._earliestDelivery == null) || deliveryDate < self._earliestDelivery) {
-                        self._earliestDelivery = self._deliveryDays[dateStr];
-                    }
-                });
-            },*/
-
+           _calendarShippingOptionIsSelected: function (item) {
+               if ((this.selectedShippingOptionId == item.id) && (new Date(this.selectedShippingDate).getTime() == new Date(item.deliveryDate).getTime())) {
+                   debugger;
+                   return true;
+               }
+               else return false;
+           }
         });
 
         function dateToTimeMinutes(date) {
