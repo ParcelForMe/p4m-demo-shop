@@ -23,18 +23,19 @@ namespace OpenOrderFramework.Controllers
 {
     public static class P4MConstants
     {
-        //public const string ClientId = "p4m-login-test";
-        //public const string ClientSecret = "123456";
-        //public const string CredClientId = "p4m-login-test";
-        //public const string CredClientSecret = "123456";
-        public const string ClientId = "10004";
-        public const string ClientSecret = "secret";
-        public const string CredClientId = "10004";
-        public const string CredClientSecret = "secret";
+        public const string ClientId = "p4m-login-test";
+        public const string ClientSecret = "123456";
+        public const string CredClientId = "p4m-login-test";
+        public const string CredClientSecret = "123456";
+        //public const string ClientId = "10004";
+        //public const string ClientSecret = "secret";
+        //public const string CredClientId = "10004";
+        //public const string CredClientSecret = "secret";
+
         public const string ClientGuestId = "codeclient_guest";
 
-//        public const string BaseAddress = "https://local.parcelfor.me:44333/core";
-        public const string BaseAddress = "https://local.parcelfor.me:44333";
+        public const string BaseAddress = "https://local.parcelfor.me:44333/core";
+//        public const string BaseAddress = "https://local.parcelfor.me:44333";
         public const string BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
         //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
         //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";

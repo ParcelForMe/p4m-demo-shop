@@ -5,6 +5,7 @@
 <link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
 <link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
 <link rel="import" href="../gfs-droppoint/gfs-location-button.html" />
+<link rel="import" href="../gfs-calendar/gfs-calendar.html" />
 <link rel="import" href="../../Lib/gfs-delivery-address/gfs-delivery-address.html" />
 <link rel="import" href="../../Lib/gfs-checkout-widget/map-region-manager/map-region-manager.html" />
 <link rel="import" href="../../Lib/paper-toggle-button/paper-toggle-button.html" />
@@ -252,7 +253,6 @@
             .cardList {
                 display: flex;
                 flex-direction: column;
-                xflex-wrap: wrap;
                 height: 630px;
                 overflow-x: hidden;
                 overflow-y: scroll;
@@ -320,11 +320,6 @@
 
             #calendarPanel {
                 padding: 15px;
-            }
-
-            #calendar-delivery-options {
-                margin-left: 25px;
-                width: 90%;
             }
 
   
@@ -460,12 +455,16 @@
             paper-tab {
                 --paper-tabs-selection-bar-color: blue;
             }  
-            
+                        
             .consumer-addresses {
                 display: flex;
                 flex-direction: row;
                 width: 280px;
-            }      
+            }  
+            
+            .pageContent {
+                padding: 20px 10px 10px 10px;
+            }    
 
         </style>
 
@@ -518,40 +517,16 @@
                     <div id="calendar-loading" class="loading">
                         <paper-spinner active id="calendar-spinner"></paper-spinner>
                     </div>
-                    <div class="row">
+                    <div class="pageContent">
                         <div>
-                            <brick-calendar id="calendar-widget" class="gfs-checkout xhidden" controls first-weekday-num=0></brick-calendar>
-                            <!-- Clicking on a day in the calendar sets _selectedDayDeliveries -->
+                            <gfs-calendar on-select-shipping-option="_selectCalendarShippingOption" day-definite-data="{{_data.dayDefinite}}"></gfs-calendar>
                         </div>
-                        <div>
-                            <div id="calendar-delivery-options" class="hidden">
-                                <h4>{{calendarDayPrompt}}</h4>
-                                <ul class="separated">
-                                    <template is="dom-repeat" items="{{_selectedDayDeliveries.deliveries}}" sort="sortDayDefiniteServices">
 
-                                        <li class="delivery-place">
-                                            <input type="radio"
-                                                    name="shipping_method"
-                                                    value="{{item.id}}"
-                                                    id="{{item.id}}"
-                                                    checked="{{item.selected}}"
-                                                    on-click="updateDayDeliveryOptionsEvent"
-                                                    class="radio calendar-delivery-selection" />
-                                            <span class="gfsmethodname">
-                                                {{item.methodTitle}}
-                                                <span class="price">{{currencySymbol}}{{item.price}}</span>
-                                            </span>
-                                        </li>
-
-                                    </template>
-                                </ul>
-                            </div>
-                        </div>
                     </div>
  
                 </iron-page>
                 <iron-page id="pageDroppoints">
-                    <div id="mapTools">
+                    <div id="mapTools" class="pageContent">
                         <div class="header" style="display:none">
                             <h3>{{dropPointTitle}}</h3>
                         </div>
@@ -1045,9 +1020,8 @@
                 this.$$('#list-loading').classList.add('hidden');
                 this.$$('#standard-loading').classList.add('hidden');
 
-                this.$$('brick-calendar').classList.remove('hidden');
+                //this.$$('brick-calendar').classList.remove('hidden');
                 this.$$('#calendar-loading').classList.add('hidden');
-                this.$$('#calendar-delivery-options').classList.remove('hidden');
 
                 /*
                 this.$$("#gfsMapCanvas-loading").classList.add('hidden');
@@ -1175,6 +1149,7 @@
 
             _checkForServices: function (defaultDelivery) {
                 //Preselect delivery option based on default delivery method
+                //TODO: Investigate this code
                 if ((defaultDelivery === 'Standard') && (this._data.standardRates.length !== 0)) {
                     this.showPage_Standard();
                     this._preselectForStandard();
@@ -1432,13 +1407,15 @@
             },
 
             _processDayDefiniteData: function() {
-
+                this.notifyPath('_data.dayDefinite');
             },
 
-            _makeCalendar: function() {
+            _makeCalendar: function () {
+                /*
                 this.$$('brick-calendar').labels = this.calendarLabels;
                 this._findAllDeliveryDays();
                 window.setTimeout(this._markDeliveryDays.bind(this), 500);
+                */
             },
 
             _makeMap: function () {
@@ -1945,7 +1922,6 @@
                 }
             },
 
-
             _locateMe: function() {
                 var self = this;
                 // Try HTML5 geolocation.
@@ -1970,54 +1946,6 @@
                 }
             },
 
-            // _preselect: function () {
-            // 	//Find the cheapest option
-            // 	//If cheapestCalendar option, also search the calendar for the cheapest option
-            // 	//Find cheapest standard option
-            // 	return;
-            // 	var self = this;
-            // 	var cheapestMethod = null;
-            // 	var preselectDay = false;
-            // 	var items = this._data.standardRates; //nonDayDefinite;//.filter(self.isGfs);
-            // 	items.forEach(function (carrier) {
-            // 		carrier.rates.forEach(function (item) {
-            // 			if (cheapestMethod === null || (item.price < cheapestMethod.price)) {
-            // 				cheapestMethod = item;
-            // 			}
-            // 		});
-            // 	});
-            // 	console.log("Cheapest method", cheapestMethod);
-
-            // 	if (self.allowCalendarPreselect) {
-            // 		items = self._earliestDelivery;
-            // 		items.forEach(function (item) {
-            // 			if (cheapestMethod === null || (item.price < cheapestMethod.price)) {
-            // 				cheapestMethod = item;
-            // 				preselectDay = true;
-            // 			}
-            // 		});
-
-            // 	}
-
-            // 	if (cheapestMethod) {
-            // 		if (preselectDay) {
-
-            // 			this.$$('brick-calendar').chosen = [cheapestMethod.dateStr];
-            // 			this._selectedDayDeliveries = self._deliveryDays[cheapestMethod.dateStr];
-            // 			window.setTimeout(function () { self._selectMethodByCode(cheapestMethod.code); }, 100)
-            // 		}
-            // 		else {
-            // 			this._selectMethodByCode(cheapestMethod.code);
-            // 		}
-            // 		//self._selectedItem = cheapestStandard;//.selected = true;
-            // 	}
-
-            // },
-
-            // _selectMethodByCode(code) {
-            // 	this.$$('#' + code).checked = true;
-            // },
-
             _makeDateStr: function(d) {
                 function pad(n, padSize) {
                     var str = n.toString();
@@ -2031,23 +1959,9 @@
                 );
             },
 
-            _deliveryDateSelected: function(e) {
-                var deliveries = this._findDayDefiniteDeliveries(e.detail.date);
-                if (deliveries && deliveries.length > 0) {//eeee _selectedDayDeliveries should include date as well
-                    this._selectedDayDeliveries = { "date": e.detail.date, "deliveries": deliveries };
-                } else {
-                    this.$$('brick-calendar').chosen = [];
-                }
-            },
-
-            _findDayDefiniteDeliveries: function(onDate) {
-                var dateStr = this._makeDateStr(onDate);
-                if (typeof(this._deliveryDays[dateStr]) !== "undefined") {
-                    return this._deliveryDays[dateStr];
-                } else {
-                    return null;
-                }
-
+            _selectCalendarShippingOption: function (e) {
+                //console.log(e);
+                this.updateDeliveryOptions(e.detail.shippingOptionId, e.detail.shippingDate);
             },
 
             _formatDayDefiniteDate: function(deliveryDate) {
@@ -2126,45 +2040,6 @@
                 this._processDeliveryArray(this._data.nonDayDefinite);
             },
 
-            _findAllDeliveryDays: function() {
-                //Make an index of delivery days, dmStandard
-                var self = this;
-                this._data.dayDefinite.forEach(function(item) {
-                    var dateStr = self._makeDateStr(new Date(item.deliveryDate));
-                    var deliveryDate = new Date(dateStr);
-                    item.dateStr = dateStr;
-
-                    self._deliveryDays[dateStr] = item.rates.filter(function(rate) {
-                    	return (rate.serviceType.type === "dmStandard");
-                    });
-
-                    if ((self._earliestDelivery == null) || deliveryDate < self._earliestDelivery) {
-                        self._earliestDelivery = self._deliveryDays[dateStr];
-                    }
-                });
-            },
-
-            _markDeliveryDays: function() {
-                for (var dateStr in this._deliveryDays) {
-                    var selector = 'brick-calendar .day[data-date="' + dateStr + '"]';
-
-					var results = document.querySelectorAll(selector);
-					if (results) {
-						for (var i = 0; i < results.length; i++) {
-							results[i].classList.add('highlighted');
-							results[i].classList.add('gfs-checkout');
-						}
-					}
-				}
-				//if (this.$.calendarPanel.opened === true) {
-					this._preselectForExpress();
-				//}
-			},
-
-            _calendarMonthChanged: function(e) {
-                this._markDeliveryDays();
-            },
-
             _preselectForStandard: function() {
                 var cheapestMethod = null;
                 var preselectDay = false;
@@ -2178,30 +2053,24 @@
                 this._selectCheapestMethod(cheapestMethod);
             },
 
-			_preselectForExpress: function () {
+            _preselectForExpress: function () {
+                // TODO: Put this back
+                /*
 				var cheapestMethod = null;
-				var preselectDay = false;
 
 				if (this.allowCalendarPreselect) {
-					items = this._earliestDelivery;
-					items.forEach(function (item) {
-						if (cheapestMethod === null || (item.price < cheapestMethod.price)) {
-							cheapestMethod = item;
-							preselectDay = true;
-						}
-					});
+                   cheapestMethod = this.$$('gfs-calendar').getCheapestSoonest()
 				}
 
 				if (cheapestMethod) {
-					if (preselectDay) {
 						this.$$('brick-calendar').chosen = [cheapestMethod.deliveryTimeFrom];
 						cheapestMethod.date = new Date(cheapestMethod.deliveryTimeFrom);
 						this.fire('datetoggleon', cheapestMethod);
 
 						if(this.defaultDelivery === 'Express')
 							this._selectCheapestMethod(cheapestMethod);
-					}
 				}
+                */
 			},
 
 			_selectCheapestMethod: function(cheapestMethod) {
@@ -2240,48 +2109,6 @@
                 });
                 myElement.opened = !myState;
             },
-
-			_toggleCalendarPanelCollapse: function (e) {
-				this._toggleCollapse('calendarPanel');
-
-				// if a service is selected disable it
-				var standardItems = document.getElementsByClassName("standard-delivery-selection");
-				for (var i = 0; i < standardItems.length; i++) {
-					standardItems[i].checked = false;
-				}
-
-				var droppointItems = document.getElementsByClassName("droppoint-delivery-selection");
-				for (var i = 0; i < droppointItems.length; i++) {
-					droppointItems[i].checked = false;
-				}
-
-				// open available services
-				this._preselectForExpress();
-
-				// reset selected service
-				this.fire("getStandardSelectedService");
-				this.fire("getCalendarSelectedService");
-				this.fire("getDroppointSelectedService");
-			},
-
-			_toggleStandardDeliveryPanelCollapse: function (e) {
-                /*
-				this._toggleCollapse('standardDeliveryPanel');
-
-				var calendarItems = document.getElementsByClassName("calendar-delivery-selection");
-				for (var i = 0; i < calendarItems.length; i++) {
-					calendarItems[i].checked = false;
-				}
-
-				var droppointItems = document.getElementsByClassName("droppoint-delivery-selection");
-				for (var i = 0; i < droppointItems.length; i++) {
-					droppointItems[i].checked = false;
-				}
-
-				this.fire("getStandardSelectedService");
-				this.fire("getCalendarSelectedService");
-				this.fire("getDroppointSelectedService");*/
-			},
 
             //TODO: Review this code
             closeCheckoutRequest: function() {
@@ -2367,23 +2194,9 @@
                     this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
                 }
                 this.fire('selectedservicechanged', this.selectedServiceDetails);
-                /*
-                if (this.$.standardDeliveriesOption.checked === true)
-                    this.fire("getStandardSelectedService", this.selectedServiceDetails);
 
-                if (this.$.calendarDeliveriesOption.checked === true)
-                    this.fire("getCalendarSelectedService", this.selectedServiceDetails);
-
-                if (this.$.dropPointDeliveriesOption.checked === true) {
-                    this.fire("getDroppointSelectedService", this.selectedServiceDetails);
-                }*/
             },
 
-            updateDayDeliveryOptionsEvent: function(e) {
-                if (e.target.checked) {
-                    this.updateDeliveryOptions(e.target.id, this._selectedDayDeliveries.date); ///eeeee 
-                }
-            },
 
             updateDeliveryOptionsEvent: function (e) {
                 if (e.target.checked) {                    
