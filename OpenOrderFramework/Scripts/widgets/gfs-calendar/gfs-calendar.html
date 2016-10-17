@@ -15,13 +15,17 @@
                 <div class="calendar-col calendar-day">
                     <div class="calendar-cell calendar-day-label"><div>{{calendarItem.deliveryDowLabel}}</div><div>{{calendarItem.deliveryDateLabel}}</div></div>
                     <template is="dom-repeat" items="{{calendarItem.slots}}" as="shippingOption">
-                        <template is="dom-if" if="{{_calendarShippingOptionIsSelected(shippingOption)}}">
-                            <span class="makeFollowingSelected"></span>
+                        <template restamp="true" is="dom-if" if="{{!_calendarShippingOptionIsSelected(shippingOption)}}">                           
+                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
                         </template>
-                        <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>                    
+                        <template restamp="true" is="dom-if" if="{{_calendarShippingOptionIsSelected(shippingOption)}}">
+                            <div class="makeFollowingSelected"></div>
+                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
+                        </template>
                     </template>                
                 </div>
             </template>
+
         </div>
         <div class="calendar-buttons">
             <div on-click="seePreviousWeek" class$="gfs-button {{_previousWeekClass}}">See previous 7 days</div>
@@ -65,9 +69,6 @@
             background-color: silver;
         }
 
-        .calendar-delivery-option.calendar-cell.selected {
-            background-color: #f8cb37;
-        }
 
         .calendar-delivery-option {
             font-weight: bold;
@@ -87,6 +88,10 @@
             visibility:hidden;
         }
 
+        .makeFollowingSelected + div {
+            background-color: #f8cb37;           
+        }
+
     </style>
 
     <script>
@@ -104,14 +109,19 @@
                     value: 2
                 },
                 selectedShippingMethodId: {
-                    type: String
+                    type: String,
+                    notify: true,
+                    observer: "_updateUi"
                 },
                 selectedShippingDate: {
-                    type: String
+                    type: String,
+                    notify: true,
+                    observer: "_updateUi"
                 },
                 selectedWeek: {
                     type: Number,
-                    value: 1
+                    value: 1,
+                    notify: true
                 },
                 _buckets: {
                     type: Array,
@@ -156,7 +166,8 @@
                 }
             },
 
-            _updateUi: function() {
+            _updateUi: function () {
+                var self = this;
                 if (this.selectedWeek <= 1) {
                     this.set('_previousWeekClass', 'concealed');
                 }
@@ -169,7 +180,19 @@
                 else {
                     this.set('_nextWeekClass', 'enabled');
                 }
-                this.$.calendarTemplate.render();
+                //this.notifyPath('dayDefiniteData');
+                //debugger;
+                
+                if (this._calendar) {
+                    var _calendar = JSON.parse(JSON.stringify(this._calendar));
+                    this.set('_calendar', _calendar);
+                    /*window.setTimeout(function () {
+                        self.set('_calendar', _calendar);
+                    }, 100);*/
+                }
+              
+                
+
 
             },
 
@@ -214,16 +237,18 @@
                     i++;
                     dayData._rates.forEach(function (rateData) {
                         rateData.deliveryDate = dayData.deliveryDate;
+                        rateData.dayIndex = today.dayIndex;
                         var minutes = dateToTimeMinutes(new Date(rateData.deliveryTimeTo));
                         var bucketIndex = self._getBucket(minutes);
                         if (bucketIndex == -1) {
                             //stretch out the top bucket to accomodate this one
-                            self._buckets[buckets.length - 1] = minutes;
+                            self._buckets[self._buckets.length - 1] = minutes;
                         }
                         else {
                             today.slots[bucketIndex] = rateData;
                         }
                     });
+                    console.log(today);
                     today.slots = today.slots.map(function (item) {
                         if (!item) item = { localizedPrice: "" }
                         else if (!item.price) item.localizedPrice = "Free";
@@ -272,7 +297,9 @@
                                
            },
 
-            selectShippingOptionCell: function (e) {
+           selectShippingOptionCell: function (e) {
+                //var shippingOption = e.currentTarget.getAttribute('data-shipping');
+                //shippingOption.selected = true;
                 this.selectedShippingOptionId = e.currentTarget.getAttribute('shipping-option-id');
                 this.selectedShippingDate = e.currentTarget.getAttribute('shipping-date');
                 this.fire('select-shipping-option',
@@ -281,11 +308,13 @@
                         shippingDate: this.selectedShippingDate
                     }
                );
+                debugger;
+               this._updateUi();
            },
 
-           _calendarShippingOptionIsSelected: function (item) {
+            _calendarShippingOptionIsSelected: function (item) {
+                console.log("Checking", item);
                if ((this.selectedShippingOptionId == item.id) && (new Date(this.selectedShippingDate).getTime() == new Date(item.deliveryDate).getTime())) {
-                   debugger;
                    return true;
                }
                else return false;
