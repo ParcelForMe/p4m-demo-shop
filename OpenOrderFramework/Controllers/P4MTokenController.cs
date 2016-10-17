@@ -144,7 +144,7 @@ namespace OpenOrderFramework.Controllers
                             result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
                     }
                     else
-                        result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}registerConsumer?consumerId={registerResult.ConsumerId}";
+                        result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}registerConsumer/{registerResult.ConsumerId}";
                 }
             }
             catch (Exception e)
@@ -315,6 +315,8 @@ namespace OpenOrderFramework.Controllers
                 Label = "Home"                
             };
             consumer.Addresses = new List<P4MAddress> { address };
+            consumer.Extras = new Dictionary<string, string>();
+            consumer.Extras.Add("LocalId", localId);
             return consumer;
         }
 
@@ -422,7 +424,7 @@ namespace OpenOrderFramework.Controllers
 
         async Task SaveLocalIdAsync(string token, string id)
         {
-            // get the consumer's details from P4M. 
+            // save the local consumer Id as an "extra" in P4M 
             _httpClient.SetBearerToken(token);
             string json = "{\"LocalId\":\""+id+"\"}";
             var content = new StringContent(json, Encoding.UTF8, "application/json");
