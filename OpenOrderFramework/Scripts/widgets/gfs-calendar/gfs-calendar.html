@@ -16,11 +16,11 @@
                     <div class="calendar-cell calendar-day-label"><div>{{calendarItem.deliveryDowLabel}}</div><div>{{calendarItem.deliveryDateLabel}}</div></div>
                     <template is="dom-repeat" items="{{calendarItem.slots}}" as="shippingOption">
                         <template restamp="true" is="dom-if" if="{{!_calendarShippingOptionIsSelected(shippingOption)}}">                           
-                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
+                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" delivery-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
                         </template>
                         <template restamp="true" is="dom-if" if="{{_calendarShippingOptionIsSelected(shippingOption)}}">
                             <div class="makeFollowingSelected"></div>
-                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" shipping-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
+                            <div class="calendar-cell calendar-delivery-option" shipping-option-id$="{{shippingOption.id}}" delivery-date$="{{calendarItem.data.deliveryDate}}" day-index$="{{shippingOption.dayIndex}}" on-click="selectShippingOptionCell"><div>{{shippingOption.localizedPrice}}</div></div>
                         </template>
                     </template>                
                 </div>
@@ -111,12 +111,12 @@
                 selectedShippingMethodId: {
                     type: String,
                     notify: true,
-                    observer: "_updateUi"
+                    observer: "_updateSelectedShippingMethodId"
                 },
-                selectedShippingDate: {
+                selectedDeliveryDate: {
                     type: String,
                     notify: true,
-                    observer: "_updateUi"
+                    observer: "_updateSelectedDeliveryDate"
                 },
                 selectedWeek: {
                     type: Number,
@@ -151,7 +151,6 @@
             },
             ready: function()
             {
-
             },
 
             seeNextWeek: function () {
@@ -180,20 +179,22 @@
                 else {
                     this.set('_nextWeekClass', 'enabled');
                 }
-                //this.notifyPath('dayDefiniteData');
-                //debugger;
-                
+
+                //Trigger a full refresh               
                 if (this._calendar) {
                     var _calendar = JSON.parse(JSON.stringify(this._calendar));
                     this.set('_calendar', _calendar);
-                    /*window.setTimeout(function () {
-                        self.set('_calendar', _calendar);
-                    }, 100);*/
                 }
-              
-                
 
+            },
 
+            _updateSelectedShippingMethodId: function () {
+                debugger;
+                this._updateUi();
+            },
+
+            _updateSelectedDeliveryDate: function() {
+                this._updateUi();
             },
 
             _prepare: function() {
@@ -248,7 +249,6 @@
                             today.slots[bucketIndex] = rateData;
                         }
                     });
-                    console.log(today);
                     today.slots = today.slots.map(function (item) {
                         if (!item) item = { localizedPrice: "" }
                         else if (!item.price) item.localizedPrice = "Free";
@@ -300,24 +300,27 @@
            selectShippingOptionCell: function (e) {
                 //var shippingOption = e.currentTarget.getAttribute('data-shipping');
                 //shippingOption.selected = true;
-                this.selectedShippingOptionId = e.currentTarget.getAttribute('shipping-option-id');
-                this.selectedShippingDate = e.currentTarget.getAttribute('shipping-date');
+                this.selectedShippingMethodId = e.currentTarget.getAttribute('shipping-option-id');
+                this.selectedDeliveryDate = e.currentTarget.getAttribute('delivery-date');
                 this.fire('select-shipping-option',
                     {
-                        shippingOptionId: this.selectedShippingOptionId,
-                        shippingDate: this.selectedShippingDate
+                        shippingMethodId: this.selectedShippingMethodId,
+                        deliveryDate: this.selectedDeliveryDate
                     }
                );
-                debugger;
                this._updateUi();
            },
 
             _calendarShippingOptionIsSelected: function (item) {
-                console.log("Checking", item);
-               if ((this.selectedShippingOptionId == item.id) && (new Date(this.selectedShippingDate).getTime() == new Date(item.deliveryDate).getTime())) {
-                   return true;
-               }
-               else return false;
+                var selectedDeliveryDate;
+                if (this.selectedDeliveryDate) {
+                    selectedDeliveryDate = new Date(Math.floor((new Date(this.selectedDeliveryDate).getTime()) / DAY_MS) * DAY_MS);//Remove time component
+                    if ((this.selectedShippingMethodId == item.id) && (selectedDeliveryDate.getTime() == new Date(item.deliveryDate).getTime())) {
+                        return true;
+                    }
+                    else return false;
+                }
+                else return false;              
            }
         });
 

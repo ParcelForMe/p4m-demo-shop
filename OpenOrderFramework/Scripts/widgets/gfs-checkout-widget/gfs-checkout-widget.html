@@ -519,7 +519,7 @@
                     </div>
                     <div class="pageContent">
                         <div>
-                            <gfs-calendar on-select-shipping-option="_selectCalendarShippingOption" day-definite-data="{{_data.dayDefinite}}"></gfs-calendar>
+                            <gfs-calendar on-select-shipping-option="_selectCalendarShippingOption" day-definite-data="{{_data.dayDefinite}}" selected-delivery-date="{{overrideDeliveryDate}}" selected-shipping-method-id="{{overrideShippingMethodId}}"></gfs-calendar>
                         </div>
 
                     </div>
@@ -741,6 +741,21 @@
                 defaultDelivery: {
                     type: String,
                     value: 'Standard'
+                },
+
+                //If set, preselect this shipping method (if possible)
+                overrideShippingMethodId: {
+                    type: String
+                },
+
+                //If set, preselect this shipping date (if possible)
+                overrideDeliveryDate: {
+                    type: String //ISO Date format
+                },
+
+                //If set, preselect this droppoint (if possible)
+                overrideDroppointId: {
+                    type: String
                 },
 
                 hideMapUI: {
@@ -1960,8 +1975,8 @@
             },
 
             _selectCalendarShippingOption: function (e) {
-                //console.log(e);
-                this.updateDeliveryOptions(e.detail.shippingOptionId, e.detail.shippingDate);
+                console.log('Updating delivery options with', e.detail.shippingMethodId, e.detail.deliveryDate);
+                this.updateDeliveryOptions(e.detail.shippingMethodId, e.detail.deliveryDate);
             },
 
             _formatDayDefiniteDate: function(deliveryDate) {
@@ -2081,8 +2096,8 @@
 				this.selectedServiceDetails.serviceCode = method.carrierCode;
 				this.selectedServiceDetails.carrier = method.carrierName;
 				this.selectedServiceDetails.shipping = method.price;
-				this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
-				this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeFrom).add(method.maxDD - method.minDD, 'days').toISOString();
+				//this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
+				//this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeFrom).add(method.maxDD - method.minDD, 'days').toISOString();
 				this.selectedServiceDetails.checked = cheapestMethod.selected;
 				this.selectedServiceDetails.currencySymbol = this.currencySymbol;
 
@@ -2165,6 +2180,7 @@
 				return JSON.stringify(this.selectedServiceDetails);
             },
 
+
             updateDeliveryOptions: function (methodId, dateOverride) {
                 var method = this._getDeliveryRateById(methodId);
                 this.selectedServiceDetails.serviceId = methodId;
@@ -2173,13 +2189,11 @@
                 this.selectedServiceDetails.carrier = method.carrierName;
                 this.selectedServiceDetails.shipping = method.price;
                 if (dateOverride) {
-                    this.selectedServiceDetails.expDeliveryDateStart = moment(dateOverride).toISOString();
-                    this.selectedServiceDetails.expDeliveryDateEnd = moment(dateOverride).toISOString();
+                    this.selectedServiceDetails.expDeliveryDate = moment.utc(dateOverride).toISOString();
                 }
                 else {
-                    this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
-                    this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeTo).add(method.maxDD - method.minDD, 'days').toISOString();
-                }
+                    this.selectedServiceDetails.expDeliveryDate = moment.utc(method.deliveryTimeTo).add(method.maxDD - method.minDD, 'days').toISOString();
+                }           
 
                 this.selectedServiceDetails.checked = true;
                 this.selectedServiceDetails.currencySymbol = this.currencySymbol;

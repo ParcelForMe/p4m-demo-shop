@@ -40,7 +40,7 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" override-droppoint-id={{}} preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -359,16 +359,17 @@
 
                 this.cartData.ShippingAmt = data.shipping;
                 this.cartData.ServiceName = data.service;
-                this.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
+                this.cartData.ServiceId = data.serviceId;
+                this.cartData.ExpDeliveryDate = data.expDeliveryDate;
 
-                var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDateEnd };
+                var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDate };
                 // got new shipping details so we need to get updated tax from the host
                 this.$.localApi.call('shippingDetails', null, shippingDetails, function (cartTotals) {
                     self.updCartTotals(cartTotals); // this updates tax
                     self.cartData.Carrier = data.carrier;
                     self.cartData.ShippingAmt = data.shipping;
                     self.cartData.ServiceName = data.service;
-                    self.cartData.ExpDeliveryDate = data.expDeliveryDateEnd;
+                    self.cartData.ExpDeliveryDate = data.expDeliveryDate;
                     if (data.collectionPoint) {
                         self.selectCollectPoint(data.provider, data.providerId, data.collectionPoint, data.deliveryAddress, function () {
                             self.updateP4mCart();
