@@ -503,6 +503,15 @@
                    debounce-duration="300">
         </iron-ajax>
 
+        <iron-ajax id="ajaxGeoCode"
+                   method="GET"
+                   handle-as="json"
+                   on-response="_handleGeoCodeResponse"
+                   on-error="_handleError"
+                   timeout="10000"
+                   debounce-duration="300">
+        </iron-ajax>
+
         <map-region-manager id="regionManager"></map-region-manager>
 
 		<div id="widgetContainer">
@@ -1092,8 +1101,7 @@
                 this.selectedServiceDetails.serviceCode = this.defaultCarrierCode;
                 this.selectedServiceDetails.carrier = this.defaultCarrier;
                 this.selectedServiceDetails.shipping = this.defaultPrice;
-                this.selectedServiceDetails.expDeliveryDateStart = startDate;
-                this.selectedServiceDetails.expDeliveryDateEnd = endDate;
+                this.selectedServiceDetails.expDeliveryDate = moment.utc(endDate).toISOString();
 
                 this.selectedServiceDetails.deliveryAddress = actualPost.Request.Order.Transit.Recipient.Location;
 
@@ -1110,13 +1118,30 @@
                 //New droppoint data
                 this._data = e.detail.response;
                 //this._data.droppoints = this._processDroppointList(this._data.droppoints);
-                this._dropPoints = this._dropPoints.concat(this._data.droppoints);
+                this._dropPoints = this._dropPoints.concat(this._data.droppoints).sort(this.sortByDistance);
                 this._processAllDroppoints();
                 this._findAllDeliveryDroppoints();
                 this._loadDroppointMarkers(this._data.droppoints);
 
+                if (this._dropPoints.length) {
+                    if (this.dropPointObserver) {
+                        this.dropPointObserver(this._dropPoints);
+                        this.dropPointObserver = null;
+                    }
+                }
+               
                 //TODO: Replace this with a method or event; we want to avoid referencing the View from logic code
                 //this.$$("#gfsMapCanvas-loading").classList.add('hidden'); // map search spinner
+            },
+
+            requestDropPointsByAddress: function (addressLine, postCode, callback) {
+                //zzzzz TODO: Get latitude and longitude, make box, request droppoints
+                var self = this;
+                this._geoCodeAddress(addressLine, postCode, function (data) {
+                    self.dropPointObserver = callback;
+                    var box = [[data.lng - 0.1, data.lat - 0.1], [data.lng + 0.1, data.lat + 0.1]];
+                    self._requestDroppointsByGeoBoxes([box]);
+                })
             },
 
             _handleGetLocationResponse: function(e) {
@@ -1674,6 +1699,25 @@
                 });
             },
 
+
+            _geoCodeAddress: function (streetAddress, postCode, callback) {
+                var addressStr = streetAddress + "," + postCode;
+                this.$.ajaxGeoCode.url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + addressStr + "&key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI"; //Make this a parameter
+                this._geoCodeCallback = callback;
+                this.$.ajaxGeoCode.generateRequest();
+            },
+
+            _handleGeoCodeResponse: function (e) {
+                console.log(e.detail.response);
+                var results = e.detail.response.results;
+                if (results && results.length) {
+                    var geoLocation = results[0].geometry.location;
+                    if (this._geoCodeCallback) {
+                        this._geoCodeCallback(geoLocation);
+                    }
+                }
+            },
+
             _mapMoved: function() {
                 var self = this;
                 if (self._moveMapTimeout) {
@@ -1760,7 +1804,7 @@
                 }
             },
 
-            _requestDroppointsByGeoBoxes: function (boxes) {
+            _requestDroppointsByGeoBoxes: function (boxes, callback) {
                 //TODO: Make an API component for this
                 this.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId + "&regions=" + JSON.stringify(boxes);
                 this.$.ajaxGetDroppoints.headers = this._computeHeader();
@@ -1779,6 +1823,8 @@
                 });
                 this._requestDroppointsByGeoBoxes(boxes);
             },
+
+
 
             _showDropPointDetails: function() {
                 this.mapHeight = this.$.gfsMapCanvas.clientHeight;
@@ -2096,7 +2142,8 @@
 				this.selectedServiceDetails.serviceCode = method.carrierCode;
 				this.selectedServiceDetails.carrier = method.carrierName;
 				this.selectedServiceDetails.shipping = method.price;
-				//this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
+			    //this.selectedServiceDetails.expDeliveryDateStart = moment(method.deliveryTimeFrom).toISOString();
+				this.selectedServiceDetails.expDeliveryDate = moment.utc(method.deliveryTimeTo).toISOString();
 				//this.selectedServiceDetails.expDeliveryDateEnd = moment(method.deliveryTimeFrom).add(method.maxDD - method.minDD, 'days').toISOString();
 				this.selectedServiceDetails.checked = cheapestMethod.selected;
 				this.selectedServiceDetails.currencySymbol = this.currencySymbol;

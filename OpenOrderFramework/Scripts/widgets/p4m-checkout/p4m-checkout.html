@@ -40,7 +40,7 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" override-droppoint-id={{}} preferred-droppoints="{{preferredDroppoints}}" default-postcode="" default-country=""></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" override-droppoint-id={{}} preferred-droppoints="{{}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -269,10 +269,8 @@
             onConsumerData: function(data) {
                 this.consumerData = data.Consumer;
                 if (this.$.gfsCheckoutWidget) {
-                    var p4mCollectPoints = this.consumerData.Addresses //TODO: Find out why DropPointProviderId is always 0                   
-                    .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude && /*item.DropPointProviderId &&*/ item.DropPointId) })
-                    .map(p4mDroppointToGfsDroppoint);
-                    this.$.gfsCheckoutWidget.setPreferredDroppoints(p4mCollectPoints);
+                    var p4mDropPoints = this._getPreferredDropPoints();
+                    this.$.gfsCheckoutWidget.setPreferredDroppoints(p4mDropPoints);
 
                     //If we have selected a droppoint, let GFS Checkout know.
                     var selectedDropPoint = this.getAddressById(this.cartData.AddressId);
@@ -280,14 +278,15 @@
                         this.$.gfsCheckoutWidget.chooseDropPointId(selectedDropPoint.DropPointId || selectedDropPoint.droppointId);
                     }
 
-                    var p4mConsumerAddresses = this.consumerData.Addresses
-                        .filter(function (item, i) { return (item.AddressType == "Address") }) //Only addresses, not droppoints
-                        .filter(function (item, i) { return (i < 3)}) //Up to 3 addresses
-                        .map(p4mAddressToGfsDroppoint);
-                        
+                    var p4mConsumerAddresses = this._getPreferredAddresses(3);                        
                     this.$.gfsCheckoutWidget.setConsumerAddresses(p4mConsumerAddresses);
-                } 
+                }
+
+                
+
             },
+
+
 
             onConsumerDataChange: function(newVal, oldVal) {
             },
@@ -350,8 +349,8 @@
                 }
             },
 
-            // the following methods relate to changes at the cart level (not the items):
-
+            //Take data from shipping selector representing selected shipping options
+            //For example output, see gfs-checkout event selectedservicechanged
             updateShipping: function (data) { //service, shipping, expDeliveryDate, collectPoint) {
                 if (this._updatingShipping) return;
                 this._updatingShipping = true;
@@ -559,6 +558,83 @@
                     //addressElement.detail.mode = "view";
                     self.$.addressList.showAsLoaded();
                 });
+            },
+
+            preselectAddress: function () {
+                //Select address based on preferences
+                if (!this.consumerData) throw "No consumer data"
+                else if (!this.cartData) throw "No cart data";
+                //Preferred address
+            },
+
+            selectPreferredAddress: function () {
+                //If there is a preferred delivery address, select that.
+                //PRECONDITION: Consumer data and Cart data exists
+                //Returns: addressId/null depending on success/failure
+                if (this.consumerData.PrefDeliveryAddressId) {
+                    this.set('cartData.AddressId', this.consumerData.PrefDeliveryAddressId);
+                    return this.consumerData.PrefDeliveryAddressId;
+                }
+                else {
+                    return null;
+                }
+            },
+
+            selectPreferredDroppoint: function() {
+                //If there are preferred droppoint addresses, select the nearest.
+                //PRECONDITION: Consumer data and Cart data exists
+                //Returns: addressId/null depending on success/failure
+
+                var preferredDroppoints = this._getPreferredDropPoints();
+
+                if (preferredDroppoints.length) {
+                    var nearestDroppoint = preferredDroppoints[0];
+                    this.set('cartData.AddressId', nearestDroppoint);
+                    return nearestDroppoint;
+                }
+                else {
+                    return null;
+                }
+            },
+
+            selectSupportedDropPoint: function (callback) {
+                //If there is a suitable shipping selector that can return droppoints, select the nearest to the preferred address
+                //PRECONDITION: Consumer data and Cart data exists
+                //Returns: addressId/null depending on success/failure
+
+                var self = this;
+                if (this.$.gfsCheckoutWidget) {
+                    //Ask GFS Checkout for the supported droppoint closest to the preferred address
+                    var preferredAddress = this.getAddressById(this.consumerData.PrefDeliveryAddressId);
+                    this.$.gfsCheckoutWidget.requestDropPointsByAddress(preferredAddress.Street1, preferredAddress.PostCode, function(dropPoints) {
+                        if (dropPoints && dropPoints.length) {
+                            var dropPoint = dropPoints[0];
+                            self.selectCollectPoint(dropPoint.providerName, dropPoint.providerId, dropPoint.droppointId, dropPoint.geoLocation, function () {
+                                self.updateP4mCart();
+                                callback(false);
+                            });
+                        }
+                        else {
+                            callback("No supported collection points found");
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            },
+
+            _getPreferredDropPoints: function() {
+                return this.consumerData.Addresses         
+                    .filter(function (item) { return (item.AddressType == "Collect" && item.Latitude && item.DropPointId) })
+                    .map(p4mDroppointToGfsDroppoint);
+            },
+
+            _getPreferredAddresses: function(maxItems) {
+                return this.consumerData.Addresses
+                    .filter(function (item, i) { return (item.AddressType == "Address") }) //Only addresses, not droppoints
+                    .filter(function (item, i) { return (i < maxItems||10) }) //Up to 3 addresses
+                    .map(p4mAddressToGfsDroppoint);
             },
 
             _onSelectTab: function (e) {
