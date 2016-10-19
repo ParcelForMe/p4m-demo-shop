@@ -503,15 +503,6 @@
                    debounce-duration="300">
         </iron-ajax>
 
-        <iron-ajax id="ajaxGeoCode"
-                   method="GET"
-                   handle-as="json"
-                   on-response="_handleGeoCodeResponse"
-                   on-error="_handleError"
-                   timeout="10000"
-                   debounce-duration="300">
-        </iron-ajax>
-
         <map-region-manager id="regionManager"></map-region-manager>
 
 		<div id="widgetContainer">
@@ -1135,12 +1126,17 @@
             },
 
             requestDropPointsByAddress: function (addressLine, postCode, callback) {
-                //zzzzz TODO: Get latitude and longitude, make box, request droppoints
+                //zzzzz
                 var self = this;
-                this._geoCodeAddress(addressLine, postCode, function (data) {
-                    self.dropPointObserver = callback;
-                    var box = [[data.lng - 0.1, data.lat - 0.1], [data.lng + 0.1, data.lat + 0.1]];
-                    self._requestDroppointsByGeoBoxes([box]);
+                this._geoCodeAddress(addressLine, postCode, function (err, data) {
+                    if (!err && data) {
+                        self.dropPointObserver = callback;
+                        var box = [[data.lng() - 0.1, data.lat() - 0.1], [data.lng() + 0.1, data.lat() + 0.1]];
+                        self._requestDroppointsByGeoBoxes([box]);
+                    }
+                    else {
+                        console.error("Failed to locate address");
+                    }
                 })
             },
 
@@ -1514,6 +1510,8 @@
                 window.map = self._map;
 
                 //=== Home marker
+                //TODO: Replace with call to geoCodeAddress
+
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode({
                     componentRestrictions: {
@@ -1702,20 +1700,24 @@
 
             _geoCodeAddress: function (streetAddress, postCode, callback) {
                 var addressStr = streetAddress + "," + postCode;
-                this.$.ajaxGeoCode.url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + addressStr + "&key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI"; //Make this a parameter
-                this._geoCodeCallback = callback;
-                this.$.ajaxGeoCode.generateRequest();
-            },
-
-            _handleGeoCodeResponse: function (e) {
-                console.log(e.detail.response);
-                var results = e.detail.response.results;
-                if (results && results.length) {
-                    var geoLocation = results[0].geometry.location;
-                    if (this._geoCodeCallback) {
-                        this._geoCodeCallback(geoLocation);
+                geocoder = new google.maps.Geocoder();
+                geocoder.geocode({
+                    componentRestrictions: {
+                        country: this.countryCode
+                    },
+                    address: addressStr
+                },
+                function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        if (results && results.length) {
+                            var geoLocation = results[0].geometry.location;
+                            callback(null, geoLocation);
+                        }
                     }
-                }
+                    else {
+                        callback("No results");
+                    }
+                });
             },
 
             _mapMoved: function() {
