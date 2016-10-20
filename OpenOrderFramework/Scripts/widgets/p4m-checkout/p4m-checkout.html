@@ -211,6 +211,7 @@
 
             ready: function()
             {
+                var self = this;
                 this.Tabs = { "ORDER": 0, "DELIVERY": 1, "PAYMENT": 2, "ADDRESS": 3 };
                 this._notUseGfsCheckout = !this.useGfsCheckout;
 
@@ -221,7 +222,10 @@
                     this.getLocalCart();
                 }
 
-                this.$.api.call('consumer', null, null, this.onConsumerData.bind(this));
+                this.$.api.call('consumer', null, null, function (data) {
+                    self.onConsumerData(data);
+                    self.preselectAddress();
+                });
             },
 
             debug: function(e) {
@@ -564,36 +568,77 @@
                 //Select address based on preferences
                 if (!this.consumerData) throw "No consumer data"
                 else if (!this.cartData) throw "No cart data";
+
+                var preferences = ["useMyDeliveryAddress", "useMyDropPoints", "useRetailerDropPoint"];
+                if (this.consumerData.DeliveryPreferences) {
+                    preferences = this.consumerData.DeliveryPreferences.split(',');
+                }
+
                 //Preferred address
+                var self = this;
+                var handlers = {
+                    "useMyDeliveryAddress": function (callback) { self.selectPreferredAddress(callback); },
+                    "useMyDropPoints": function (callback) { self.selectPreferredDroppoint(callback); },
+                    "useRetailerDropPoint": function (callback) { self.selectSupportedDropPoint(callback); }
+                };
+                var handlerArray = [];
+                preferences.forEach(function (pref) {
+                    handlerArray.push(handlers[pref]);
+                });
+
+                function runHandler(index) {
+                    handler = handlerArray[index || 0];
+                    if (handler) {
+                        console.log("Running handler", index);
+                        handler(function (err, data) {
+                            console.log("Handler returned", err);
+                            if (err) {
+                                runHandler(index+1);
+                            }
+                        });
+                    }
+                    else {
+                        console.log("Finished running handlers");
+                    }
+                }
+
+                runHandler(0);
+                 
             },
 
-            selectPreferredAddress: function () {
+            selectPreferredAddress: function (callback) {
                 //If there is a preferred delivery address, select that.
                 //PRECONDITION: Consumer data and Cart data exists
                 //Returns: addressId/null depending on success/failure
+  
                 if (this.consumerData.PrefDeliveryAddressId) {
                     this.set('cartData.AddressId', this.consumerData.PrefDeliveryAddressId);
-                    return this.consumerData.PrefDeliveryAddressId;
+                    callback(null, this.consumerData.PrefDeliveryAddressId);
                 }
                 else {
-                    return null;
+                    callback("No preferred address");
                 }
             },
 
-            selectPreferredDroppoint: function() {
+            selectPreferredDroppoint: function(callback) {
                 //If there are preferred droppoint addresses, select the nearest.
                 //PRECONDITION: Consumer data and Cart data exists
                 //Returns: addressId/null depending on success/failure
 
+                var self = this;
                 var preferredDroppoints = this._getPreferredDropPoints();
 
                 if (preferredDroppoints.length) {
                     var nearestDroppoint = preferredDroppoints[0];
-                    this.set('cartData.AddressId', nearestDroppoint);
-                    return nearestDroppoint;
+                    //this.set('cartData.AddressId', nearestDroppoint.droppointId);
+                    this.selectCollectPoint(nearestDroppoint.providerName, nearestDroppoint.providerId, nearestDroppoint.droppointId, nearestDroppoint.geoLocation, function () {
+                        self.updateP4mCart();
+                        callback(false);
+                    });
+                    callback(null, nearestDroppoint);
                 }
                 else {
-                    return null;
+                    callback("No preferred droppoints");
                 }
             },
 
