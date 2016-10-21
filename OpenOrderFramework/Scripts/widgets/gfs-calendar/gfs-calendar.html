@@ -189,7 +189,6 @@
             },
 
             _updateSelectedShippingMethodId: function () {
-                debugger;
                 this._updateUi();
             },
 
@@ -255,6 +254,7 @@
                         return item;
                     });
                     self.push("_calendar", today);
+
                 });
 
 
@@ -263,6 +263,10 @@
                 this._buckets.forEach(function (bucketTime) {
                     self.push("_deliveryLabels", minutesToTimeStr(bucketTime));
                 });
+
+                if (this._autoSelect) {
+                    this.autoSelect();
+                }
 
             },
 
@@ -284,8 +288,8 @@
 
             _filterBySelectedWeek: function (item) {
                 var from = (this.selectedWeek-1) * 7;
-                var to = this.selectedWeek * 7;;
-                return (item.dayIndex > from && item.dayIndex < to);
+                var to = this.selectedWeek * 7;
+                return (item.dayIndex >= from && item.dayIndex < to);
             },
 
             onDataChange: function () {
@@ -295,21 +299,56 @@
             onWeekChange: function () {
                 this._updateUi();
                                
-           },
+            },
 
-           selectShippingOptionCell: function (e) {
+            autoSelect: function () {
+                var nextDeliverySlot;
+                this._autoSelect = true; //If true, autoselection will trigger after initialisation. Ie, run this again later if the data isn't present yet.
+
+                //If the calendar has already loaded, select the option immediately
+                if (this._calendar && this._calendar[0]) {
+                    for (var d=0; d<this._calendar.length || !nextDeliverySlot; d++) {
+                        var day = this._calendar[d];
+                        if (day.slots && day.slots.length) {
+                            for (var s = 0; s < day.slots.length && !nextDeliverySlot; s++) {
+                                if (day.slots[s].id) {
+                                    nextDeliverySlot = day.slots[s];
+                                    break;
+                                }
+                            }
+                        }
+                        if (nextDeliverySlot) break;
+                    }
+                    if (nextDeliverySlot) {
+                        this.selectShippingOption(nextDeliverySlot.id, nextDeliverySlot.deliveryDate);
+                    }
+                    else {
+                        console.error("No calendar delivery slots available");
+                    }
+                        
+
+                   
+                }
+                
+            },
+
+            selectShippingOption: function (methodId, deliveryDateStr) {
                 //var shippingOption = e.currentTarget.getAttribute('data-shipping');
                 //shippingOption.selected = true;
-                this.selectedShippingMethodId = e.currentTarget.getAttribute('shipping-option-id');
-                this.selectedDeliveryDate = e.currentTarget.getAttribute('delivery-date');
+                this.selectedShippingMethodId = methodId;
+                this.selectedDeliveryDate = deliveryDateStr;
                 this.fire('select-shipping-option',
                     {
                         shippingMethodId: this.selectedShippingMethodId,
                         deliveryDate: this.selectedDeliveryDate
                     }
-               );
-               this._updateUi();
-           },
+                );
+                this._updateUi();
+            },
+
+            selectShippingOptionCell: function (e) {
+               this.selectShippingOption(e.currentTarget.getAttribute('shipping-option-id'), e.currentTarget.getAttribute('delivery-date'));
+            },
 
             _calendarShippingOptionIsSelected: function (item) {
                 var selectedDeliveryDate;

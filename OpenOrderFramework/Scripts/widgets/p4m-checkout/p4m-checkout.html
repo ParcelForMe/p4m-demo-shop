@@ -225,6 +225,7 @@
                 this.$.api.call('consumer', null, null, function (data) {
                     self.onConsumerData(data);
                     self.preselectAddress();
+                    self.preselectDeliveryMethod();
                 });
             },
 
@@ -380,6 +381,17 @@
                         });
                     }
                     else {
+                        //If no non-collection address specified, pick the preferred one
+                        var address = self.getAddressById(self.cartData.AddressId);
+                        if (!address || address !== 'Address') {
+                            if (self.consumerData.PrefDeliveryAddressId) {
+                                address = self.getAddressById(self.consumerData.PrefDeliveryAddressId);
+                                if (address) {
+                                    self.cartData.AddressId = address.Id;
+                                }
+                            }
+                        }                    
+
                         self.updateP4mCart();
                         self._updatingShipping = false;
                     }
@@ -389,7 +401,7 @@
 
             selectCollectPoint: function (providerName, providerId, collectPointId, collectPointAddress, callback) {
                 //Make API call to add invisible address
-                //TODO: Don't post until payment time
+                //Don't post until payment time
                 var self = this;
                 if (!collectPointId) {
                     console.error("No collectPointId");
@@ -454,20 +466,6 @@
             },
 
             onPaymentComplete: function () {
-                /*
-                if (this.queuedNewAddress) {
-                    var self = this;
-                    this.$.api.call("postAddress", null, this._queuedNewAddress, function (result) {
-                        self.cartData.AddressId = result.Address.Id;
-                        self.consumerData.Addresses.push(result.Address);
-                        //self.cartData.ServiceName = "Collection point";
-                        self.$.api.call('consumer', null, null, function (data) {
-                            self.onConsumerData.bind(self)(data);
-                            callback(result);
-                        });
-                    });
-                }*/
-
             },
 
             toggleDetailExpansion: function (expand) {
@@ -562,6 +560,19 @@
                     //addressElement.detail.mode = "view";
                     self.$.addressList.showAsLoaded();
                 });
+            },
+
+            preselectDeliveryMethod: function () {
+                //Select delivery details based on selected address and user's preferences
+                if (!this.consumerData) throw "No consumer data"
+                else if (!this.cartData) throw "No cart data";
+
+                //this.consumerData.PreferSoonestDelivery = true; //TODO: Remove. This is just here for testing.
+                if (this.consumerData.PreferSoonestDelivery) {
+                    if (this.$.gfsCheckoutWidget) {
+                        this.$.gfsCheckoutWidget.showPage_Calendar();
+                    }
+                }
             },
 
             preselectAddress: function () {
@@ -665,7 +676,7 @@
                     });
                 }
                 else {
-                    return false;
+                    callback("No shipping handler to get droppoints");
                 }
             },
 
