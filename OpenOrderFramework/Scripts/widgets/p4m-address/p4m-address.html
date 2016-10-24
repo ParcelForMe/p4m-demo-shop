@@ -48,7 +48,7 @@
                 </iron-page>
                 <iron-page>
                     <div class="card-panel">
-                        <div class="card-body">
+                        <div class="card-body card-edit">
                             <div class="address-form">
                                 <input is="iron-input" type="text" id="address-label" bind-value="{{addressData.Label}}" placeholder="Label, e.g. 'Home'" />
                                 <input is="iron-input" type="text" id="address-street-1" bind-value="{{addressData.Street1}}" placeholder="Street address" />
@@ -103,8 +103,7 @@
         }
         .address-actions a {
             color: black;
-            margin: 4px;
-            
+            margin: 4px;          
         }
 
         .address-content {
@@ -186,9 +185,15 @@
             flex-direction: row;
         }
 
-        .buttons {
+        .card-body.card-edit {
             display: flex;
             flex-direction: column;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: row;
+            margin: auto;
             padding: 4px;
         }
 
