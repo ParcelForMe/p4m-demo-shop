@@ -7,9 +7,11 @@
 
     <template>
         <div id="content">
-            <input is="iron-input" type="text" id="discountCode" bind-value="{{discountCode}}" placeholder="Discount code" />
-            <button on-click="sendCode">Apply</button>
-            <div id="p4mDiscountInputError" class="hidden">{{errorMsg}}</div>
+            <a href="#" on-click="show">Redeem a coupon</a>
+            <div id="drawer" class="hidden">
+                <input is="iron-input" type="text" id="discountCode"  on-keydown="_onKeyDown" bind-value="{{discountCode}}" placeholder="Discount code" />              
+                <div id="p4mDiscountInputError" class="hidden">{{errorMsg}}</div>
+            </div>
         </div>
         <p4m-api id="localApi" is-local="true"></p4m-api>
     </template>
@@ -24,6 +26,17 @@
             width: 90%;
             
         }
+        #content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content #drawer {
+            display: flex;
+            flex-direction: row;
+                
+        }
+
     </style>
 
     <script>
@@ -49,6 +62,27 @@
             {
 
             },
+            show: function() {
+                this.$.drawer.classList.remove("hidden");
+            },
+
+            _onKeyDown: function (e) {
+                //console.log(e);
+                if (e && e.key && e.key === 'Enter') {
+                    this._findPostcode();
+                }
+                else {
+                    this._delayedPostcodeSearch();
+                }
+            },
+
+            _delayedSend: function () {
+                if (this._sendTimeout) {
+                    window.clearTimeout(this._sendTimeout);
+                }
+                this._sendTimeout = window.setTimeout(this.sendCode.bind(this), 300);
+            },
+
             sendCode: function() {
                 this.$.localApi.call('applyDiscountCode', { discountCode: this.discountCode }, null, this.onResponse.bind(this));
             },
