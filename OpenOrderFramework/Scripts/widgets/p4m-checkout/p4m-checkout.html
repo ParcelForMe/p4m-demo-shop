@@ -40,7 +40,6 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" override-droppoint-id={{}} preferred-droppoints="{{}}" default-postcode="" default-country=""></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>

@@ -1319,6 +1319,7 @@
                 this.set('_consumerAddresses', addressList);
             },
 
+
             _processAllDroppoints: function () {
                 this._removeDupDropPoints();
                 this._addDropPointDeliveries();
@@ -1494,11 +1495,11 @@
                 //var postcode = document.getElementById('shipping:postcode').value; //Improve selection method
 
                 self._map = new google.maps.Map(self.$.gfsMapCanvas, mapOptions);
-                window.map = self._map;
+                window.map = self._map;            
 
                 //=== Home marker
                 //TODO: Replace with call to geoCodeAddress
-
+                /*
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode({
                     componentRestrictions: {
@@ -1528,6 +1529,7 @@
                         $("#gfsMapCanvas").append("<div style='color: #d60000; margin: 20px auto; text-align: center;'> Postcode <strong>" + self.initialAddress + "</strong> return zero restults </div>");
                     }
                 });
+                */
 
                 //TODO: Take a close look at this. Do we need it?
                 /*google.maps.event.addListener(self._map, 'bounds_changed', function() {
@@ -1837,6 +1839,7 @@
                     this._loadDroppointMarkers(this._dropPoints);                                                                           
                     this._resetMap(this._map);
                     this._fixMapMarker();
+                    this.panToDefaultLocation();
 
                 }
                 else {
@@ -1995,6 +1998,19 @@
                     //handleLocationError(false, infoWindow, GMap.getCenter());
                 }
             },
+
+            panToDefaultLocation: function() {
+                if (this._consumerAddresses.length) {
+                    if (this._consumerAddresses[0].geoLocation.coordinates.latitude && this._consumerAddresses[0].geoLocation.coordinates.longitude) {
+                        var geoLocation = {
+                            lat: this._consumerAddresses[0].geoLocation.coordinates.latitude,
+                            lng: this._consumerAddresses[0].geoLocation.coordinates.longitude
+                        };
+                        this._panToGeoLocation(geoLocation);
+                    }
+                }
+            },
+
 
             _makeDateStr: function(d) {
                 function pad(n, padSize) {
