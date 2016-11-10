@@ -535,6 +535,7 @@ namespace OpenOrderFramework.Controllers
                                     },
                                     Postcode = ViewBag.InitialPostCode,// "SO40 7JF", //ViewBag.InitialPostCode,
                                     town = "Soho",
+                                    addressLineCollection = new string[] { "AddressLine" },
                                 },
                                 contactDetails = new
                                 {
@@ -542,6 +543,9 @@ namespace OpenOrderFramework.Controllers
                                 },
                                 Person = new
                                 {
+                                    firstName = "First",
+                                    lastName = "Last",
+                                    title = "Title"
                                 }
                                 
                             }
