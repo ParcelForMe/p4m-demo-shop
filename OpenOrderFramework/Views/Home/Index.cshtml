@@ -3,13 +3,18 @@
 }
 <link rel="import" href="/Scripts/widgets/p4m-register/p4m-register.html">
 
-<div class="jumbotron">
-   
+<div style="display: flex; flex-direction: row; justify-content: space-between">
+    <div class="jumbotron" style="background-image: none">       
         <h1>Isla Clothing</h1>
         <p class="lead">This is simply a test shop</p>
         <p><button type="button" class="btn btn-primary btn-large" onclick="location.href='@Url.Action("Index", "Items")'">Shop Now &raquo;</button></p>
-   
+    </div>
+    <!-- ***** P4M ***** -->
+    <p4m-register></p4m-register>
+    <!-- ***** P4M ***** -->
+    
 </div>
+
 <div id="myCarousel" class="carousel slide" data-ride="carousel">
     <!-- Indicators -->
     <ol class="carousel-indicators">
@@ -48,10 +53,6 @@
         <span class="sr-only">Next</span>
     </a>
 </div>
-
-<!-- ***** P4M ***** -->
-<p4m-register></p4m-register>
-<!-- ***** P4M ***** -->
 
 <div class="row">
     <div class="col-md-4">
