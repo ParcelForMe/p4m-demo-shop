@@ -169,7 +169,7 @@ namespace OpenOrderFramework.Controllers
 
             var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
             var tokenResponse = await client.RequestAuthorizationCodeAsync(code, P4MConstants.LocalCallbackUrl);
-            if (ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
+            if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
             {
                 //var parsedToken = ParseJwt(response.AccessToken);
                 this.Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
