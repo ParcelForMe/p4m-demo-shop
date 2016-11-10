@@ -530,12 +530,11 @@ namespace OpenOrderFramework.Controllers
                                 {
                                     CountryCode = new
                                     {
-                                        Code = "GB", //ViewBag.InitialCountryCode, //"GB",
+                                        Code = ViewBag.InitialCountryCode, //"GB",
                                         Encoding = "ccISO_3166_1_Alpha2"
                                     },
                                     Postcode = ViewBag.InitialPostCode,// "SO40 7JF", //ViewBag.InitialPostCode,
                                     town = "Soho",
-                                    addressLineCollection = new string[] { "AddressLine1" },
                                 },
                                 contactDetails = new
                                 {
@@ -543,9 +542,6 @@ namespace OpenOrderFramework.Controllers
                                 },
                                 Person = new
                                 {
-                                    firstName = "FirstName",
-                                    lastName = "LastName",
-                                    title = "Mr"
                                 }
                                 
                             }
