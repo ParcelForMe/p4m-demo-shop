@@ -61,11 +61,14 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Value = token;
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
-            ViewBag.AccessToken = token;
+            ViewBag.AccessToken = token;          
+            ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
+            ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
+            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;//p4mDefaultPostCode
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
-
             ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
+
 
             // Return the view
             return View("P4MCheckout");
@@ -527,11 +530,24 @@ namespace OpenOrderFramework.Controllers
                                 {
                                     CountryCode = new
                                     {
-                                        Code = "GB",
+                                        Code = "GB", //ViewBag.InitialCountryCode, //"GB",
                                         Encoding = "ccISO_3166_1_Alpha2"
                                     },
-                                    Postcode = "SO40 7JF"
+                                    Postcode = ViewBag.InitialPostCode,// "SO40 7JF", //ViewBag.InitialPostCode,
+                                    town = "Soho",
+                                    addressLineCollection = new string[] { "AddressLine1" },
                                 },
+                                contactDetails = new
+                                {
+                                    Email = ""
+                                },
+                                Person = new
+                                {
+                                    firstName = "FirstName",
+                                    lastName = "LastName",
+                                    title = "Mr"
+                                }
+                                
                             }
                         },
                         Value = new
@@ -543,7 +559,9 @@ namespace OpenOrderFramework.Controllers
                     RequestedDeliveryTypes = new string[] { "dmDropPoint", "dmStandard" },
                     Session = new  // TODO: Remove this when the Open ID connection is in place
                     {
-                        APIKeyId = "CL-4CE92613-89A6-4248-A573-A9A7333E6A06"
+                        APIKeyId = "CL-4CE92613-89A6-4248-A573-A9A7333E6A06",
+                        sessionID = ""
+
                     }
                 }
             };
