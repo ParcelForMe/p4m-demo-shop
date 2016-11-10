@@ -100,7 +100,6 @@
                 if (this.hideImage) this.topClass += " hide-image";
                 if (this.hideName) this.topClass += " hide-name";
 
-                //window.addEventListener('p4m_getConsumerDetails', this.onProfile.bind(this));
                 window.addEventListener('p4m_consumer', this.onProfileData.bind(this));
                 this.load();
 
@@ -109,8 +108,11 @@
             load: function() {
 
                 //Try to read all data from cookies first
-                this._profilePicUrl = this.$.p4mAvatarCookie.readCookie();
-                if (this._profilePicUrl === "") this._profilePicUrl = null;
+                var picUrl = this.$.p4mAvatarCookie.readCookie();
+                if (picUrl === "")
+                    this._profilePicUrl = null;
+                else
+                    this._profilePicUrl = unescape(picUrl);
                 this._profileName = this.$.p4mGivenNameCookie.readCookie();
 
                 //Check to see if the user is logged in

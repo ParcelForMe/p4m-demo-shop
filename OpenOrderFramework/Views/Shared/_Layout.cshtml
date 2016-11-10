@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using OpenOrderFramework.ViewModels
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -59,7 +60,7 @@
                         </li>
                     </ul>
 
-                    @Html.Partial("_LoginPartial")
+                    @Html.Partial("_LoginPartial", new P4MLoginViewModel())
 
                 </div>
             </div>
