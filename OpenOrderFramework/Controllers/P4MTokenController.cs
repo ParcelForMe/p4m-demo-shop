@@ -18,43 +18,28 @@ using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
 using System.Net.Http.Formatting;
 using System.Linq;
+using OpenOrderFramework.ViewModels;
 
 namespace OpenOrderFramework.Controllers
 {
     public static class P4MConstants
     {
-        //public const string ClientId = "p4m-login-test";
-        //public const string ClientSecret = "123456";
-        //public const string CredClientId = "p4m-login-test";
-        //public const string CredClientSecret = "123456";
-        public const string ClientId = "10004";
-        public const string ClientSecret = "secret";
-        public const string CredClientId = "10004";
-        public const string CredClientSecret = "secret";
-        public const string AppMode = "dev";
+        //public const string ClientId = "10004";
+        //public const string ClientSecret = "secret";
+        //public const string AppMode = "dev";
 
-        public const string ClientGuestId = "codeclient_guest";
-
-        //public const string BaseAddress = "https://local.parcelfor.me:44333/core";
-        public const string BaseAddress = "https://"+AppMode+".parcelfor.me:44333";
-        public const string BaseApiAddress = "https://" + AppMode + ".parcelfor.me:44321/api/v2/";
-        //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
-        //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
-        public const string BaseIdSrvAddress = BaseAddress + "/ui/";
-        public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
-
-        public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
-        public const string LogoutEndpoint = BaseAddress + "/connect/endsession";
-        public const string TokenEndpoint = BaseAddress + "/connect/token";
-        public const string UserInfoEndpoint = BaseAddress + "/connect/userinfo";
-        public const string IdentityTokenValidationEndpoint = BaseAddress + "/connect/identitytokenvalidation";
-        public const string SetPasswordUrl = BaseAddress + "/resetPassword?userId={0}&code={1}&signin=register&clientId={2}";
+        //public const string BaseAddress = "https://"+AppMode+".parcelfor.me:44333";
+        //public const string BaseApiAddress = "https://" + AppMode + ".parcelfor.me:44321/api/v2/";
+        //public const string IdSrvUrl = BaseAddress + "/ui/";
+        //public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
+        //public const string TokenEndpoint = BaseAddress + "/connect/token";
     }
 
     public class P4MTokenController : Controller
     {
         ApplicationDbContext storeDB = new ApplicationDbContext();
         static HttpClient _httpClient = new HttpClient();
+        static P4MUrls _urls = new P4MUrls();
         public P4MTokenController()
         {
         }
@@ -111,7 +96,7 @@ namespace OpenOrderFramework.Controllers
                 var authUser = AuthenticationManager.User;
                 if (authUser == null || !authUser.Identity.IsAuthenticated)
                 {
-                    result.RedirectUrl = P4MConstants.BaseIdSrvAddress + "signup";
+                    result.RedirectUrl = _urls.IdSrvUrl + "signup";
                 }
                 else
                 {
@@ -119,7 +104,7 @@ namespace OpenOrderFramework.Controllers
                     if (_clientToken == null)
                     {
                         // get our client token - this can be cached
-                        var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
+                        var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
                         _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
                     }
 
@@ -132,7 +117,7 @@ namespace OpenOrderFramework.Controllers
                     _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     var registerMessage = new ConsumerAndCartMessage { Consumer = consumer, Cart = cart };
                     var content = new ObjectContent<ConsumerAndCartMessage>(registerMessage, new JsonMediaTypeFormatter());
-                    var apiResult = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "registerConsumer", content);
+                    var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "registerConsumer", content);
                     // check the result
                     apiResult.EnsureSuccessStatusCode();
                     var messageString = await apiResult.Content.ReadAsStringAsync();
@@ -140,12 +125,12 @@ namespace OpenOrderFramework.Controllers
                     if (!registerResult.Success)
                     {
                         if (registerResult.Error.Contains("registered"))
-                            result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
+                            result.RedirectUrl = $"{_urls.IdSrvUrl}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
                         else
-                            result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
+                            result.RedirectUrl = $"{_urls.IdSrvUrl}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
                     }
                     else
-                        result.RedirectUrl = $"{P4MConstants.BaseIdSrvAddress}registerConsumer/{registerResult.ConsumerId}";
+                        result.RedirectUrl = $"{_urls.IdSrvUrl}registerConsumer/{registerResult.ConsumerId}";
                 }
             }
             catch (Exception e)
@@ -167,8 +152,8 @@ namespace OpenOrderFramework.Controllers
                 throw new Exception("Invalid state returned from ID server");
             this.Response.Cookies["p4mState"].Expires = DateTime.UtcNow;
 
-            var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
-            var tokenResponse = await client.RequestAuthorizationCodeAsync(code, P4MConstants.LocalCallbackUrl);
+            var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
+            var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
             if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
             {
                 //var parsedToken = ParseJwt(response.AccessToken);
@@ -418,7 +403,7 @@ namespace OpenOrderFramework.Controllers
             // get the consumer's details from P4M. 
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var result = await _httpClient.GetAsync(P4MConstants.BaseApiAddress + "consumer?checkHasOpenCart=true");
+            var result = await _httpClient.GetAsync(_urls.BaseApiAddress + "consumer?checkHasOpenCart=true");
             var messageString = await result.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
         }
@@ -429,7 +414,7 @@ namespace OpenOrderFramework.Controllers
             _httpClient.SetBearerToken(token);
             string json = "{\"LocalId\":\""+id+"\"}";
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var result = await _httpClient.PostAsync(P4MConstants.BaseApiAddress + "consumerExtras", content);
+            var result = await _httpClient.PostAsync(_urls.BaseApiAddress + "consumerExtras", content);
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<P4MBaseMessage>(messageString);
             if (!message.Success)
@@ -446,8 +431,8 @@ namespace OpenOrderFramework.Controllers
 
             var parameters = new TokenValidationParameters
             {
-                ValidAudience = P4MConstants.ClientId,
-                ValidIssuers = new List<string> { P4MConstants.BaseAddress, "https://parcelfor.me" },
+                ValidAudience = _urls.ClientId,
+                ValidIssuers = new List<string> { _urls.BaseIdSrvUrl, "https://parcelfor.me" },
                 IssuerSigningToken = new X509SecurityToken(cert)
             };
 

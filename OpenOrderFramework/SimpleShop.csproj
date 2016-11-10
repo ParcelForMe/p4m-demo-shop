@@ -239,11 +239,10 @@
     <Compile Include="Models\P4MMessages.cs" />
     <Compile Include="Models\P4MModels.cs" />
     <Compile Include="Models\ShoppingCart.cs" />
-    <Compile Include="p4mUrls.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ViewModels\OrderDateGroup.cs" />
-    <Compile Include="ViewModels\P4MLoginViewModel.cs" />
+    <Compile Include="Models\P4MUrls.cs" />
     <Compile Include="ViewModels\ShoppingCartRemoveViewModel.cs" />
     <Compile Include="ViewModels\ShoppingCartViewModel.cs" />
   </ItemGroup>
