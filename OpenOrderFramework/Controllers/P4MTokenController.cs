@@ -23,23 +23,23 @@ namespace OpenOrderFramework.Controllers
 {
     public static class P4MConstants
     {
-        //public const string ClientId = "p4m-login-test";
-        //public const string ClientSecret = "123456";
-        //public const string CredClientId = "p4m-login-test";
-        //public const string CredClientSecret = "123456";
+        public const string ClientId = "p4m-login-test";
+        public const string ClientSecret = "123456";
+        public const string CredClientId = "p4m-login-test";
+        public const string CredClientSecret = "123456";
+        /*
         public const string ClientId = "10004";
         public const string ClientSecret = "secret";
         public const string CredClientId = "10004";
-        public const string CredClientSecret = "secret";
-        public const string AppMode = "dev";
+        public const string CredClientSecret = "secret";*/
+        public const string AppMode = "test";
+        public const string ApiUrlPrefix = "/core";
 
         public const string ClientGuestId = "codeclient_guest";
 
-        //public const string BaseAddress = "https://local.parcelfor.me:44333/core";
-        public const string BaseAddress = "https://"+AppMode+".parcelfor.me:44333";
+        public const string BaseAddress = "https://" + AppMode + ".parcelfor.me:44333" + ApiUrlPrefix;
         public const string BaseApiAddress = "https://" + AppMode + ".parcelfor.me:44321/api/v2/";
-        //public const string BaseAddress = "https://dev.parcelfor.me:44333/core";
-        //public const string BaseApiAddress = "https://dev.parcelfor.me:44321/api/v2/";
+
         public const string BaseIdSrvAddress = BaseAddress + "/ui/";
         public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
 
@@ -166,7 +166,7 @@ namespace OpenOrderFramework.Controllers
             if (!state.Equals(stateFromCookie, StringComparison.Ordinal))
                 throw new Exception("Invalid state returned from ID server");
             this.Response.Cookies["p4mState"].Expires = DateTime.UtcNow;
-
+    
             var client = new OAuth2Client(new Uri(P4MConstants.TokenEndpoint), P4MConstants.ClientId, P4MConstants.ClientSecret);
             var tokenResponse = await client.RequestAuthorizationCodeAsync(code, P4MConstants.LocalCallbackUrl);
             if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
@@ -231,8 +231,10 @@ namespace OpenOrderFramework.Controllers
             this.Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
             this.Response.Cookies["p4mDefaultPostCode"].Value = consumer.PrefDeliveryAddress?.PostCode;
             this.Response.Cookies["p4mDefaultPostCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
-            this.Response.Cookies["p4mDefaultCountryCode"].Value = consumer.PrefDeliveryAddress?.CountryCode;
+            this.Response.Cookies["p4mDefaultCountryCode"].Value = (consumer.PrefDeliveryAddress?.CountryCode != null)?consumer.PrefDeliveryAddress?.CountryCode:"GB";
             this.Response.Cookies["p4mDefaultCountryCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
+            this.Response.Cookies["p4mInitialAddress"].Value = consumer.PrefDeliveryAddress?.Street1 + " " + consumer.PrefDeliveryAddress?.PostCode + " " + consumer.PrefDeliveryAddress?.CountryCode;
+            this.Response.Cookies["p4mInitialAddress"].Expires = DateTime.UtcNow.AddYears(1);
 
             // is there a logged in user already?
             string authUserId = null;
