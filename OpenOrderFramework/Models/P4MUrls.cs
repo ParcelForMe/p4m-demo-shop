@@ -4,7 +4,7 @@
     {
         public P4MUrls()
         {
-            AppMode = "local";
+            AppMode = "dev";
             P4MUrl = $"https://{AppMode}.parcelfor.me";
             BaseIdSrvUrl = $"{P4MUrl}:44333";
             BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
