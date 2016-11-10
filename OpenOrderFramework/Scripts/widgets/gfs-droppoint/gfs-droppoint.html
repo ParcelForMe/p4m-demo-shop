@@ -606,10 +606,8 @@ div, span, h3, ul, tr {
 							collectionSlot.day = DOW_NAMES[collectionSlot.collectionDateTime.getDay()];
 
 							collectionSlot.timeSlots.forEach(function (timeSlot) {
-								timeSlot.fromDateTime = self._getUtcTime(new Date(timeSlot.from));
-								timeSlot.toDateTime = self._getUtcTime(new Date(timeSlot.to));
-								timeSlot.fromTime = self._getTimeStr(timeSlot.fromDateTime);
-								timeSlot.toTime = self._getTimeStr(timeSlot.toDateTime);
+							    timeSlot.fromTime = timeSlot.from; //self._getTimeStr(timeSlot.fromDateTime);
+							    timeSlot.toTime = timeSlot.to; //self._getTimeStr(timeSlot.toDateTime);
 							});
 								
 							if (collectionSlot.timeSlots.length > 0) {
