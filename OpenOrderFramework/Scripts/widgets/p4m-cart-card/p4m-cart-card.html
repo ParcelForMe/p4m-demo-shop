@@ -1,6 +1,7 @@
 ﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-input/iron-input.html" />
 <link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+<link rel="import" href="../../Lib/paper-input/paper-input.html" />
 
 <dom-module id="p4m-cart-card">
 
@@ -17,8 +18,7 @@
             </div>
 
             <div id="quantity" class="card-panel">
-                <label for="qty">Qty</label>
-                <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]" type="text" id="qty" bind-value="{{cartItemData.Qty}}" />
+                <paper-input label="Qty" _is="iron-input" prevent-invalid-input allowed-pattern="[0-9]" type="text" id="qty" bind-value="{{cartItemData.Qty}}" value="{{cartItemData.Qty}}" />
             </div>
 
             <div id="wishlist" class="card-panel hidden">
@@ -69,9 +69,14 @@
             width: 90%;
             margin: auto;
         }
+
+        #qty label {
+            margin: auto;
+        }
         .card-panel {
             padding: 4px;
         }
+
         #actions {
             width: 80%;
             margin: auto;

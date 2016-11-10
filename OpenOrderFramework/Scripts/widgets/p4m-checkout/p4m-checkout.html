@@ -40,7 +40,7 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" override-droppoint-id={{}} preferred-droppoints="{{}}" default-postcode="" default-country=""></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}"></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -61,8 +61,7 @@
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" new-drop-point="{{_queuedNewAddress}}" on-payment-complete="onPaymentComplete" on-request-payment-method="goToPaymentMethods" use-paypal="{{usePaypal}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
                     <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>    
-                    <p4m-discount-list cart-data="{{cartData}}" on-discountdelete="onDiscountDelete"></p4m-discount-list>              
-                </div>
+                 </div>
             </div>           
         </div>
 
@@ -75,6 +74,7 @@
         #container {
             width: 100%;
             margin: auto;
+            padding-bottom: 8px;
         }
         #panelContainer {
             display: flex;
@@ -120,6 +120,7 @@
 
         #detailPanel.p4m-panel {
             width: 67%;
+            padding-right: 8px;
         }
         #summaryPanel.p4m-panel {
             width: 33%;

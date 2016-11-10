@@ -580,12 +580,14 @@
                                         <paper-spinner active id="map-spinner"></paper-spinner>
                                     </div>
                                 </div>
-                                <div class="preferredDroppoints">
-                                    <h3>My Collection Points</h3>
-                                    <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
-                                        <gfs-droppoint click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
-                                    </template>
-                                </div>
+                                <template dom-if="{{_preferredDroppoints.length}}">
+                                    <div class="preferredDroppoints">
+                                        <h3>My Collection Points</h3>
+                                        <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
+                                            <gfs-droppoint click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
+                                        </template>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -732,7 +734,7 @@
 
                 calendarDeliveryTitle: {
                     type: String,
-                    value: 'Calendar Delivery'
+                    value: 'Choose your day'
                 },
 
                 calendarDayPrompt: {
@@ -1145,6 +1147,7 @@
 
                 if (this.useDropPoints) {
                     this._makeMap();
+                    this._findPostcode();
                     this._findAllDeliveryDroppoints();
                     this._processAllDroppoints();
                 }
@@ -1319,6 +1322,7 @@
                 this.set('_consumerAddresses', addressList);
             },
 
+
             _processAllDroppoints: function () {
                 this._removeDupDropPoints();
                 this._addDropPointDeliveries();
@@ -1449,7 +1453,7 @@
                 self._infoWindow = new google.maps.InfoWindow({
                     content: self.$.droppoint_info
                 });
-                //var position = new google.maps.LatLng(self.startingLatitude, self.startingLongitude);
+                var position = new google.maps.LatLng(37, 0);
 
                 // map options
                 var mapOptions = {
@@ -1459,7 +1463,7 @@
                     minZoom: self.startingZoomLevel - 2,
 
                     // initial center position
-                    //center: position,
+                    center: position,
 
                     // type of map (ROADMAP, SATELLITE, TERRAIN, HYBRID)
                     mapTypeId: google.maps.MapTypeId.TERRAIN,
@@ -1494,11 +1498,11 @@
                 //var postcode = document.getElementById('shipping:postcode').value; //Improve selection method
 
                 self._map = new google.maps.Map(self.$.gfsMapCanvas, mapOptions);
-                window.map = self._map;
+                window.map = self._map;            
 
                 //=== Home marker
                 //TODO: Replace with call to geoCodeAddress
-
+                /*
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode({
                     componentRestrictions: {
@@ -1528,6 +1532,7 @@
                         $("#gfsMapCanvas").append("<div style='color: #d60000; margin: 20px auto; text-align: center;'> Postcode <strong>" + self.initialAddress + "</strong> return zero restults </div>");
                     }
                 });
+                */
 
                 //TODO: Take a close look at this. Do we need it?
                 /*google.maps.event.addListener(self._map, 'bounds_changed', function() {
@@ -1628,7 +1633,7 @@
                     window.clearTimeout(this._searchTimeout);
                 }
                 var self = this;
-                var address = this.$.droppointAddress.value;
+                var address = this.$.droppointAddress.value || this.postCode;
                 self.initialAddress = address;
                 //self.$$("#gfsMapCanvas-loading").classList.remove('hidden');
 
@@ -1837,6 +1842,7 @@
                     this._loadDroppointMarkers(this._dropPoints);                                                                           
                     this._resetMap(this._map);
                     this._fixMapMarker();
+                    this.panToDefaultLocation();
 
                 }
                 else {
@@ -1995,6 +2001,19 @@
                     //handleLocationError(false, infoWindow, GMap.getCenter());
                 }
             },
+
+            panToDefaultLocation: function() {
+                if (this._consumerAddresses.length) {
+                    if (this._consumerAddresses[0].geoLocation.coordinates.latitude && this._consumerAddresses[0].geoLocation.coordinates.longitude) {
+                        var geoLocation = {
+                            lat: this._consumerAddresses[0].geoLocation.coordinates.latitude,
+                            lng: this._consumerAddresses[0].geoLocation.coordinates.longitude
+                        };
+                        this._panToGeoLocation(geoLocation);
+                    }
+                }
+            },
+
 
             _makeDateStr: function(d) {
                 function pad(n, padSize) {

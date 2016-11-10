@@ -7,8 +7,10 @@
 
     <template>
         <div id="content">
-            <input is="iron-input" type="text" id="discountCode" bind-value="{{discountCode}}" placeholder="Discount code" />
-            <button on-click="sendCode">Apply</button>
+            <a href="#" id="prompt" on-click="show">Redeem a coupon</a>
+            <div id="drawer" class="hidden">
+                <input is="iron-input" type="text" id="discountCode"  on-keydown="_onKeyDown" bind-value="{{discountCode}}" placeholder="Discount code" />                            
+            </div>
             <div id="p4mDiscountInputError" class="hidden">{{errorMsg}}</div>
         </div>
         <p4m-api id="localApi" is-local="true"></p4m-api>
@@ -16,14 +18,31 @@
 
     <style>
         #p4mDiscountInputError {
-            padding: 4px;
+            padding: 8px;
             color: red;
+        }  
+
+        #p4mDiscountInputError.success {
+            color: green;
         }
+          
         #content {
-            margin: auto;
-            width: 90%;
+
+            display: flex;
+            flex-direction: column;
+            margin: 4px 4px 8px 14px;
             
         }
+
+        #content #drawer {
+            display: flex;
+            flex-direction: row;
+                
+        }
+
+
+
+
     </style>
 
     <script>
@@ -34,9 +53,6 @@
             properties: {
                 discountCode: {
                     type: String
-                },
-                cartData: {
-                    type: Object
                 },
                 errorMsg: {
                     type: String
@@ -49,27 +65,63 @@
             {
 
             },
+            show: function() {
+                this.$.drawer.classList.remove("hidden");
+                this.$.prompt.classList.add("hidden");
+                this.showError("");
+            },
+
+            hide: function () {
+                this.$.drawer.classList.add("hidden");
+                //this.$.prompt.classList.remove("hidden");
+            },
+
+            _onKeyDown: function (e) {
+                //console.log(e);
+                if (e && e.key && e.key === 'Enter') {
+                    this.sendCode();
+                }
+                else {
+                    this._delayedSend();
+                }
+            },
+
+            _delayedSend: function () {
+                if (this._sendTimeout) {
+                    window.clearTimeout(this._sendTimeout);
+                }
+                this._sendTimeout = window.setTimeout(this.sendCode.bind(this), 1000);
+            },
+
             sendCode: function() {
                 this.$.localApi.call('applyDiscountCode', { discountCode: this.discountCode }, null, this.onResponse.bind(this));
             },
             onResponse: function (e) {
                 if (e.Success == false) {
-                    this.showError(e.Error);
+                    this.showError("This isn't a valid discount code");
+                    //this.showError(e.Error);
                 }
                 else {
-                    this.showError(null);
+                    this.showError("Discount applied", true);
+                    this.hide();
                     this.fire('discount', e);
                     this.discountCode = null;
                 }
             },
-            showError(err) {
-                if (err) {
+            showError(msg, success) {
+                if (msg) {
                     this.$.p4mDiscountInputError.classList.remove('hidden')
                 }
                 else {
                     this.$.p4mDiscountInputError.classList.add('hidden')
                 }
-               this.errorMsg = err;
+                if (success) {
+                    this.$.p4mDiscountInputError.classList.add('success')
+                }
+                else {
+                    this.$.p4mDiscountInputError.classList.add('error')
+                }
+               this.errorMsg = msg;
             }
 
         });
