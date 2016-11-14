@@ -6,8 +6,16 @@
     <template>
         <div id="container">
             Thanks for ordering from us <span class="p4m-label">{{consumerData.GivenName}}</span>.
-            <template is="dom-if" if="{{cartData.ExpDeliveryDate}}">
-                We'll deliver your order to your {{addressTypeStr}}: <span class="p4m-label">{{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}<span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via <span class="p4m-label">{{deliveryMethodStr}} delivery</span>.
+
+            <template is="dom-if" if="{{!cartData.AddressId}}">
+                You have not yet chosen an address. <a on-click="requestAddress">Click here to choose one.</a>
+            </template>
+
+            <template is="dom-if" if="{{_hasDeliveryDetails()}}">
+                We'll deliver your order to your {{addressTypeStr}}:
+                <span class="p4m-label">{{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}
+                <span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via
+                <span class="p4m-label">{{deliveryMethodStr}} delivery</span>.
             </template>
             <template is="dom-if" if="{{isLoading}}">
                 <p>Getting your delivery details now...</p>
@@ -76,6 +84,7 @@
                     this.deliveryDatePrefixStr = this._expectedDeliveryDatePrefixStr(this.cartData.ExpDeliveryDate);
                     this.deliveryDateStr = this._expectedDeliveryDateStr(this.cartData.ExpDeliveryDate);
                     this.deliveryMethodStr = this.cartData.ServiceName;
+
                 }
                 else {
                     this.isLoading = true;
@@ -84,13 +93,16 @@
 
             _addressById: function(id) {
                 var foundAddress = null;
-                for (var i = 0; i < this.consumerData.Addresses.length; i++) {
-                    var address = this.consumerData.Addresses[i];
-                    if (address.Id == this.cartData.AddressId) {
-                        foundAddress = address;
-                        break;
+                if (this.consumerData && this.consumerData.Addresses && this.consumerData.Addresses.length) {
+                    for (var i = 0; i < this.consumerData.Addresses.length; i++) {
+                        var address = this.consumerData.Addresses[i];
+                        if (address.Id == this.cartData.AddressId) {
+                            foundAddress = address;
+                            break;
+                        }
                     }
                 }
+
                 return foundAddress;            
             },
 
@@ -115,7 +127,7 @@
                 }
             },
 
-            
+           
             _expectedDeliveryDateStr: function (dateStr) {
                 if (dateStr) {                                   
                     return moment(new Date(dateStr)).format('ddd Do MMM YYYY');
@@ -134,7 +146,16 @@
                     return ". ";
                 }
 
+            },
+
+            _hasDeliveryDetails: function() {
+                return (this.cartData && this.cartData.ExpDeliveryDate && this.cartData.AddressId);
+            },
+
+            requestAddress: function () {
+                this.fire('request-address');
             }
+
 
 
         });

@@ -57,7 +57,7 @@
                     </iron-pages>                 
                 </div>
                 <div id="summaryPanel" class="p4m-panel smallSummary">
-                    <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}"></p4m-order-text>
+                    <p4m-order-text cart-data="{{cartData}}" consumer-data="{{consumerData}}" on-request-address="goToAddresses"></p4m-order-text>
                     <p4m-purchase id="p4mPurchase" cart-data="{{cartData}}" new-drop-point="{{_queuedNewAddress}}" on-payment-complete="onPaymentComplete" on-request-payment-method="goToPaymentMethods" use-paypal="{{usePaypal}}" selected-card="{{selectedCard}}" use-paypal="true"></p4m-purchase>
                     <p4m-order-summary id="orderSummary" cart-data="{{cartData}}"></p4m-order-summary>  
                     <p4m-discount-input on-discount="onDiscount"></p4m-discount-input>    
@@ -732,9 +732,12 @@
             goToPaymentMethods: function () {
                 this.selectedTab = this.Tabs.PAYMENT;
                 this.$.cardList.addNewCard();
+            },
+
+            goToAddresses: function () {
+                this.selectedTab = this.Tabs.ADDRESS;
+                this.$.addressList.addNewAddress();
             }
-
-
         });
 
         function p4mDroppointToGfsDroppoint(item) {

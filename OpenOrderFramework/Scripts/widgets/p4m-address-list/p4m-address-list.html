@@ -7,7 +7,7 @@
 
     <template>
         <div id="container">
-            <a href="#" on-tap="addNewAddress">Add a new address</a>
+            <p><a id="addNewAddress" href="#" on-tap="addNewAddress">Add a new address</a></p>
 
             <template is="dom-repeat" items="{{addressListData}}" filter="filterNewOnly">
                 <p4m-address address-data="{{item}}" on-canceledit="cancelAdd" cart-data="{{cartData}}" mode="edit" on-save="onAddAddress"></p4m-address>
@@ -85,10 +85,8 @@
                     this._addedNewAddress = true;
                     //Add empty object to handle adding a new address
                     this.push('addressListData', this.newAddress);
-                    //this.$.newAddressCollapse.opened = true;
-                }
-                
- 
+                }             
+
             },
 
             cancelAdd: function(e) {
