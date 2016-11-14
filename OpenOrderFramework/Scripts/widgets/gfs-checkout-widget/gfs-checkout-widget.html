@@ -707,6 +707,14 @@
                 initialAddress: {
                     type: String
                 },
+               
+                defaultPostCode: {
+                    type: String
+                },
+
+                defaultCountryCode: {
+                    type: String
+                },
 
                 /*
                 selectedTab: {
@@ -985,8 +993,8 @@
                 var theJson = atob(this.gfsData);
                 theJson = theJson.replace(/\r?\n|\r/g, "");
                 actualPost = JSON.parse(theJson);
-                this.countryCode = actualPost.Request.Order.Transit.Recipient.Location.CountryCode.Code;
-                this.postCode = actualPost.Request.Order.Transit.Recipient.Location.Postcode;
+                this.countryCode = this.defaultCountryCode;
+                this.postCode = this.defaultPostCode;
 
                 if (this.accessToken === "") {
                     this.$.errorNotification = "No Access Token.. ";
@@ -1633,48 +1641,26 @@
                     window.clearTimeout(this._searchTimeout);
                 }
                 var self = this;
-                var address = this.$.droppointAddress.value || this.postCode;
-                self.initialAddress = address;
+                var postcode = this.$.droppointAddress.value || this.postCode;
+                //self.initialAddress = address;
                 //self.$$("#gfsMapCanvas-loading").classList.remove('hidden');
 
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode({
                     componentRestrictions: {
                         country: this.countryCode,
-                        postalCode: address
+                        postalCode: postcode
                     }
                 }, function (results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
 
                         self._panToGeoLocation({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
-                        /*
-                        self._map.setCenter(results[0].geometry.location);
 
-                        // check if searching for the home location
-                        
-                        if ((results[0].geometry.location.lat() === marker.getPosition().lat()) && (results[0].geometry.location.lng() === marker.getPosition().lng())) {
-                            self.$$("#gfsMapCanvas-loading").classList.add('hidden');
-                            self.$.errorNotification.text = "Your home location is already at " + address;
-                            self.$.errorNotification.fitInto = self.$.gfsMapCanvas;
-                            self.$.errorNotification.open();
-                        }
-                        */
                         marker = new google.maps.Marker({
                             map: self._map,
                             icon: self._getHomeIcon(),
                             position: results[0].geometry.location
                         });
-                        /*
-                        if (marker && marker.setPosition) {
-                            marker.setPosition(results[0].geometry.location);
-                        }
-                        else {
-                            marker = new google.maps.Marker({
-                                map: self._map,
-                                icon: self._getHomeIcon(),
-                                position: results[0].geometry.location
-                            });
-                        }*/
                     }
 
                     else {

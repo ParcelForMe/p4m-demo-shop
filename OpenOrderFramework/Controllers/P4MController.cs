@@ -67,6 +67,14 @@ namespace OpenOrderFramework.Controllers
             ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
             ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;//p4mDefaultPostCode
+            if (ViewBag.InitialCountryCode == null)
+            {
+                ViewBag.InitialCountryCode = "GB";
+            }
+            if (ViewBag.InitialPostCode == null)
+            {
+                ViewBag.InitialPostCode = "W1A 0AX";
+            }
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
             ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);

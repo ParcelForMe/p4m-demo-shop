@@ -40,7 +40,7 @@
                             <p4m-cart id="cart" cart-data="{{cartData}}"></p4m-cart>                         
                         </iron-page>
                         <iron-page id="deliveryPage">
-                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}"></gfs-checkout>
+                            <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" default-post-code="{{initialPostCode}}" default-country-code="{{initialCountryCode}}"></gfs-checkout>
 
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
@@ -143,11 +143,6 @@
     </style>
 
     <script>
-        //
-        /*window.addEventListener('selectedServiceChanged', function (e) {
-            console.log('p4m: selectedServiceChanged', e);
-        });*/
-
 
         Polymer({
             is: "p4m-checkout",
@@ -194,6 +189,14 @@
                 },
                 gfsData: {
                     type: String
+                },
+                initialPostCode: {
+                    type: String,
+                    value: "W1A 0AX"
+                },
+                initialCountryCode: {
+                    type: String,
+                    value: "GB"
                 },
                 _notUseGfsCheckout: {
                     type: Object,
@@ -656,25 +659,28 @@
 
             selectSupportedDropPoint: function (callback) {
                 //If there is a suitable shipping selector that can return droppoints, select the nearest to the preferred address
-                //PRECONDITION: Consumer data and Cart data exists
+                //PRECONDITION: Consumer data and Cart data exists, preferred address 
                 //Returns: addressId/null depending on success/failure
 
                 var self = this;
                 if (this.$.gfsCheckoutWidget) {
                     //Ask GFS Checkout for the supported droppoint closest to the preferred address
-                    var preferredAddress = this.getAddressById(this.consumerData.PrefDeliveryAddressId);
-                    this.$.gfsCheckoutWidget.requestDropPointsByAddress(preferredAddress.Street1, preferredAddress.PostCode, function(dropPoints) {
-                        if (dropPoints && dropPoints.length) {
-                            var dropPoint = dropPoints[0];
-                            self.selectCollectPoint(dropPoint.providerName, dropPoint.providerId, dropPoint.droppointId, dropPoint.geoLocation, function () {
-                                self.updateP4mCart();
-                                callback(false);
-                            });
-                        }
-                        else {
-                            callback("No supported collection points found");
-                        }
-                    });
+                    if (this.consumerData.PrefDeliveryAddressId) {
+                        var preferredAddress = this.getAddressById(this.consumerData.PrefDeliveryAddressId);
+                        this.$.gfsCheckoutWidget.requestDropPointsByAddress(preferredAddress.Street1, preferredAddress.PostCode, function (dropPoints) {
+                            if (dropPoints && dropPoints.length) {
+                                var dropPoint = dropPoints[0];
+                                self.selectCollectPoint(dropPoint.providerName, dropPoint.providerId, dropPoint.droppointId, dropPoint.geoLocation, function () {
+                                    self.updateP4mCart();
+                                    callback(false);
+                                });
+                            }
+                            else {
+                                callback("No supported collection points found");
+                            }
+                        });
+                    }
+
                 }
                 else {
                     callback("No shipping handler to get droppoints");
