@@ -10,29 +10,25 @@
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <div style="background: white;" class="corners-5px">
                 <div class="corners-top-5px p4m-register-top" style="">
-                    <div class="p4m-widget-registration-subtitle">CHECKOUT WITH</div>
-                    <div>
-                        <span class="p4m-widget-registration-maintitle">PARCEL FOR ME</span>
-                        <img src="./logo-icon.png" id="peli-icon-header" />
-                    </div>
+                    <div class="p4m-widget-registration-title">Checkout with Parcel For Me</div>
                 </div>
-                <div class="p4m-register-bottom">
+                <div class="p4m-register-middle corners-bottom-5px">
                     <template is="dom-if" if="{{_notLoggedIn}}">
-
-                        <!--div class="p4m-widget-registration-title">We supportParcel For Me -->
-                        <div class="p4m-widget-registration-text">Purchase faster than ever before and get your parcel first time, every time.</div>
-                        <div class="gotham_bookregular mobPaddingPosition">
-                            <button type="submit" on-tap="onSignUp" class="button p4m-button corners-5px p4m-register-button p4m-button-active">Sign Up to Parcel For Me</button>
+                        <div class="p4m-register-title">
+                            <img class="p4m-register-logo" src="./logo-icon.png" id="peli-icon-header" />
+                            <div class="p4m-register-text">Purchase faster than ever before and get your parcel first time, every time.</div>
                         </div>
-                        <div class="p4m-widget-registration-text-link">
-                            Already registered with Parcel For Me? Sign in by clicking the Peli icon above.
+                        <div class="gotham_bookregular mobPaddingPosition">
+                            <button type="submit" on-tap="onSignUp" class="p4m-button p4m-button-active p4m-register-button">Sign Up to Parcel For Me</button>
+                        </div>
+                        <div class="p4m-register-text-link">
+                            <a>Sign in</a>
                         </div>
                     </template>
                     <template is="dom-if" if="{{_loggedIn}}">
                         Thanks for using Parcel For Me
                     </template>
                 </div>
-
             </div>
         </div>
     </template>
@@ -51,15 +47,55 @@
             flex-direction: row;
         }
 
-        .p4m-register-top {
+        .p4m-register-logo {
+            height: 50px;
+        }
+
+        .p4m-register-title {
             display: flex;
             flex-direction: row;
             padding: 8px;
         }
 
-        .p4m-register-bottom {
+        .p4m-register-top {
+            display: flex;
+            flex-direction: row;
             padding: 8px;
+            text-transform: uppercase;
         }
+
+        .p4m-register-middle {
+            display: flex;
+            flex-direction: column;
+            background-color:#2aa54f;
+            color:#fff;
+            padding:10px;
+        }
+
+        .p4m-register-text {
+            padding-left: 10px;
+            padding-right: 5px;
+        }
+
+        .p4m-register-text-link {
+            display: flex;
+            flex-direction: row;
+            margin: auto;
+        }
+
+        .p4m-register-text-link a {
+            color: white;
+        }
+
+        .p4m-button.p4m-register-button {
+            background-color: white;
+            color: black;
+            width: 245px;
+        }
+
+
+
+
 
     </style>
 
