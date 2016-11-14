@@ -10,11 +10,11 @@
             <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
             <div style="background: white;" class="corners-5px">
                 <div class="corners-top-5px p4m-register-top" style="">
-                    <div class="p4m-widget-registration-title">Checkout with Parcel For Me</div>
+                    <div class="p4m-register-title">Checkout with Parcel For Me</div>
                 </div>
                 <div class="p4m-register-middle corners-bottom-5px">
                     <template is="dom-if" if="{{_notLoggedIn}}">
-                        <div class="p4m-register-title">
+                        <div class="p4m-register-explain">
                             <img class="p4m-register-logo" src="./logo-icon.png" id="peli-icon-header" />
                             <div class="p4m-register-text">Purchase faster than ever before and get your parcel first time, every time.</div>
                         </div>
@@ -52,9 +52,14 @@
         }
 
         .p4m-register-title {
+            margin:auto;
+        }
+
+        .p4m-register-explain {
             display: flex;
             flex-direction: row;
             padding: 8px;
+            margin: auto;
         }
 
         .p4m-register-top {
@@ -62,6 +67,7 @@
             flex-direction: row;
             padding: 8px;
             text-transform: uppercase;
+            
         }
 
         .p4m-register-middle {
@@ -81,6 +87,7 @@
             display: flex;
             flex-direction: row;
             margin: auto;
+            cursor: pointer;
         }
 
         .p4m-register-text-link a {
