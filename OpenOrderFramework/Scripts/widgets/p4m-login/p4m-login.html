@@ -93,6 +93,7 @@
             },
 
             ready: function () {
+                window.addEventListener('p4m-request-login', this.onRequestForLogin.bind(this));
                 this._getTokenCookie();
                 if (this.p4mToken) 
                 {
@@ -254,6 +255,12 @@
             showDlgSpinner: function () {
                 this.$.dlgSpinner.active = true;
                 //this.$.dlgSpinner.classList.remove('hidden');
+            },
+
+            onRequestForLogin: function () {
+                //If we hear a global event calling for a login
+                this.launchPopup();
+
             }
         });
     </script>

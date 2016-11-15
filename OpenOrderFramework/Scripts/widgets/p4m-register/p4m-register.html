@@ -22,7 +22,7 @@
                             <button type="submit" on-tap="onSignUp" class="p4m-button p4m-button-active p4m-register-button">Sign Up to Parcel For Me</button>
                         </div>
                         <div class="p4m-register-text-link">
-                            <a>Sign in</a>
+                            <a on-click="requestLogin">Sign in</a>
                         </div>
                     </template>
                     <template is="dom-if" if="{{_loggedIn}}">
@@ -144,6 +144,11 @@
                 // we have a token from PP so now we can launch PP in a popup
                 var signupUrl = "//" + window.location.host + "/p4m/signup";
                 this.openPopup(signupUrl, "signupWindow", 650, 750);
+            },
+
+            requestLogin: function () {
+                var event = new CustomEvent('p4m-request-login');
+                window.dispatchEvent(event);
             },
 
             openPopup: function(url, id, w, h) {
