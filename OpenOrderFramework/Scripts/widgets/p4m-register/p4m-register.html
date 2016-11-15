@@ -3,17 +3,17 @@
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-register">
-
     <template>
-        <div id="p4mRegisterContainer" class$="{{_topClass}}">        
-            <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
-            <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
-            <div style="background: white;" class="corners-5px">
-                <div class="corners-top-5px p4m-register-top" style="">
-                    <div class="p4m-register-title">Checkout with Parcel For Me</div>
-                </div>
-                <div class="p4m-register-middle corners-bottom-5px">
-                    <template is="dom-if" if="{{_notLoggedIn}}">
+        <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
+        <polymer-cookie id="p4mGivenNameCookie" name="p4mGivenName"></polymer-cookie>
+        <template is="dom-if" if="{{_notLoggedIn}}">
+            <div id="p4mRegisterContainer" class$="{{_topClass}}">
+
+                <div style="background: white;" class="corners-5px">
+                    <div class="corners-top-5px p4m-register-top" style="">
+                        <div class="p4m-register-title">Checkout with Parcel For Me</div>
+                    </div>
+                    <div class="p4m-register-middle corners-bottom-5px">
                         <div class="p4m-register-explain">
                             <img class="p4m-register-logo" src="./logo-icon.png" id="peli-icon-header" />
                             <div class="p4m-register-text">Purchase faster than ever before and get your parcel first time, every time.</div>
@@ -24,14 +24,12 @@
                         <div class="p4m-register-text-link">
                             <a on-click="requestLogin">Sign in</a>
                         </div>
-                    </template>
-                    <template is="dom-if" if="{{_loggedIn}}">
-                        Thanks for using Parcel For Me
-                    </template>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
     </template>
+
 
     <style> 
 
@@ -136,8 +134,8 @@
             load: function () {
                 //Check to see if the user is logged in - if so just thank them for using P4M :)
                 var token = this.$.p4mTokenCookie.readCookie();
-                this._loggedIn = token !== "";
-                this._notLoggedIn = !this._loggedIn;
+                this.set('_loggedIn', token !== "");
+                this.set('_notLoggedIn', !this._loggedIn);
             },
 
             onSignUp: function (e) {
