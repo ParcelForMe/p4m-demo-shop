@@ -3,6 +3,8 @@
 <link rel="import" href="../../Lib/paper-dialog/paper-dialog.html" />
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
+<link rel="import" href="../../Lib/paper-menu/paper-menu.html" />
+<link rel="import" href="../../Lib/paper-item/paper-item.html" />
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
@@ -10,8 +12,15 @@
 <dom-module id="p4m-login">
 
     <template>  
-        <p4m-profile id="p4mProfile" on-click="launchPopup"></p4m-profile>
-        
+        <p4m-profile id="p4mProfile" on-click="launchPopup" on-mouseover="_mouseOverMenu"></p4m-profile>
+        <div id="p4m-menu-wrapper" class="p4m-menu hidden" on-mouseleave="_mouseOutMenu">
+            <paper-menu id="p4m-menu" on-iron-select="_selectMenuItem">
+                <paper-item>Log out</paper-item>
+                <paper-item>Restore last cart</paper-item>
+                <paper-item>Saved items</paper-item>
+            </paper-menu>
+        </div>
+    
         <paper-dialog id="lastCartDlg" modal="true">
             <h2>Restore your last cart?</h2>
             <div class="restoreCartMessage">{{_restoreCartMessage}}</div>
@@ -21,7 +30,6 @@
             <div class="buttons">
                 <div class="p4m-button p4m-button-active no" on-click="_useNewCart">No</div>
                 <div class="p4m-button p4m-button-active" on-click="_useLastCart">Yes</div>
-
             </div>
         </paper-dialog>
         <polymer-cookie id="p4mTokenCookie" name="p4mToken"></polymer-cookie>
@@ -34,6 +42,18 @@
     </template>
 
     <style>
+        .p4m-menu {
+            position:absolute;
+            min-width:180px;
+            border: 1px solid silver;
+            z-index: 99;
+        }
+        .p4m-menu paper-item {
+            min-height: 28px;
+        }
+        .p4m-menu paper-item:hover{
+            background-color: silver;
+        }
         #dlgSpinner {
             width: 50px;
             height: 50px;
@@ -245,6 +265,35 @@
                 this._restoreCartStatusMessage = "Restored cart";
                 this.$.lastCartDlg.close();
                 window.location.reload(true);
+            },
+
+            _selectMenuItem: function() {
+                var selectedItemIndex = this.$['p4m-menu'].selected;
+                if (selectedItemIndex == "0") {
+                    this.logout();
+                }
+                else if (selectedItemIndex == "1") {
+                    this._useLastCart();
+                }
+            },
+
+            _mouseOverMenu: function() {                
+                if (this.$.p4mTokenCookie.readCookie() !== "") {
+                    this.showMenu();
+                }            
+            },
+
+            _mouseOutMenu: function () {
+                //console.log('Mouseout');
+                this.hideMenu();
+            },
+
+            showMenu: function(){
+                this.$['p4m-menu-wrapper'].classList.remove('hidden');
+            },
+
+            hideMenu: function () {
+                this.$['p4m-menu-wrapper'].classList.add('hidden');
             },
 
             hideDlgSpinner: function () {
