@@ -1,0 +1,54 @@
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
+
+<dom-module id="address-lookup-field">
+    <template>
+        <input type="text" name="alfField" id="alfField" />
+    </template>
+    <style>
+
+    </style>
+
+    <script>
+
+        Polymer({
+            is: "address-lookup-field",
+
+            properties: {
+                googleMapsKey: {
+                    type: String
+                },
+                autoComplete: {
+                    type: Object
+                }
+            },
+            observers: [
+  
+            ],
+
+            ready: function()
+            {
+                this.fire('ready1');
+                this.initAutoComplete();
+                this.fire('ready2');
+            },
+
+            initAutoComplete() {
+                // Create the autocomplete object, restricting the search to geographical location types.
+                this.autoComplete = new google.maps.places.Autocomplete(
+                    this.$.alfField,
+                    {
+                        types: ['geocode']
+                    }
+                );
+
+                this.autoComplete.addListener('place_changed', this.selectAddress.bind(this));
+            },
+
+            selectAddress: function () {
+                var place = this.autoComplete.getPlace();
+                this.fire('foundplace', place);
+            }
+        });
+    </script>
+
+</dom-module>

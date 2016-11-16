@@ -15,19 +15,22 @@
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 <link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
-<link rel="import" href="../gfs-checkout-widget/gfs-checkout-widget.html">
+<link rel="import" href="../gfs-checkout-widget/gfs-checkout-widget.html" />
+<link rel="import" href="../address-lookup-field/address-lookup-field.html" />
 
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-checkout">
 
     <template>
+
         <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
         <p4m-api id="localApi" is-local="true"></p4m-api>
         <div id="container">
             <div id="topPanel" class="topPanel"><h2>Review My Order</h2><p4m-profile mode="basic"></p4m-profile></div>
             <div id="panelContainer">
                 <div id="detailPanel" class="p4m-panel">
+                    
                     
                     <paper-tabs selected="{{selectedTab}}">
                         <paper-tab>My Order</paper-tab>
@@ -41,7 +44,6 @@
                         </iron-page>
                         <iron-page id="deliveryPage">
                             <gfs-checkout id="gfsCheckoutWidget" gfs-data="{{gfsData}}" access-token="{{gfsAccessToken}}" on-show-droppoints="onGfsShowDroppoints" on-show-standard="onGfsShowStandard" on-selectedservicechanged="onGfsServiceChanged" delivery-preferences="{{deliveryPreferences}}" consumer-addresses="{{consumerData.addresses}}" override-shipping-method-id="{{cartData.ServiceId}}" override-delivery-date="{{cartData.ExpDeliveryDate}}" default-post-code="{{initialPostCode}}" default-country-code="{{initialCountryCode}}"></gfs-checkout>
-
                             <template is="dom-if" if="{{_notUseGfsCheckout}}">
                                 <p4m-delivery></p4m-delivery>
                             </template>

@@ -194,9 +194,7 @@
             }
 
             #viewAsList, #viewAsMap {
-                margin-top: 14px;
-                margin-bottom: 4px;               
-                margin-right: 18px;
+                padding-top: 16px;
             }
 
 
@@ -448,8 +446,9 @@
 
             .search-button {
                 position: absolute;
-                left: 200px;
-                top: 14px;
+                left: 206px;
+                top: 18px;
+                opacity: 0.5;
             }   
             
             paper-tab {
@@ -506,6 +505,9 @@
         <map-region-manager id="regionManager"></map-region-manager>
 
 		<div id="widgetContainer">
+            
+            <!--address-lookup-field on-ready1="_ready1" on-ready2="_ready2" on-foundplace="_panToPlace"></!--address-lookup-field-->
+
             <paper-tabs selected="{{selectedTab}}">             
                 <paper-tab>{{calendarDeliveryTitle}}</paper-tab>
                 <paper-tab>Click and Collect</paper-tab>
@@ -520,7 +522,6 @@
                         <div>
                             <gfs-calendar id="calendar" on-select-shipping-option="_selectCalendarShippingOption" day-definite-data="{{_data.dayDefinite}}" selected-delivery-date="{{overrideDeliveryDate}}" selected-shipping-method-id="{{overrideShippingMethodId}}"></gfs-calendar>
                         </div>
-
                     </div>
  
                 </iron-page>
@@ -529,9 +530,9 @@
                         <div class="header" style="display:none">
                             <h3>{{dropPointTitle}}</h3>
                         </div>
-
+                      
                         <div class="search-postcode-wrap">
-                            <input type="text" id="droppointAddress" placeholder="Find area by postcode" on-keydown="_onPostcodeSearchKeyDown" />
+                            <address-lookup-field id="droppointAddress" on-foundplace="_panToPlace"></address-lookup-field>
                             <div type="submit" class="search-button" on-click="_findPostcode"><iron-icon icon="icons:search"></iron-icon></div>
                         </div>
 
@@ -580,14 +581,14 @@
                                         <paper-spinner active id="map-spinner"></paper-spinner>
                                     </div>
                                 </div>
-                                <template dom-if="{{_preferredDroppoints.length}}">
+
                                     <div class="preferredDroppoints">
                                         <h3>My Collection Points</h3>
                                         <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                             <gfs-droppoint click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                         </template>
                                     </div>
-                                </template>
+
                             </div>
                         </div>
 
@@ -2333,6 +2334,18 @@
                 this._map.panTo(geoLocation);
                 this._mapViewPort = [[ geoLocation.lng - 0.01,geoLocation.lat - 0.01], [geoLocation.lng + 0.01, geoLocation.lat + 0.01]];
                 this._requestDroppointsByGeoBoxes([this._mapViewPort]);
+			},
+
+			_panToPlace: function (e) {
+			    this._panToGeoLocation(e.detail.geometry.location);
+            },
+
+            _ready1: function (e) {
+                console.log('ready1');
+            },
+
+            _ready2: function (e) {
+                console.log('ready2')
             }
 
         });

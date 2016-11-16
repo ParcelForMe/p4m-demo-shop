@@ -914,6 +914,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Scripts\Lib\gfs-droppoint\.git\objects\info\" />
     <Folder Include="Scripts\Lib\gfs-droppoint\.git\refs\tags\" />
+    <Folder Include="Scripts\widgets\address-lookup-field\" />
     <Folder Include="Scripts\widgets\gfs-checkout-widget\Docs\" />
   </ItemGroup>
   <ItemGroup>
