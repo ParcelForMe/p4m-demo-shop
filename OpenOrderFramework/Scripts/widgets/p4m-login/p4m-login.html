@@ -12,8 +12,8 @@
 <dom-module id="p4m-login">
 
     <template>  
-        <p4m-profile id="p4mProfile" on-click="launchPopup" on-mouseover="_mouseOverMenu"></p4m-profile>
-        <div id="p4m-menu-wrapper" class="p4m-menu hidden" on-mouseleave="_mouseOutMenu">
+        <p4m-profile id="p4mProfile" on-click="launchPopup" on-mouseover="_mouseOverMenu" on-mouseleave="_mouseOutMenu"></p4m-profile>
+        <div id="p4m-menu-wrapper" class="p4m-menu hidden" on-mouseleave="_mouseOutMenu" on-mouseover="_mouseOverMenu">
             <paper-menu id="p4m-menu" on-iron-select="_selectMenuItem">
                 <paper-item>Log out</paper-item>
                 <paper-item>Restore last cart</paper-item>
