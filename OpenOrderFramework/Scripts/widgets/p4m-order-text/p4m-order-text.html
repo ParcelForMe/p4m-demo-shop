@@ -11,7 +11,7 @@
                 You have not yet chosen an address. <a on-click="requestAddress">Click here to choose one.</a>
             </template>
 
-            <template is="dom-if" if="{{_hasDeliveryDetails()}}">
+            <template is="dom-if" if="{{cartData.AddressId}}">
                 We'll deliver your order to your {{addressTypeStr}}:
                 <span class="p4m-label">{{deliveryAddressStr}}</span>{{deliveryDatePrefixStr}}
                 <span class="p4m-label">{{deliveryDateStr}}.</span> Your order will be sent via
@@ -148,7 +148,8 @@
 
             },
 
-            _hasDeliveryDetails: function() {
+            _hasDeliveryDetails: function () {
+                console.log('_hasDeliveryDetails');
                 return (this.cartData && this.cartData.ExpDeliveryDate && this.cartData.AddressId);
             },
 
