@@ -72,7 +72,7 @@
             is: "p4m-login",
 
             properties: {
-                authBaseUrl: {
+                idSrvUrl: {
                     type: String,
                 },
                 clientId: {
@@ -82,9 +82,6 @@
                     type: String,
                 },
                 logoutForm: {
-                    type: String,
-                },
-                logoutUrl: {
                     type: String,
                 },
                 p4mToken: {
@@ -157,7 +154,8 @@
             },
 
             logout: function () {
-                this.popupCenter(this.logoutUrl, "Logout", 450, 500);
+                var logoutUrl = this.idSrvUrl + "/connect/endsession";
+                this.popupCenter(logoutUrl, "Logout", 450, 500);
                 this.clearCookies();
                 if (this.logoutForm && this.logoutForm != '') {
                     document.getElementById(this.logoutForm).submit();
@@ -189,7 +187,8 @@
                 this.$.p4mNonceCookie.createCookie();
             },
 
-            _makeAuthUrl: function() {
+            _makeAuthUrl: function () {
+                var authBaseUrl = this.idSrvUrl + "/connect/authorize";
                 this._authUrl =
                     this.authBaseUrl
                     + "?response_type=code&client_id=" + this.clientId

@@ -739,7 +739,7 @@
     <Content Include="Scripts\widgets\p4m-address-list\p4m-address-list.html" />
     <Content Include="Scripts\widgets\p4m-address\p4m-address-text.html" />
     <Content Include="Scripts\widgets\p4m-address\p4m-address.html" />
-    <Content Include="Scripts\widgets\p4m-ajax-block\p4m-ajax-block.html" />
+    <Content Include="Scripts\widgets\p4m-get-html\p4m-get-html.html" />
     <Content Include="Scripts\widgets\p4m-api\p4m-api.html" />
     <Content Include="Scripts\widgets\p4m-card-list\p4m-card-list.html" />
     <Content Include="Scripts\widgets\p4m-card\p4m-new-card.html" />

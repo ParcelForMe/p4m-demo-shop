@@ -346,7 +346,6 @@ namespace OpenOrderFramework.Controllers
             return p4mCart;
         }
 
-
         async Task<ApplicationUser> GetAppUserAsync(Consumer consumer, string localId)
         {
             var address = consumer.PrefDeliveryAddress;
