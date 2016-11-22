@@ -1,13 +1,7 @@
 ﻿<link rel="import" href="../../polymer/polymer.html" />
-<link rel="import" href="../../Lib/brick-calendar/dist/brick-calendar.html" />
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../Lib/iron-list/iron-list.html" />
-<link rel="import" href="../../Lib/iron-collapse/iron-collapse.html" />
-<link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
-<link rel="import" href="../gfs-droppoint/gfs-location-button.html" />
-<link rel="import" href="../gfs-calendar/gfs-calendar.html" />
-<link rel="import" href="../../Lib/gfs-delivery-address/gfs-delivery-address.html" />
-<link rel="import" href="../../Lib/gfs-checkout-widget/map-region-manager/map-region-manager.html" />
+
 <link rel="import" href="../../Lib/paper-toggle-button/paper-toggle-button.html" />
 <link rel="import" href="../../Lib/paper-spinner/paper-spinner.html" />
 <link rel="import" href="../../Lib/paper-toast/paper-toast.html" />
@@ -15,6 +9,12 @@
 <link rel="import" href="../../Lib/paper-tabs/paper-tabs.html" />
 <link rel="import" href="../../Lib/iron-pages/iron-pages.html" />
 <link rel="import" href="../../Lib/iron-icons/iron-icons.html" />
+
+<link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
+<link rel="import" href="../gfs-droppoint/gfs-location-button.html" />
+<link rel="import" href="../gfs-calendar/gfs-calendar.html" />
+<link rel="import" href="../gfs-delivery-address/gfs-delivery-address.html" />
+<link rel="import" href="../map-region-manager/map-region-manager.html" />
 
 <script src="../../Lib/momentjs/min/moment.min.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMQhcXM06TZBHZ95LwJBRVGSV4CqUQMpI&libraries=places"></script>
@@ -24,7 +24,7 @@
 <dom-module id="gfs-checkout">
     <!--<link rel="import" type="css" href="custom.css">-->
 
-    <template>
+    <template>     
         <style>
 
             h3 {
