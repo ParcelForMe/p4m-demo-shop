@@ -24,7 +24,7 @@ namespace OpenOrderFramework.Controllers
         {
             // ***** P4M *****
             if (this.Request.Cookies["p4mToken"] != null && !string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
-                return RedirectToAction("p4mCheckout", "checkout");
+                return RedirectToAction("checkout", "p4m");
             else
             // ***** P4M *****
                 return RedirectToAction("Address");
@@ -36,7 +36,7 @@ namespace OpenOrderFramework.Controllers
         {
             // ***** P4M *****
             if (!string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
-                return RedirectToAction("p4mCheckout", "checkout");
+                return RedirectToAction("checkout", "p4m");
             // ***** P4M *****
 
             ViewBag.CreditCardTypes = CreditCardTypes;

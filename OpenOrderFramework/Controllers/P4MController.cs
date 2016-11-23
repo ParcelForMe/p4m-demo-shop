@@ -41,7 +41,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("checkout/p4mCheckout")]
+        [Route("p4m/checkout")]
         public ActionResult P4MCheckout()
         {
             var localCart = ShoppingCart.GetCart(this.HttpContext);
@@ -244,7 +244,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpPost]
-        [Route("p4m/shippingDetails")]
+        [Route("p4m/updShippingService")]
         public JsonResult ShippingDetails(ShippingDetails details)
         {
             var result = new CartTotalsMessage();

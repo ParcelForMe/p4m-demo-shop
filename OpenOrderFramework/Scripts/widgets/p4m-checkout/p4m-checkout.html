@@ -374,7 +374,7 @@
 
                 var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDate };
                 // got new shipping details so we need to get updated tax from the host
-                this.$.localApi.call('shippingDetails', null, shippingDetails, function (cartTotals) {
+                this.$.localApi.call('updShippingService', null, shippingDetails, function (cartTotals) {
                     self.updCartTotals(cartTotals); // this updates tax
                     self.cartData.Carrier = data.carrier;
                     self.cartData.ShippingAmt = data.shipping;

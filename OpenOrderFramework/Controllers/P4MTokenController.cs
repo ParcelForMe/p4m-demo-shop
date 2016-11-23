@@ -189,7 +189,7 @@ namespace OpenOrderFramework.Controllers
                 var hasOpenCart = await LocalConsumerLoginAsync(token);
                 this.Response.Cookies["p4mOfferCartRestore"].Value = hasOpenCart ? "true" : "false";
                 if (currentPage.ToLower().Contains("/account/login"))
-                    result.RedirectUrl = "/checkout/p4mCheckout";
+                    result.RedirectUrl = "/p4m/checkout";
             }
             catch (Exception e)
             {
