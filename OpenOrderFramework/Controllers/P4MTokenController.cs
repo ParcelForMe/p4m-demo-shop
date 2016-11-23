@@ -96,7 +96,7 @@ namespace OpenOrderFramework.Controllers
                 var authUser = AuthenticationManager.User;
                 if (authUser == null || !authUser.Identity.IsAuthenticated)
                 {
-                    result.RedirectUrl = _urls.IdSrvUrl + "signup";
+                    result.RedirectUrl = _urls.BaseIdSrvUiUrl + "signup";
                 }
                 else
                 {
@@ -125,12 +125,12 @@ namespace OpenOrderFramework.Controllers
                     if (!registerResult.Success)
                     {
                         if (registerResult.Error.Contains("registered"))
-                            result.RedirectUrl = $"{_urls.IdSrvUrl}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
+                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
                         else
-                            result.RedirectUrl = $"{_urls.IdSrvUrl}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
+                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
                     }
                     else
-                        result.RedirectUrl = $"{_urls.IdSrvUrl}registerConsumer/{registerResult.ConsumerId}";
+                        result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}registerConsumer/{registerResult.ConsumerId}";
                 }
             }
             catch (Exception e)

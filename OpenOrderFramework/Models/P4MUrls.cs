@@ -8,7 +8,7 @@
             P4MUrl = $"https://{AppMode}.parcelfor.me";
             BaseIdSrvUrl = $"{P4MUrl}:44333";
             BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
-            IdSrvUrl = $"{BaseIdSrvUrl}/ui/";
+            BaseIdSrvUiUrl = $"{BaseIdSrvUrl}/ui/";
             AuthBaseUrl = $"{BaseIdSrvUrl}/connect/authorize";
             TokenEndpoint = $"{BaseIdSrvUrl}/connect/token";
             LogoutUrl = $"{BaseIdSrvUrl}/connect/endsession";
@@ -25,7 +25,7 @@
         public string P4MUrl { get; set; }
         public string BaseIdSrvUrl { get; set; }
         public string BaseApiAddress { get; set; }
-        public string IdSrvUrl { get; set; }
+        public string BaseIdSrvUiUrl { get; set; }
         public string TokenEndpoint { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
