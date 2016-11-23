@@ -55,10 +55,17 @@ namespace OpenOrderFramework.Controllers
                 var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
                 var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
                     uri,
-                    "ambitious_alice",
-                    "m@dhatt3r");
+                   "parcel_4_me",
+                   "needmoreparcels");
+
+                   //"ambitious_alice",
+                   //"m@dhatt3r");
 
                 var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
+                if (tokenResponse == null || tokenResponse.AccessToken == null)
+                {
+                    throw new Exception("Request for client credentials denied");
+                }
                 token = Base64Encode(tokenResponse.AccessToken);
                 Response.Cookies["gfsCheckoutToken"].Value = token;
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
@@ -549,7 +556,7 @@ namespace OpenOrderFramework.Controllers
                                 },
                                 contactDetails = new
                                 {
-                                    Email = ""
+                                    Email = "test@earsman.com"
                                 },
                                 Person = new
                                 {
@@ -579,41 +586,6 @@ namespace OpenOrderFramework.Controllers
             return Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest);
 
             //return Convert.ToBase64String(Encoding.ASCII.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest)));
-        }
-
-        public string OldGetGfsCheckoutPost()
-        {
-
-            var localCart = ShoppingCart.GetCart(HttpContext);
-            var template =
-            "{" +
-              "\"Request\": {" +
-               " \"DateRange\": {" +
-                  "\"DateFrom\": \"2016-09-12\"," +
-                  "\"DateTo\": \"2016-09-24\"" +
-                "}," +
-                "\"Order\": {" +
-                  "\"Transit\": {" +
-                   " \"Recipient\": {" +
-                      "\"Location\": {" +
-                        "\"CountryCode\": {" +
-                          "\"Code\": \"GB\"," +
-                          "\"Encoding\": \"ccISO_3166_1_Alpha2\"" +
-                        "}," +
-                        "\"Postcode\": \"SO40 7JF\"" +
-                      "}" +
-                    "}" +
-                  "}," +
-                  "\"Value\": {" +
-                    "\"CurrencyCode\": \"GBP\"," +
-                    "\"Value\": 45.99" +
-                  "}" +
-                "}," +
-                "\"RequestedDeliveryTypes\": [ \"dmDropPoint\", \"dmStandard\" ]," +
-                "\"Session\": { \"APIKeyId\": \"CL-69AE704F-D592-4A4A-A56D-EC5E9F1C28B2\" }" +
-              "}" +
-            "}";
-            return template;
         }
 
         [HttpGet]

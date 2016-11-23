@@ -1,16 +1,11 @@
-﻿<script src="../webcomponentsjs/webcomponents.min.js"></script>
-<link rel="import" href="../polymer/polymer.html"/>
+﻿<script src="../../Lib/webcomponentsjs/webcomponents.min.js"></script>
+<link rel="import" href="../../Lib/polymer/polymer.html"/>
 <link rel="import" href="../local-image/local-image.html" />
 
 <dom-module id="gfs-droppoint">
 
 	<template>
 		<style>
-			/*
-div, span, h3, ul, tr {
-				font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
-			}
-			*/
             .content {
                  cursor: pointer;
             }
@@ -53,7 +48,8 @@ div, span, h3, ul, tr {
 
             .dp-large-card .dp-details {
                 display: flex;
-                flex-direction: row;          
+                flex-direction: row;     
+                min-height: 175px;     
             }
 
             .dp-large-card #dp-minor-info {
@@ -369,8 +365,10 @@ div, span, h3, ul, tr {
 				<div class="dp-details">
                     <div class="dp-header">
                         <div class="dp-icon">
-                            <local-image img-src="{{droppointData.providerName}}.png" local-folder="gfs-droppoint/images" class="imageicon" height="45"></local-image>
-                            <b class="dpProviderName">{{droppointData.providerName}}</b>
+                            <template is="dom-if" if="{{droppointData.providerName}}">
+                                <local-image img-src="{{droppointData.providerName}}.png" local-folder="gfs-droppoint/images" class="imageicon" height="45"></local-image>
+                                <b class="dpProviderName">{{droppointData.providerName}}</b>
+                            </template>
                         </div>
                         <template is="dom-if" if="{{isTickButton}}">
                             <div class$="b-tick {{buttonClass}}"></div>
@@ -635,7 +633,6 @@ div, span, h3, ul, tr {
 			    }
                 //If the droppoint chosen was this one, make sure this "chosen" value reflects the other one
 			    if (dp.droppointId == this.droppointData.droppointId) {
-			        console.log("gfs-droppoint: onDroppointChanged()");
 			        if (this.droppointData.chosen !== dp.chosen) {
 			            this.set('droppointData.chosen', dp.chosen);
 			        }
@@ -753,9 +750,7 @@ div, span, h3, ul, tr {
 			selectOption: function (shippingOptionId) {            
 			    for (var i=0; i< this.droppointData.deliveries.length; i++) {
 			        var item = this.droppointData.deliveries[i];
-			        if (item.id === shippingOptionId) {
-			            console.log("Setting selected to true");
-			        }
+
 			        this.set("droppointData.deliveries." + i + ".selected", item.id === shippingOptionId);
 			        this.fire('select-delivery-option', shippingOptionId);
 			    }
@@ -763,7 +758,6 @@ div, span, h3, ul, tr {
 
 			autoSelectOption: function() {
 			    if (this.droppointData.deliveries) {		        
-			        console.log("Selecting option", '#dp-' + this.droppointData.deliveries[0].id);
 			        this.selectOption(this.droppointData.deliveries[0].id);
 			    }
 			    else {
@@ -772,7 +766,6 @@ div, span, h3, ul, tr {
 			},
 
 			_onShippingOptionsChanged: function() {
-			    console.log("Detected data change");
 			    this._onShippingOptionSelected();
 			},
 

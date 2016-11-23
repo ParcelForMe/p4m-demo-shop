@@ -1,29 +1,33 @@
+
 <link rel="import" href="../../Lib/polymer/polymer.html" />
+
 <link rel="import" href="../../Lib/polymer-cookie/polymer-cookie.html" />
 <link rel="import" href="../../Lib/paper-tabs/paper-tabs.html" />
 <link rel="import" href="../../Lib/iron-pages/iron-pages.html" />
-
 <link rel="import" href="../p4m-profile/p4m-profile.html" />
 <link rel="import" href="../p4m-api/p4m-api.html" />
-<link rel="import" href="../p4m-cart/p4m-cart.html" />
+<link rel="import" href="../p4m-cart/p4m-cart.html" /> 
 <link rel="import" href="../p4m-order-summary/p4m-order-summary.html" />
 <link rel="import" href="../p4m-address-list/p4m-address-list.html" />
 <link rel="import" href="../p4m-purchase/p4m-purchase.html" />
 <link rel="import" href="../p4m-card-list/p4m-card-list.html" />
 <link rel="import" href="../p4m-delivery/p4m-delivery.html" />
 <link rel="import" href="../p4m-order-text/p4m-order-text.html" />
+
 <link rel="import" href="../p4m-discount-input/p4m-discount-input.html" />
 <link rel="import" href="../p4m-discount-list/p4m-discount-list.html" />
 
 <link rel="import" href="../gfs-checkout-widget/gfs-checkout-widget.html" />
-<link rel="import" href="../address-lookup-field/address-lookup-field.html" />
+
+<link rel="import" href="../address-lookup-field/address-lookup-field.html" />   
+
+
 
 <link rel="stylesheet" href="../p4m-shared/p4m.css" />
 
 <dom-module id="p4m-checkout">
 
     <template>
-
         <p4m-api id="api" ssl="true" host-base-domain="parcelfor.me" host-type="dev" version="v2"></p4m-api>
         <p4m-api id="localApi" is-local="true"></p4m-api>
         <div id="container">
@@ -70,6 +74,8 @@
         <polymer-cookie id="sessionCookie" name="CartId"></polymer-cookie>
         <polymer-cookie id="p4mDefaultPostCode" name="p4mDefaultPostCode"></polymer-cookie>
         <polymer-cookie id="p4mDefaultCountry" name="p4mDefaultCountry"></polymer-cookie>
+
+
     </template>
 
     <style>
@@ -240,7 +246,7 @@
             },
 
             getLocalCart: function () {
-                this.$.localApi.call('getP4MCart',null, null, this.onCartData.bind(this) );
+                this.$.localApi.call('getP4MCart', null, null, this.onCartData.bind(this) );
             },
 
             getP4mCart: function () {
@@ -305,7 +311,7 @@
             updateP4mCart: function () {
                 this.$.orderSummary.showAsLoading();
                 this.$.p4mPurchase.setLoadingState(true);
-
+                //if (this.cartData.Id == null) return;
                 //Send changes to P4M
                 var cartMessage =
                 {
@@ -314,6 +320,7 @@
                     "Cart": this.cartData,
                     "DeliverToNewDropPoint": this._queuedNewAddress ? true : false
                 }
+                //console.log('Posting', cartMessage);
                 this.$.api.call('postCart', null, cartMessage, this.onRemoteCartData.bind(this));
             },
 
@@ -496,7 +503,7 @@
                 this.set('cartData.Tax', Number(e.detail.Tax));
                 var cartDiscount = this.cartData.Discounts.find((element, index, arr) => element.Code === e.detail.Code); //TODO: Change to bound function; arrow functions may not work in older browsers
                 if (cartDiscount) {
-                    console.log("Added existing discount")
+                    //console.log("Added existing discount")
                     if (cartDiscount.Description !== e.detail.Description ||
                         cartDiscount.Amount !== e.detail.Amount ||
                         cartDiscount.Code !== e.detail.Code)
@@ -561,7 +568,7 @@
                 };
                 var self = this;
                 this.$.api.call("postAddress", null, postData, function (result) {
-                    console.log("Got address result: ", result);
+                    //console.log("Got address result: ", result);
                     addressElement.detail.addressData.Id = result.Address.Id;
                     //addressElement.detail.mode = "view";
                     self.$.addressList.showAsLoaded();
@@ -592,6 +599,7 @@
                 }
 
                 //Preferred address
+                //Process a priority list of address preferences
                 var self = this;
                 var handlers = {
                     "useMyDeliveryAddress": function (callback) { self.selectPreferredAddress(callback); },
@@ -606,16 +614,16 @@
                 function runHandler(index) {
                     handler = handlerArray[index || 0];
                     if (handler) {
-                        console.log("Running handler", index);
+                        //console.log("Running handler", index);
                         handler(function (err, data) {
-                            console.log("Handler returned", err);
+                            //console.log("Handler returned", err);
                             if (err) {
                                 runHandler(index+1);
                             }
                         });
                     }
                     else {
-                        console.log("Finished running handlers");
+                        //console.log("Finished running handlers");
                     }
                 }
 
@@ -714,7 +722,7 @@
             },
 
             onGfsServiceChanged: function (e) {
-                console.log("p4m widget: onGfsServiceChanged():", e);
+                //console.log("p4m widget: onGfsServiceChanged():", e);
                 this.updateShipping(e.detail);
             },
 
