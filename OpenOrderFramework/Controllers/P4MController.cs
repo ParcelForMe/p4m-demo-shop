@@ -183,7 +183,7 @@ namespace OpenOrderFramework.Controllers
 
         async Task<P4MCart> GetOpenCartFromP4M()
         {
-            // update P4M with the current cart details
+            // retrieve the last unpurchased cart details
             var token = Request.Cookies["p4mToken"].Value;
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -297,6 +297,7 @@ namespace OpenOrderFramework.Controllers
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
+                    result.Discount = localCart.Discount;
                     result.Shipping = localCart.Shipping;
                     result.Tax = localCart.Tax;
                     result.Total = localCart.Total;
@@ -325,6 +326,7 @@ namespace OpenOrderFramework.Controllers
                 result.Amount = localCart.Discount;
                 result.Shipping = localCart.Shipping;
                 result.Tax = localCart.Tax;
+                result.Discount = localCart.Discount;
                 result.Total = localCart.Total;
             }
             catch (Exception e)
