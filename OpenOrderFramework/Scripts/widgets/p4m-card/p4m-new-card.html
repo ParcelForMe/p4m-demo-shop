@@ -130,7 +130,8 @@
             },
 
             onConsumerData: function (consumer) {
-                this.set('payerExist',(consumer.PaymentMethods.length > 0) ? "1" : "0");
+                this.set('payerExist', "1");
+                //this.set('payerExist',(consumer.PaymentMethods.length > 0) ? "1" : "0");
             },
 
             loadRealexForm: function() {
@@ -165,7 +166,6 @@
                     console.log("FRAME LOADED");
                     this.$.container.classList.remove('loading');
                 }
-
             },
 
             receiveMessage: function (event)
