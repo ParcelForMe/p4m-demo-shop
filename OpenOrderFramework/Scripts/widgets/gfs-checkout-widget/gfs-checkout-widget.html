@@ -1,4 +1,4 @@
-﻿<link rel="import" href="../../polymer/polymer.html" />
+﻿<link rel="import" href="../../Lib/polymer/polymer.html" />
 <link rel="import" href="../../Lib/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../Lib/iron-list/iron-list.html" />
 
@@ -13,7 +13,6 @@
 <link rel="import" href="../gfs-droppoint/gfs-droppoint.html" />
 <link rel="import" href="../gfs-droppoint/gfs-location-button.html" />
 <link rel="import" href="../gfs-calendar/gfs-calendar.html" />
-<link rel="import" href="../gfs-delivery-address/gfs-delivery-address.html" />
 <link rel="import" href="../map-region-manager/map-region-manager.html" />
 
 <script src="../../Lib/momentjs/min/moment.min.js"></script>
@@ -504,10 +503,7 @@
 
         <map-region-manager id="regionManager"></map-region-manager>
 
-		<div id="widgetContainer">
-            
-            <!--address-lookup-field on-ready1="_ready1" on-ready2="_ready2" on-foundplace="_panToPlace"></!--address-lookup-field-->
-
+		<div id="widgetContainer">          
             <paper-tabs selected="{{selectedTab}}">             
                 <paper-tab>{{calendarDeliveryTitle}}</paper-tab>
                 <paper-tab>Click and Collect</paper-tab>
@@ -581,13 +577,15 @@
                                         <paper-spinner active id="map-spinner"></paper-spinner>
                                     </div>
                                 </div>
-
+                                <template is="dom-if" if="{{_preferredDroppoints.length}}">
                                     <div class="preferredDroppoints">
                                         <h3>My Collection Points</h3>
                                         <template id="mapPreferredDropPointList" is="dom-repeat" items="{{_preferredDroppoints}}" sort="sortByDistance">
                                             <gfs-droppoint click-to-choose="true" on-select="_onSelectPreferredDroppoint" container-class="dp-mini-card" xon-droppoint-click="_onClickDroppoint" button-type="tick" disable-unchoose="true" droppoint-data="{{item}}" class="droppoint"></gfs-droppoint>
                                         </template>
                                     </div>
+                                </template>
+
 
                             </div>
                         </div>
@@ -1001,9 +999,10 @@
                     this.$.errorNotification = "No Access Token.. ";
                     this.$.errorNotification.show();
                 } else {
-                    this.$.ajaxPost.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
+                    this.$.ajaxPost.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession"; //"///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
+                    //this.$.ajaxPost.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
                     this.$.ajaxPost.body = actualPost;
-                    console.log("Initial POST", new Date().getTime());
+                    //console.log("Initial POST", new Date().getTime());
                     this.$.ajaxPost.headers = this._computeHeader();
                     this.$.ajaxPost.generateRequest();
 
@@ -1022,7 +1021,8 @@
             _handlePostResponse: function(e) {
                 // console.log("Followup GET", new Date().getTime());
                 this._sessionId = e.detail.response.substring(e.detail.response.lastIndexOf("/") + 1);
-                this.$.ajaxGet.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
+                this.$.ajaxGet.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
+                //this.$.ajaxGet.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
                 this.$.ajaxGet.headers = this._computeHeader();
 
                 //console.log('sessionID', this._sessionId);
@@ -1317,7 +1317,7 @@
 
 
             setPreferredDroppoints: function (droppointList) {
-                this._preferredDroppoints = droppointList;//.filter(function (item) { return true });
+                this._preferredDroppoints = []; //eeee droppointList;//.filter(function (item) { return true });
                 this._processPreferredDroppoints();
 
                 if (this._preferredDroppoints.length > 0) {             
@@ -1327,7 +1327,7 @@
             },
 
             setConsumerAddresses: function (addressList) {
-                console.log("Setting consumer addresses", addressList);
+                //console.log("Setting consumer addresses", addressList);
                 this.set('_consumerAddresses', addressList);
             },
 
@@ -1557,17 +1557,17 @@
                 // 'idle' event is triggered when the user stopped zooming/dragging;
                 google.maps.event.addListener(self._map, 'idle', function (event) {
                     //console.log(JSON.stringify(event));
-                    console.log('MAP EVENT idle');
+                    //console.log('MAP EVENT idle');
                     self._mapMoved();
                 });
 
                 google.maps.event.addListener(self._map, 'click', function (event) {
-                    console.log('MAP EVENT click');
+                    //console.log('MAP EVENT click');
                     self._unselectDropPoint();
                 });
 
                 google.maps.event.addListener(self._map, 'center_changed', function (event) {
-                    console.log('MAP EVENT center_changed');
+                    //console.log('MAP EVENT center_changed');
                     //self._unselectDropPoint();
                 });
 
@@ -1757,7 +1757,7 @@
 
             _reloadDroppoints: function() {
                 if (this._sessionId) {
-                    console.log('reloadDroppoints()');
+                    //console.log('reloadDroppoints()');
 
                     //Get viewport rectangle
                     this._updateMapViewPort();
@@ -1787,7 +1787,7 @@
 
             _requestDroppointsByGeoBoxes: function (boxes, callback) {
                 //TODO: Make an API component for this
-                this.$.ajaxGetDroppoints.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId + "&regions=" + JSON.stringify(boxes);
+                this.$.ajaxGetDroppoints.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId + "&regions=" + JSON.stringify(boxes);
                 this.$.ajaxGetDroppoints.headers = this._computeHeader();
                 this.$.ajaxGetDroppoints.generateRequest(); //Response handled in _handleGetDroppointsResponse
             },
@@ -1929,7 +1929,7 @@
                         this._loadDroppointMarkers([this._selectedDropPoint]);
                         this._currentMarker = this._selectedDropPoint.marker; //this._droppointById(this._selectedDropPoint.providerId, this._selectedDropPoint.droppointId).marker;
                     }
-                    console.log("### Opening info box");
+                    //console.log("### Opening info box");
                    
                     this.$.dropPointRadio.setAttribute('checked', 'true');
                     this._map.panTo(this._currentMarker.getPosition());
@@ -1941,7 +1941,7 @@
             },
 
             _droppointChanged: function(e) {
-                console.log('_droppointChanged', e.detail);
+                //console.log('_droppointChanged', e.detail);
                 var changedDroppoint = e.detail;
 
                 if (this._selectedDropPoint)
@@ -2016,7 +2016,7 @@
             },
 
             _selectCalendarShippingOption: function (e) {
-                console.log('Updating delivery options with', e.detail.shippingMethodId, e.detail.deliveryDate);
+                //console.log('Updating delivery options with', e.detail.shippingMethodId, e.detail.deliveryDate);
                 this.updateDeliveryOptions(e.detail.shippingMethodId, e.detail.deliveryDate);
             },
 
@@ -2142,7 +2142,7 @@
                     this.$$('#list-spinner').active = true;
                     this.$$('#list-loading').classList.remove('hidden');
                     this.$$('#standard-loading').classList.remove('hidden');
-                    this.$.ajaxPatch.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId;
+                    this.$.ajaxPatch.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession?sessionId=" + this._sessionId;
                     this.$.ajaxPatch.body = patchJson;
                     this.$.ajaxPatch.headers = this._computeHeader();
                     this.$.ajaxPatch.generateRequest();
@@ -2338,14 +2338,6 @@
 
 			_panToPlace: function (e) {
 			    this._panToGeoLocation(e.detail.geometry.location);
-            },
-
-            _ready1: function (e) {
-                console.log('ready1');
-            },
-
-            _ready2: function (e) {
-                console.log('ready2')
             }
 
         });
