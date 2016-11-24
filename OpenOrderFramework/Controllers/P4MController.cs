@@ -53,6 +53,7 @@ namespace OpenOrderFramework.Controllers
             if (string.IsNullOrWhiteSpace(token))
             {
                 var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
+                
                 var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
                     uri,
                    "parcel_4_me",
@@ -185,6 +186,7 @@ namespace OpenOrderFramework.Controllers
         {
             // retrieve the last unpurchased cart details
             var token = Request.Cookies["p4mToken"].Value;
+            
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var sessionId = HttpContext.Session[ShoppingCart.CartSessionKey].ToString();
