@@ -198,8 +198,7 @@
 .card.mastercard.identified .logo.mastercard {
   opacity: 1; }
 
-body {
-  font-family: "Helvetica Neue"; }
+
   body > *, body > *:before, body > *:after {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -271,7 +270,7 @@ body {
         opacity: 1;
         font-weight: 700; }
     .card .front .cvc, .card .back .cvc {
-      font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+      
       font-size: 14px; }
     .card .front .shiny, .card .back .shiny {
       width: 50px;
@@ -307,12 +306,12 @@ body {
       position: relative;
       bottom: 5px; }
     .card .front .lower .number {
-      font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+      
       font-size: 24px;
       clear: both;
       margin-bottom: 30px; }
     .card .front .lower .expiry {
-      font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+      
       letter-spacing: 0em;
       position: relative;
       float: right;
@@ -339,7 +338,7 @@ body {
         bottom: 0; }
     .card .front .lower .name {
       text-transform: uppercase;
-      font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+      
       float: left;
       font-size: 20px;
       position: relative;

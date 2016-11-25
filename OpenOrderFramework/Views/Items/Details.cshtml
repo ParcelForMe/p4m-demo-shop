@@ -60,7 +60,7 @@
     <h4>Item</h4>
     <hr />
     <dl class="dl-horizontal">
-        <img src="@Url.Action("RenderImage", new { id = Model.ID})" />
+        <img src="@Model.ItemPictureUrl" style="max-width:200px;" />
     
     <dl class="dl-horizontal">
         <dt>
@@ -87,13 +87,6 @@
             @Html.DisplayFor(model => model.Price)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ItemPictureUrl)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ItemPictureUrl)
-        </dd>
 
     </dl>
 </div>

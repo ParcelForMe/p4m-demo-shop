@@ -223,6 +223,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611240048151_Initial.cs" />
+    <Compile Include="Migrations\201611240048151_Initial.Designer.cs">
+      <DependentUpon>201611240048151_Initial.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AdminViewModel.cs" />
@@ -306,6 +310,8 @@
     <Content Include="Content\variables.less" />
     <Content Include="Content\datepicker.less" />
     <Content Include="Content\bootswatch.less" />
+    <Content Include="bower.json" />
+    <Content Include=".bowerrc" />
     <None Include="Properties\PublishProfiles\ninateststore - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\ninateststore - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\orderframework.pubxml" />
@@ -924,6 +930,11 @@
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201611240048151_Initial.resx">
+      <DependentUpon>201611240048151_Initial.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
