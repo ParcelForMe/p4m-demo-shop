@@ -456,7 +456,6 @@ namespace OpenOrderFramework.Controllers
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
                 if (!setupResult.Success)
                     throw new Exception(setupResult.Error);
-                // retailer has opted to use 3D Secure and the consumer is enrolled
                 result.Token = setupResult.Token;
             }
             catch (Exception e)
@@ -631,7 +630,7 @@ namespace OpenOrderFramework.Controllers
 
         async Task<CartMessage> GetCartFromP4MAsync(string cartId)
         {
-            // update P4M with the current cart details
+            // locally store the purchased cart from P4M
             var token = Request.Cookies["p4mToken"].Value;
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
