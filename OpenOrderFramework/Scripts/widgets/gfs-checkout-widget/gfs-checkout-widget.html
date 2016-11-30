@@ -851,9 +851,9 @@
                 //
                 // Do not modify these properties.
 
-                _droppointOpened: {
-                    type: Boolean,
-                    value: false
+                _postData: {
+                    type: Object,
+                    value: {}
                 },
 
                 _autoChooseCollectionPoint: {
@@ -1008,28 +1008,32 @@
             // METHODS
 
             // This function is called as soon as the widget is ready
-            ready: function() {
-                var theJson = atob(this.gfsData);
-                theJson = theJson.replace(/\r?\n|\r/g, "");
-                actualPost = JSON.parse(theJson);
+            ready: function () {
+                console.log("GFS Checkout ready", new Date().getTime());
                 this.countryCode = this.defaultCountryCode;
-                this.postCode = this.defaultPostCode;
+                this.postCode = this.defaultPostCode;              
+                this._postData = JSON.parse(atob(this.gfsData).replace(/\r?\n|\r/g, ""));
+                this.postGfsData();
+            },
 
+            postGfsData: function () {
                 if (this.accessToken === "") {
                     this.$.errorNotification = "No Access Token.. ";
                     this.$.errorNotification.show();
-                } else {
-                    this.$.ajaxPost.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession"; //"///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
-                    //this.$.ajaxPost.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
-                    this.$.ajaxPost.body = actualPost;
-                    //console.log("Initial POST", new Date().getTime());
-                    this.$.ajaxPost.headers = this._computeHeader();
-                    this.$.ajaxPost.generateRequest();
-
-                    /*if (this.defaultDelivery === '') { // set Standard delivery if none is supplied
-                        this.defaultDelivery = 'Standard';
-                    }*/
                 }
+                else {
+                    this.$.ajaxPost.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession"; //"///rest.api.checkout.justshoutgfs.com/api/CheckoutSession";
+                    this.$.ajaxPost.body = this._postData;
+                    this.$.ajaxPost.headers = this._computeHeader();
+                    console.log("GFS Checkout POST send", new Date().getTime());
+                    this.$.ajaxPost.generateRequest();
+                }
+            },
+
+            setGfsOrderValue: function (value) {
+                console.log('setGfsOrderValue(' + value + ')');
+                this._postData.Request.Order.Value.Value = value;
+                this.postGfsData();
             },
 
             _computeHeader: function () {
@@ -1040,16 +1044,19 @@
 
             _handlePostResponse: function(e) {
                 // console.log("Followup GET", new Date().getTime());
+                console.log("GFS Checkout POST response", new Date().getTime());
                 this._sessionId = e.detail.response.substring(e.detail.response.lastIndexOf("/") + 1);
                 this.$.ajaxGet.url = "///rest.test.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
                 //this.$.ajaxGet.url = "///rest.api.checkout.justshoutgfs.com/api/CheckoutSession/" + this._sessionId;
                 this.$.ajaxGet.headers = this._computeHeader();
 
                 //console.log('sessionID', this._sessionId);
+                console.log("GFS Checkout GET send", new Date().getTime());
                 this.$.ajaxGet.generateRequest();
             },
 
-            _handleGetResponse: function(e) {
+            _handleGetResponse: function (e) {
+                console.log("GFS Checkout GET response", new Date().getTime());
                 this.$$('#list-spinner').active = false;
                 this.$$('#list-loading').classList.add('hidden');
                 this.$$('#standard-loading').classList.add('hidden');

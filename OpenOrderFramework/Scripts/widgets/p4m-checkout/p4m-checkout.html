@@ -223,6 +223,7 @@
 
             ready: function()
             {
+                console.log("P4M Checkout ready", new Date().getTime());
                 var self = this;
                 this.Tabs = { "ORDER": 0, "DELIVERY": 1, "PAYMENT": 2, "ADDRESS": 3 };
                 this._notUseGfsCheckout = !this.useGfsCheckout;
@@ -264,15 +265,18 @@
                 if (changes.length > 0) {
                     this.$.localApi.call('itemQtyChanged', {}, changes, function (newCartTotals) {
                         //console.log("Called local api itemQtyChanged");
+                        console.log("sendCartItemChanges(): itemQtyChanged: new cart totals", newCartTotals);
                         self.$.cart.clearChanges();
                         self.updCartTotals(newCartTotals);
                         self.cartData.Discounts = newCartTotals.Discounts;
                         self.updateP4mCart();
                     });
+
                 }
                 else {
                     //console.log("No changes to send");
                 }
+
 
 
             },
@@ -281,6 +285,16 @@
                 this.cartData.Tax = newCartTotals.Tax;
                 this.cartData.ShippingAmt = newCartTotals.Shipping;
                 this.cartData.Total = newCartTotals.Total;
+
+                if (this.$.gfsCheckoutWidget) {
+                    var cartValue = Number(this.cartData.Total - (this.cartData.ShippingAmt || 0));
+                    console.log(cartValue, this.$.gfsCheckoutWidget._postData.Request.Order.Value.Value);
+                    if (cartValue != this.$.gfsCheckoutWidget._postData.Request.Order.Value.Value) {
+                        console.log("Updating GFS Checkout");
+                        this.$.gfsCheckoutWidget.setGfsOrderValue(cartValue);
+                    }
+
+                }
             },
 
             onConsumerData: function(data) {
@@ -309,8 +323,7 @@
             },
 
             updateP4mCart: function () {
-                this.$.orderSummary.showAsLoading();
-                this.$.p4mPurchase.setLoadingState(true);
+                console.log('updateP4mCart()');
                 //if (this.cartData.Id == null) return;
                 //Send changes to P4M
                 var cartMessage =
@@ -321,10 +334,19 @@
                     "DeliverToNewDropPoint": this._queuedNewAddress ? true : false
                 }
                 //console.log('Posting', cartMessage);
-                this.$.api.call('postCart', null, cartMessage, this.onRemoteCartData.bind(this));
+                //var cartValue = Number(this.cartData.Total - (this.cartData.ShippingAmt || 0));
+               // if (cartValue) {
+                    this.$.orderSummary.showAsLoading();
+                    this.$.p4mPurchase.setLoadingState(true);
+                    
+
+                    this.$.api.call('postCart', null, cartMessage, this.onRemoteCartData.bind(this));
+                //}
+                
             },
 
-            onRemoteCartData: function(data) {
+            onRemoteCartData: function (data) {
+                console.log('onRemoteCartData()');
                 if (!data.Success) {
                     console.error(data.Error);
                     this.onCartData(data);
@@ -334,7 +356,7 @@
                     window.location.reload(true);
                 }                  
                 else {
-                    this.onCartData(data);
+                    this.onCartData(data);                                     
                 }
                     
             },
@@ -346,7 +368,7 @@
                 if (data.Success) {
                     this.cartData = data.Cart;
                     if (this.cartData && this.cartData.Id === null) {
-                        //console.log("Updating P4M");
+                        console.log("Creating initial p4m cart");
                         //In this case we have retrieved the cart from the local server so we need to update P4M
                         this.updateP4mCart();
                     }
@@ -357,13 +379,20 @@
             },
 
             onCartItemsChange: function (e) {
-                //console.log('p4m-checkout: onCartItemsChange()', JSON.stringify(e));
+                console.log('p4m-checkout: onCartItemsChange()');//, JSON.stringify(e));
                 //If this is a valid change record,
-                if (e.path) {
+                var beforeHash = JSON.stringify(e.base);
+                var afterHash = JSON.stringify(e.value);
+                if (e.path && beforeHash !== afterHash ) {
                     //Start timer, then send changes.
                     //If more changes are detected while the timer is active, reset the timer.
+                    console.log("onCartItemsChange: Preparing to send card changes");
                     if (this._changeTimer) window.clearTimeout(this._changeTimer);
                     this._changeTimer = window.setTimeout(this.sendCartItemChanges.bind(this), 2000);
+                }
+                else
+                {
+                    console.log("onCartItemsChange: No cart changes");
                 }
             },
 
@@ -382,7 +411,7 @@
                 var shippingDetails = { 'Service': data.service, 'Amount': data.shipping, 'DueDate': data.expDeliveryDate };
                 // got new shipping details so we need to get updated tax from the host
                 this.$.localApi.call('shippingDetails', null, shippingDetails, function (cartTotals) {
-                    self.updCartTotals(cartTotals); // this updates tax
+                    //self.updCartTotals(cartTotals); // this updates tax
                     self.cartData.Carrier = data.carrier;
                     self.cartData.ShippingAmt = data.shipping;
                     self.cartData.ServiceName = data.service;
