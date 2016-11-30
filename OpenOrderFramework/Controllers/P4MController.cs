@@ -229,8 +229,10 @@ namespace OpenOrderFramework.Controllers
                 var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
                 var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
                     uri,
-                    "ambitious_alice",
-                    "m@dhatt3r");
+                   "parcel_4_me",
+                   "needmoreparcels");
+                   // "ambitious_alice",
+                   // "m@dhatt3r");
 
                 var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
                 token = Base64Encode(tokenResponse.AccessToken);
@@ -238,12 +240,8 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
             ViewBag.AccessToken = token;
-            //zzzzzz
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
-
-            // set the initial address
-            // ViewBag.InitialAddress = "";
 
             // define initial post data
             ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
