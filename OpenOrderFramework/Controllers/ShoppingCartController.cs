@@ -18,7 +18,7 @@ namespace OpenOrderFramework.Controllers
         {
             // ***** P4M *****
             if (this.Request.Cookies["p4mToken"] != null && !string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value))
-                return RedirectToAction("p4mCheckout", "checkout");
+                return RedirectToAction("checkout", "p4m");
             // ***** P4M *****
 
             var cart = ShoppingCart.GetCart(this.HttpContext);

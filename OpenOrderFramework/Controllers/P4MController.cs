@@ -41,7 +41,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("checkout/p4mCheckout")]
+        [Route("p4m/checkout")]
         public ActionResult P4MCheckout()
         {
             var localCart = ShoppingCart.GetCart(this.HttpContext);
@@ -53,6 +53,7 @@ namespace OpenOrderFramework.Controllers
             if (string.IsNullOrWhiteSpace(token))
             {
                 var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
+                
                 var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
                     uri,
                    "parcel_4_me",
@@ -183,8 +184,9 @@ namespace OpenOrderFramework.Controllers
 
         async Task<P4MCart> GetOpenCartFromP4M()
         {
-            // update P4M with the current cart details
+            // retrieve the last unpurchased cart details
             var token = Request.Cookies["p4mToken"].Value;
+            
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var sessionId = HttpContext.Session[ShoppingCart.CartSessionKey].ToString();
@@ -249,7 +251,7 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpPost]
-        [Route("p4m/shippingDetails")]
+        [Route("p4m/updShippingService")]
         public JsonResult ShippingDetails(ShippingDetails details)
         {
             var result = new CartTotalsMessage();
@@ -295,6 +297,7 @@ namespace OpenOrderFramework.Controllers
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
+                    result.Discount = localCart.Discount;
                     result.Shipping = localCart.Shipping;
                     result.Tax = localCart.Tax;
                     result.Total = localCart.Total;
@@ -323,6 +326,7 @@ namespace OpenOrderFramework.Controllers
                 result.Amount = localCart.Discount;
                 result.Shipping = localCart.Shipping;
                 result.Tax = localCart.Tax;
+                result.Discount = localCart.Discount;
                 result.Total = localCart.Total;
             }
             catch (Exception e)
@@ -452,7 +456,6 @@ namespace OpenOrderFramework.Controllers
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
                 if (!setupResult.Success)
                     throw new Exception(setupResult.Error);
-                // retailer has opted to use 3D Secure and the consumer is enrolled
                 result.Token = setupResult.Token;
             }
             catch (Exception e)
@@ -627,7 +630,7 @@ namespace OpenOrderFramework.Controllers
 
         async Task<CartMessage> GetCartFromP4MAsync(string cartId)
         {
-            // update P4M with the current cart details
+            // locally store the purchased cart from P4M
             var token = Request.Cookies["p4mToken"].Value;
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

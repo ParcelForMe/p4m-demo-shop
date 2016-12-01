@@ -14,11 +14,14 @@ p{
 
 .jumbotron{
     background-color:transparent;
-   box
-  
-
 }
-@media (min-width: 1000px) {
+.pad-top-xs{
+        padding-top:10px;
+    }
+.form-control{
+    color:#797979;
+}
+@media (min-width: 992px) {
     .jumbotron {
         background-image:url("../Images/Catwomenmainimg.jpg");
         background-repeat:no-repeat;
@@ -26,4 +29,142 @@ p{
     background-position:right;
   
     }
+}
+@media (min-width: 480px) {
+    .pad-top-xs{
+        padding-top:0px;
+    }
+
+}
+
+.selected-droppoint {
+    width: auto !important;
+	margin: 0 !important;
+}
+
+/* shopping card widget */
+.basket-info {
+    padding: 10px; 
+    background-color: #fff;
+	border: 1px solid #fff;
+    border-radius: 3px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2)
+}
+
+	.basket-info h3 {
+		margin: 0 0 10px;
+		padding: 0 0 5px
+	}
+
+	.basket-info .row {
+		margin: 0;
+		padding: 10px 0;
+		border-bottom: 1px solid #e0dede
+	}
+		
+		.basket-info .row:last-child {
+			border-bottom: none
+		}
+
+	.basket-info .total-price {
+		margin: 15px 0 5px;
+		font-weight: bold;
+	}
+
+	.basket-info .col-lg-4 {
+		padding: 0
+	}
+
+	input[type="checkbox"]#RememberMe {
+		margin-left: 0
+	}
+
+
+/* Error message */
+#service-error {
+    margin: 0;
+    font-size: 14px;
+    display: none;
+    background-color: #d60000;
+    color: white;
+    min-width: 288px;
+    width: 100%;
+    padding: 16px 24px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+    -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 736px) and (orientation: landscape) {
+
+	.col-lg-3, .col-lg-6 {
+		float: left
+	}
+	
+	.col-lg-3 {
+		width: 27%;
+	}
+
+	.col-lg-6 {
+		width: 45%
+	}
+	
+	hr {
+		margin: 0;
+		border: none
+	}
+
+	#socialLoginForm h4, #loginForm h4 {
+		margin-top: 25px
+	}
+
+		#socialLoginForm .guestSubmit {
+			padding-left: 0
+		}
+
+		#loginForm .form-group {
+			margin-bottom: 10px
+		}
+
+		#loginForm .checkbox {
+			margin: 5px 0 15px
+		}
+}
+
+
+@media (max-width: 568px) and (orientation: landscape) {
+	
+	.col-lg-3, .col-lg-6 {
+		width: 100%;
+		float: none
+	}
+}
+
+
+@media (max-width: 667px) {
+
+	hr {
+		margin: 0;
+		border: none
+	}
+
+	#socialLoginForm h4, #loginForm h4 {
+		margin-top: 25px
+	}
+
+		#socialLoginForm .guestSubmit {
+			padding-left: 0
+		}
+
+		#loginForm .form-group {
+			margin-bottom: 10px
+		}
+
+		#loginForm .checkbox {
+			margin: 5px 0 15px
+		}
 }

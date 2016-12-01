@@ -2,8 +2,8 @@
 @{
     ViewBag.Title = "P4MCheckout";
 }
-<link rel="import" href="/Scripts/widgets/p4m-checkout/p4m-checkout.html">
-<link rel="import" href="/Scripts/widgets/p4m-login/p4m-login.html">
+<link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-checkout/p4m-checkout.html">
+<link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-login/p4m-login.html">
 
 
 <p4m-checkout use-paypal="true" use-gfs-checkout="true" gfs-access-token="@ViewBag.AccessToken" gfs-data="@ViewBag.InitialData" initial-address="@ViewBag.InitialAddress" initial-post-code="@ViewBag.InitialPostCode" initial-country-code="@ViewBag.InitialCountryCode"></p4m-checkout>

@@ -1,1 +1,0 @@
-xcopy .\bower_components\* .\Lib /H /I /C /E /Y

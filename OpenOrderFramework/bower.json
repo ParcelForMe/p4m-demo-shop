@@ -1,0 +1,21 @@
+{
+  "name": "p4m-demo-shop",
+  "homepage": "https://github.com/ParcelForMe/p4m-demo-shop",
+  "authors": [
+    "Barry Earsman <barry@earsman.com>"
+  ],
+  "description": "Demonstration shop",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "p4m-widgets": "https://github.com/ParcelForMe/p4m-widgets.git#0.0.2"
+  }
+}

@@ -40,10 +40,28 @@ namespace OpenOrderFramework.Controllers
         //
         // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public async Task<ActionResult> Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
+            //NC Start of auto login code - always auto sign in as guest, copied from the guest post code!
+            GuestViewModel model = new GuestViewModel { GuestAcct = "Guest@Guest.com", GuestPassword = "guest1" };
+            var result = await SignInHelper.PasswordSignIn(model.GuestAcct, model.GuestPassword, false, shouldLockout: false);
+            switch (result)
+            {
+                case SignInStatus.Success:
+                    return RedirectToLocal(returnUrl);
+                case SignInStatus.LockedOut:
+                    return View("Lockout");
+                case SignInStatus.RequiresTwoFactorAuthentication:
+                    return RedirectToAction("SendCode", new { ReturnUrl = returnUrl });
+                case SignInStatus.Failure:
+                default:
+                    ModelState.AddModelError("", "Invalid login attempt.");
+                    return View(model);
+            }
+            //NC - End of auto sign in code
             return View();
+
         }
 
         private SignInHelper _helper;
