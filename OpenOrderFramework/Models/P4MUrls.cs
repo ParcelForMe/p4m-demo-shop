@@ -4,7 +4,7 @@
     {
         public P4MUrls()
         {
-            AppMode = "dev";
+            AppMode = System.Configuration.ConfigurationManager.AppSettings["appMode"];
             P4MUrl = $"https://{AppMode}.parcelfor.me";
             BaseIdSrvUrl = $"{P4MUrl}:44333";
             BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
@@ -13,11 +13,13 @@
             TokenEndpoint = $"{BaseIdSrvUrl}/connect/token";
             LogoutUrl = $"{BaseIdSrvUrl}/connect/endsession";
 
-            RedirectUrl = "http://localhost:3000/p4m/getP4MAccessToken";
+            
+
+            RedirectUrl = System.Configuration.ConfigurationManager.AppSettings["redirectUrl"];
             LogoutForm = "logoutForm";
 
-            ClientId = "10004";
-            ClientSecret = "secret";
+            ClientId = System.Configuration.ConfigurationManager.AppSettings["clientId"];
+            ClientSecret = System.Configuration.ConfigurationManager.AppSettings["clientSecret"];
         }
 
         public string AuthBaseUrl { get; set; }
