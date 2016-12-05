@@ -431,7 +431,7 @@ namespace OpenOrderFramework.Controllers
             var parameters = new TokenValidationParameters
             {
                 ValidAudience = _urls.ClientId,
-                ValidIssuers = new List<string> { _urls.BaseIdSrvUrl, "https://parcelfor.me" },
+                ValidIssuers = new List<string> { _urls.BaseIdSrvUrl, "https://parcelfor.me", "https://dev.parcelfor.me" },
                 IssuerSigningToken = new X509SecurityToken(cert)
             };
 

@@ -286,10 +286,12 @@ namespace OpenOrderFramework.Controllers
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
                 localCart.Shipping = details.Amount;
-                localCart.CalcTax();
-                result.Discount = localCart.Discount;
-                result.Tax = localCart.Tax;
-                result.Total = localCart.Total;
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
+                //result.Shipping = localCart.Shipping;
+                //result.Discount = localCart.Discount;
+                //result.Tax = localCart.Tax;
+                //result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -320,14 +322,14 @@ namespace OpenOrderFramework.Controllers
                         storeDB.CartDiscounts.Add(disc);
                         storeDB.SaveChanges();
                     }
-                    localCart.CalcTax();
+                    GetCartTotals(result, localCart);
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
-                    result.Discount = localCart.Discount;
-                    result.Shipping = localCart.Shipping;
-                    result.Tax = localCart.Tax;
-                    result.Total = localCart.Total;
+                    //result.Discount = localCart.Discount;
+                    //result.Shipping = localCart.Shipping;
+                    //result.Tax = localCart.Tax;
+                    //result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -348,13 +350,14 @@ namespace OpenOrderFramework.Controllers
                 var disc = storeDB.CartDiscounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discountCode).FirstOrDefault();
                 storeDB.CartDiscounts.Remove(disc);
                 storeDB.SaveChanges();
-                localCart.CalcTax();
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
                 result.Code = discountCode;
                 result.Amount = localCart.Discount;
-                result.Shipping = localCart.Shipping;
-                result.Tax = localCart.Tax;
-                result.Discount = localCart.Discount;
-                result.Total = localCart.Total;
+                //result.Shipping = localCart.Shipping;
+                //result.Tax = localCart.Tax;
+                //result.Discount = localCart.Discount;
+                //result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -378,18 +381,30 @@ namespace OpenOrderFramework.Controllers
                     var roundQty = (int)Math.Round(chgItem.Qty);
                     await localCart.SetItemQtyAsync(item.ID, roundQty);
                 }
-                localCart.CalcTax();
-                result.Tax = localCart.Tax;
-                result.Shipping = localCart.Shipping;
-                result.Discount = localCart.Discount;
-                result.Total = localCart.Total;
-                result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
+                //result.Tax = localCart.Tax;
+                //result.Shipping = localCart.Shipping;
+                //result.Discount = localCart.Discount;
+                //result.Total = localCart.Total;
+                //result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
             {
                 result.Error = e.Message;
             }
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        void GetCartTotals(CartTotalsMessage result, ShoppingCart localCart = null)
+        {
+            if (localCart == null)
+                localCart = ShoppingCart.GetCart(this.HttpContext);
+            localCart.CalcTax();
+            result.Tax = localCart.Tax;
+            result.Shipping = localCart.Shipping;
+            result.Discount = localCart.Discount;
+            result.Total = localCart.Total;
         }
 
         [HttpPost]
@@ -455,7 +470,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/paypalSetup")]
-        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal)
+        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal, P4MAddress newDropPoint)
         {
             // this is the first part of a paypal transaction, which sends a request from P4M to Realex
             // when this returns we redirect the consumer to PP in a popup window
@@ -477,7 +492,12 @@ namespace OpenOrderFramework.Controllers
                 var token = Request.Cookies["p4mToken"].Value;
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
+
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, NewDropPoint = newDropPoint };
+                var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
+                var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "paypalSetup", content);
+
+                //var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
