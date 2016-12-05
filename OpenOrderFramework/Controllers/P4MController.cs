@@ -13,6 +13,7 @@ using System.Net.Http.Formatting;
 using Newtonsoft.Json;
 using System.Text;
 using OpenOrderFramework.ViewModels;
+using Thinktecture.IdentityModel.Client;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -21,6 +22,7 @@ namespace OpenOrderFramework.Controllers
         ApplicationDbContext storeDB = new ApplicationDbContext();
         private ApplicationUserManager _userManager;
         static HttpClient _httpClient = new HttpClient();
+        static TokenResponse _clientToken = null;
         static P4MUrls _urls = new P4MUrls();
 
         public ApplicationUserManager UserManager
@@ -42,8 +44,14 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/checkout")]
-        public ActionResult P4MCheckout()
+        public async Task<ActionResult> P4MCheckout()
         {
+            if (Request.Cookies["p4mToken"] == null || string.IsNullOrWhiteSpace(Request.Cookies["p4mToken"].Value))
+            {
+                // no token so we must be in exclusive mode
+                if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive || !await GetGuestTokenAsync())
+                    return Redirect("/home");
+            }
             var localCart = ShoppingCart.GetCart(this.HttpContext);
             var cart = GetP4MCartFromLocalCart();
             if (localCart == null || cart == null || cart.Items.Count == 0)
@@ -74,22 +82,41 @@ namespace OpenOrderFramework.Controllers
             ViewBag.AccessToken = token;          
             ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
-            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;//p4mDefaultPostCode
+            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;
             if (ViewBag.InitialCountryCode == null)
             {
-                ViewBag.InitialCountryCode = "GB";
+                ViewBag.InitialCountryCode = P4MUrls.DefaultInitialCountryCode;
             }
             if (ViewBag.InitialPostCode == null)
             {
-                ViewBag.InitialPostCode = "W1A 0AX";
+                ViewBag.InitialPostCode = P4MUrls.DefaultInitialPostCode;
             }
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
             ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
-
-
+            
             // Return the view
             return View("P4MCheckout");
+        }
+
+        async Task<bool> GetGuestTokenAsync()
+        {
+            // consumer is unknown so if we're in exclusive mode we need a guest token to access the P4M API
+            if (_clientToken == null)
+            {
+                // get our client token - this can be cached
+                var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
+                _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
+            }
+            _httpClient.SetBearerToken(_clientToken.AccessToken);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var locale = Request.Cookies["p4mLocale"].Value;
+            var result = await _httpClient.GetAsync($"{_urls.BaseApiAddress}guestAccessToken/{locale}");
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<TokenMessage>(messageString);
+            if (message.Success)
+                Response.Cookies["p4mToken"].Value = message.Token;
+            return message.Success;
         }
 
         //async Task AddItemsToP4MCartAsync()
