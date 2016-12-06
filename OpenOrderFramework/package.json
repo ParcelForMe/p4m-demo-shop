@@ -3,6 +3,8 @@
 	"name": "p4m-demo-shop",
 	"private": true,
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "del": "^2.2.2",
+    "gulp-util": "^3.0.7"
   }
 }
