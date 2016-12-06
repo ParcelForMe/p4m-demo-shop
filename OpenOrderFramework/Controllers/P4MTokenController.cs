@@ -170,9 +170,12 @@ namespace OpenOrderFramework.Controllers
         public JsonResult IsLocallyLoggedIn()
         {
             var result = new P4MBaseMessage();
-            var authUser = AuthenticationManager.User;
-            if (authUser == null || !authUser.Identity.IsAuthenticated)
-                result.Error = "Not logged in";
+            if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive)
+            {
+                var authUser = AuthenticationManager.User;
+                if (authUser == null || !authUser.Identity.IsAuthenticated)
+                    result.Error = "Not logged in";
+            }
             this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
             return Json(result, JsonRequestBehavior.AllowGet);
         }
