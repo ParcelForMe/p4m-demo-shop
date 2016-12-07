@@ -79,7 +79,8 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Value = token;
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
-            ViewBag.AccessToken = token;          
+            ViewBag.AccessToken = token;
+            ViewBag.HostType = _urls.AppMode;
             ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
             ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;

@@ -6,4 +6,13 @@
 <link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-login/p4m-login.html">
 
 
-<p4m-checkout use-paypal="true" use-gfs-checkout="true" gfs-access-token="@ViewBag.AccessToken" gfs-data="@ViewBag.InitialData" initial-address="@ViewBag.InitialAddress" initial-post-code="@ViewBag.InitialPostCode" initial-country-code="@ViewBag.InitialCountryCode"></p4m-checkout>
+<p4m-checkout use-paypal="true" 
+              host-type="@ViewBag.HostType"
+              use-gfs-checkout="true" 
+              gfs-access-token="@ViewBag.AccessToken" 
+              gfs-data="@ViewBag.InitialData" 
+              initial-address="@ViewBag.InitialAddress" 
+              initial-post-code="@ViewBag.InitialPostCode" 
+              initial-country-code="@ViewBag.InitialCountryCode">
+
+</p4m-checkout>
