@@ -5,7 +5,7 @@
     {
         public P4MUrls()
         {
-            AppMode = "local";// System.Configuration.ConfigurationManager.AppSettings["appMode"];
+            AppMode = System.Configuration.ConfigurationManager.AppSettings["appMode"];
             P4MUrl = $"https://{AppMode}.parcelfor.me";
             BaseIdSrvUrl = $"{P4MUrl}:44333";
             BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
