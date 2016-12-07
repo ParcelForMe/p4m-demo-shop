@@ -333,6 +333,92 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\Lib\p4m-widgets\address-lookup-field\address-lookup-field.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-calendar\gfs-calendar.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\css\custom.css" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\gfs-checkout-widget.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\back_button.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\Collect Plus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\DE\Collect Plus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\DE\Doddle.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\DE\dpd.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\DE\Hermes.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\DE\Inpost.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\Doddle.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\dot_check.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\dpd.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\dpd2.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\FR\Collect Plus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\FR\Doddle.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\FR\dpd.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\FR\Hermes.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\FR\Inpost.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\GB\Collect Plus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\GB\Doddle.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\GB\dpd.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\GB\Hermes.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\GB\Inpost.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\Gfs.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\Hermes.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\home.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\icon_marker_red.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\icon_peli_off.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\icon_peli_on.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\Inpost.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\locateme.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\tick.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\tick_on.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\images\x.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\gfs-droppoint-text.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\gfs-droppoint.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\gfs-location-button.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\Collect Plus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\Doddle.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\dpd.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\Gfs.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\Hermes.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\Inpost.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\opensign.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\parking.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\tick.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-droppoint\images\tick_on.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\gfs-shared\gfs.css" />
+    <Content Include="Scripts\Lib\p4m-widgets\local-image-widget\local-image.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\local-image\local-image.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\map-region-manager\map-region-manager.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-address-list\p4m-address-list.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-address\p4m-address-text.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-address\p4m-address.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-api\p4m-api.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card-list\p4m-card-list.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\amex.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\cirrus.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\diners.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\maestro.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\mastercard.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\assets\visa.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\p4m-card.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-card\p4m-new-card.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-cart-card\p4m-cart-card.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-cart\p4m-cart.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-checkout\p4m-checkout.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-delivery\p4m-delivery.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-discount-input\p4m-discount-input.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-discount-list\p4m-discount-list.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-get-html\p4m-get-html.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-login\p4m-login.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-order-summary\p4m-order-summary.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-order-text\p4m-order-glance.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-order-text\p4m-order-text.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-overlay\p4m-overlay.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\p4m-profile.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\peli-logo-green.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\peli-logo-grey.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-purchase\p4m-purchase.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-register\logo-icon.png" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-register\p4m-register.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-shared\p4m.css" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-wish\p4m-wish.html" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
@@ -433,6 +519,9 @@
     <Content Include="Views\P4M\P4MDelivery.cshtml" />
     <Content Include="Views\P4M\P4MRedirect.cshtml" />
     <Content Include="Views\P4M\P4M3DSPurchaseComplete.cshtml" />
+    <Content Include="Scripts\Lib\p4m-widgets\bower.json" />
+    <Content Include="Scripts\Lib\p4m-widgets\LICENSE" />
+    <Content Include="Scripts\Lib\p4m-widgets\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -478,13 +567,11 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-
   <Target Name="BeforeBuild">
     <ItemGroup>
       <Content Include="Scripts\Lib\**\*" />
-    </ItemGroup>    
+    </ItemGroup>
   </Target>
-
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
