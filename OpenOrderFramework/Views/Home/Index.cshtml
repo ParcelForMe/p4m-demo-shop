@@ -1,7 +1,15 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 }
-<link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-register/p4m-register.html">
+
+@if (HttpContext.Current.IsDebuggingEnabled)
+{
+    <link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-register/p4m-register.html">
+}
+else
+{
+    <link rel="import" href="/Scripts/p4m-widget.vulcanized.html">
+}
 
 <div style="display: flex; flex-direction: row; justify-content: space-between">
     <div class="jumbotron" style="background-image: none">       
