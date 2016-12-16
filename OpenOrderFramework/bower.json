@@ -16,6 +16,6 @@
     "tests"
   ],
   "dependencies": {
-    "p4m-widgets": "https://github.com/ParcelForMe/p4m-widgets.git#main"
+    "p4m-widgets": "https://github.com/ParcelForMe/p4m-widgets.git#master"
   }
 }
