@@ -514,7 +514,7 @@
     <Content Include="Views\Manage\GuestIndex.cshtml" />
     <Content Include="Views\Checkout\Delivery.cshtml" />
     <Content Include="Views\Checkout\Payment.cshtml" />
-    <Content Include="Views\P4MToken\ReturnToken.cshtml" />
+    <Content Include="Views\P4M\ClosePopup.cshtml" />
     <Content Include="Views\P4M\P4MCheckout.cshtml" />
     <Content Include="Views\P4M\P4MDelivery.cshtml" />
     <Content Include="Views\P4M\P4MRedirect.cshtml" />
@@ -522,6 +522,7 @@
     <Content Include="Scripts\Lib\p4m-widgets\bower.json" />
     <Content Include="Scripts\Lib\p4m-widgets\LICENSE" />
     <Content Include="Scripts\Lib\p4m-widgets\README.md" />
+    <Content Include="Views\P4M\P4MLogin.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

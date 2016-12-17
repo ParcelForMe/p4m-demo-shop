@@ -23,6 +23,13 @@ namespace OpenOrderFramework.Models
         public bool HasOpenCart { get; set; }
     }
 
+    public class ConsumerStatusMessage : P4MBaseMessage
+    {
+        public string UserId { get; set; }
+        public bool IsKnown { get; set; }
+        public bool IsConfirmed { get; set; }
+    }
+
     public class ConsumerIdMessage : P4MBaseMessage
     {
         public string ConsumerId { get; set; }

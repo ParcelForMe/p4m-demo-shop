@@ -22,7 +22,6 @@ namespace OpenOrderFramework.Controllers
         ApplicationDbContext storeDB = new ApplicationDbContext();
         private ApplicationUserManager _userManager;
         static HttpClient _httpClient = new HttpClient();
-        static TokenResponse _clientToken = null;
         static P4MUrls _urls = new P4MUrls();
 
         public ApplicationUserManager UserManager
@@ -103,20 +102,18 @@ namespace OpenOrderFramework.Controllers
         async Task<bool> GetGuestTokenAsync()
         {
             // consumer is unknown so if we're in exclusive mode we need a guest token to access the P4M API
-            if (_clientToken == null)
-            {
-                // get our client token - this can be cached
-                var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
-                _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
-            }
-            _httpClient.SetBearerToken(_clientToken.AccessToken);
+            var clientToken = await P4MHelpers.GetClientTokenAsync();
+            _httpClient.SetBearerToken(clientToken.AccessToken);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var locale = Request.Cookies["p4mLocale"].Value;
             var result = await _httpClient.GetAsync($"{_urls.BaseApiAddress}guestAccessToken/{locale}");
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<TokenMessage>(messageString);
             if (message.Success)
+            {
                 Response.Cookies["p4mToken"].Value = message.Token;
+                Response.Cookies["p4mTokenType"].Value = "Guest";
+            }
             return message.Success;
         }
 
@@ -205,8 +202,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            Response.Cookies["p4mOfferCartRestore"].Value = null;
-            Response.Cookies["p4mOfferCartRestore"].Expires = DateTime.UtcNow;
+            Response.Cookies.Remove("p4mOfferCartRestore");
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
