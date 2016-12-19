@@ -3,15 +3,8 @@
     ViewBag.Title = "P4MCheckout";
 }
 
-@if (HttpContext.Current.IsDebuggingEnabled)
-{
 <link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-checkout/p4m-checkout.html">
 <link rel="import" href="/Scripts/Lib/p4m-widgets/p4m-login/p4m-login.html">
-}
-else
-{
-    <link rel="import" href="/Scripts/p4m-widget.vulcanized.html">
-}
 
 <p4m-checkout use-paypal="true" 
               host-type="@ViewBag.HostType"

@@ -14,7 +14,7 @@ var htmlmin = require('gulp-htmlmin');
 var pump = require('pump');
 
 gulp.task('default', function () {
-    runSeries('clean', 'copyBowerComponents', 'vulcanize');
+    runSeries('clean', 'copyBowerComponents');
 });
 
 gulp.task('copyBowerComponents', function () {
@@ -31,6 +31,7 @@ gulp.task('clean', function () {
     ]);
 });
 
+// Example gulp-vulcanize task to vulcanize the p4m-widgets
 gulp.task('vulcanize', function (cb) {
     // Vulcanize the p4m-widget polymer
     pump(
