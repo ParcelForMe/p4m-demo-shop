@@ -5,6 +5,11 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "del": "^2.2.2",
-    "gulp-util": "^3.0.7"
+    "gulp-util": "^3.0.7",
+    "gulp-vulcanize": "^6.1.0",
+    "run-sequence": "^1.2.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-htmlmin": "^3.0.0",
+    "pump": "^1.0.1"
   }
 }
