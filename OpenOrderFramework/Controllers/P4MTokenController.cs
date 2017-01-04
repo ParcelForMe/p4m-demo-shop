@@ -39,6 +39,15 @@ namespace OpenOrderFramework.Controllers
             }
             return _clientToken;
         }
+
+        public static void RemoveCookie(HttpResponseBase response, string cookieName)
+        {
+            var cookie = response.Cookies[cookieName];
+            if (cookie != null)
+            {
+                cookie.Expires = DateTime.UtcNow.AddDays(-1);
+            }
+        }
     }
 
     public class P4MTokenController : Controller
@@ -191,7 +200,7 @@ namespace OpenOrderFramework.Controllers
             GetTempState(out stateFromCookie, out nonceFromCookie);
             if (!state.Equals(stateFromCookie, StringComparison.Ordinal))
                 throw new Exception("Invalid state returned from ID server");
-            this.Response.Cookies.Remove("p4mState");
+            P4MHelpers.RemoveCookie(Response, "p4mState");
 
             var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
             var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
@@ -258,8 +267,8 @@ namespace OpenOrderFramework.Controllers
             Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
             if (consumer.PrefDeliveryAddress == null)
             {
-                Response.Cookies.Remove("p4mDefaultPostCode");
-                Response.Cookies.Remove("p4mDefaultCountryCode");
+                P4MHelpers.RemoveCookie(Response, "p4mDefaultPostCode");
+                P4MHelpers.RemoveCookie(Response, "p4mDefaultCountryCode");
             }
             else
             {
@@ -493,7 +502,7 @@ namespace OpenOrderFramework.Controllers
 
             if (!string.Equals(nonceClaim.Value, nonce, StringComparison.Ordinal))
                 throw new Exception("invalid nonce");
-            this.Response.Cookies.Remove("p4mNonce");
+            P4MHelpers.RemoveCookie(Response, "p4mNonce");
             return true;
         }
 
@@ -514,13 +523,13 @@ namespace OpenOrderFramework.Controllers
         public static void Logoff(HttpResponseBase response)
         {
             // clear the local P4M cookies
-            response.Cookies.Remove("p4mToken");
-            response.Cookies.Remove("p4mTokenType");
-            response.Cookies.Remove("p4mAvatarUrl");
-            response.Cookies.Remove("p4mGivenName");
-            response.Cookies.Remove("p4mLocalLogin");
-            response.Cookies.Remove("p4mDefaultPostCode");
-            response.Cookies.Remove("p4mDefaultCountry");
+            P4MHelpers.RemoveCookie(response, "p4mToken");
+            P4MHelpers.RemoveCookie(response, "p4mTokenType");
+            P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
+            P4MHelpers.RemoveCookie(response, "p4mGivenName");
+            P4MHelpers.RemoveCookie(response, "p4mLocalLogin");
+            P4MHelpers.RemoveCookie(response, "p4mDefaultPostCode");
+            P4MHelpers.RemoveCookie(response, "p4mDefaultCountry");
         }
 
         void GetTempState(out string state, out string nonce)

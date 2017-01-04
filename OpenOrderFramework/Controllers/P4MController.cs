@@ -12,8 +12,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json;
 using System.Text;
-using OpenOrderFramework.ViewModels;
-using Thinktecture.IdentityModel.Client;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -202,7 +200,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            Response.Cookies.Remove("p4mOfferCartRestore");
+            P4MHelpers.RemoveCookie(Response, "p4mOfferCartRestore");
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
