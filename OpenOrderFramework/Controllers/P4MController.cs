@@ -75,7 +75,7 @@ namespace OpenOrderFramework.Controllers
             ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
             ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;//p4mDefaultPostCode
-            if (ViewBag.InitialCountryCode == null)
+            if (ViewBag.InitialCountryCode == null || ViewBag.InitialCountryCode == "")
             {
                 ViewBag.InitialCountryCode = "GB";
             }
