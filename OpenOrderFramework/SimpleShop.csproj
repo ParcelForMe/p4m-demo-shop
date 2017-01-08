@@ -1506,6 +1506,7 @@
     <Content Include="Scripts\Lib\p4m-widgets\p4m-discount-input\p4m-discount-input.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-discount-list\p4m-discount-list.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-get-html\p4m-get-html.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-imports\p4m-imports.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-login\p4m-login.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-order-summary\p4m-order-summary.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-order-text\p4m-order-glance.html" />
