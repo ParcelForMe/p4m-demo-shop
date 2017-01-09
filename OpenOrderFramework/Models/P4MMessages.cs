@@ -23,6 +23,13 @@ namespace OpenOrderFramework.Models
         public bool HasOpenCart { get; set; }
     }
 
+    public class ConsumerStatusMessage : P4MBaseMessage
+    {
+        public string UserId { get; set; }
+        public bool IsKnown { get; set; }
+        public bool IsConfirmed { get; set; }
+    }
+
     public class ConsumerIdMessage : P4MBaseMessage
     {
         public string ConsumerId { get; set; }
@@ -49,13 +56,6 @@ namespace OpenOrderFramework.Models
         public decimal Total { get; set; }
     }
 
-    public class DiscountMessage : CartTotalsMessage
-    {
-        public string Code { get; set; }
-        public string Description { get; set; }
-        public decimal Amount { get; set; }
-    }
-
     public class TokenMessage : P4MBaseMessage
     {
         public string Token { get; set; }
@@ -64,6 +64,13 @@ namespace OpenOrderFramework.Models
     public class CartUpdateMessage : CartTotalsMessage
     {
         public List<P4MDiscount> Discounts { get; set; }
+    }
+
+    public class DiscountMessage : CartUpdateMessage
+    {
+        public string Code { get; set; }
+        public string Description { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class PurchaseResultMessage : P4MBaseMessage

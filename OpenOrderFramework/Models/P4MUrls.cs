@@ -1,5 +1,6 @@
 ﻿namespace OpenOrderFramework.Models
 {
+    public enum CheckoutMode { Shared, Exclusive }
     public class P4MUrls
     {
         public P4MUrls()
@@ -13,8 +14,6 @@
             TokenEndpoint = $"{BaseIdSrvUrl}/connect/token";
             LogoutUrl = $"{BaseIdSrvUrl}/connect/endsession";
 
-            
-
             RedirectUrl = System.Configuration.ConfigurationManager.AppSettings["redirectUrl"];
             LogoutForm = "logoutForm";
 
@@ -22,6 +21,9 @@
             ClientSecret = System.Configuration.ConfigurationManager.AppSettings["clientSecret"];
         }
 
+        public static string DefaultInitialPostCode { get; set; } = "W1D 1LL";
+        public static string DefaultInitialCountryCode { get; set; } = "GB";
+        public static CheckoutMode CheckoutMode { get; set; } = CheckoutMode.Exclusive;
         public string AuthBaseUrl { get; set; }
         public string AppMode { get; set; }
         public string P4MUrl { get; set; }

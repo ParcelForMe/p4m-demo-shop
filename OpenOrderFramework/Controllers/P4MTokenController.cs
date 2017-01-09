@@ -22,17 +22,32 @@ using OpenOrderFramework.ViewModels;
 
 namespace OpenOrderFramework.Controllers
 {
-    public static class P4MConstants
+    public static class P4MHelpers
     {
-        //public const string ClientId = "10004";
-        //public const string ClientSecret = "secret";
-        //public const string AppMode = "dev";
+        static TokenResponse _clientToken = null;
+        static DateTime _clientTokenExpires = DateTime.UtcNow;
+        static P4MUrls _urls = new P4MUrls();
 
-        //public const string BaseAddress = "https://"+AppMode+".parcelfor.me:44333";
-        //public const string BaseApiAddress = "https://" + AppMode + ".parcelfor.me:44321/api/v2/";
-        //public const string IdSrvUrl = BaseAddress + "/ui/";
-        //public const string LocalCallbackUrl = "http://localhost:3000/p4m/getP4MAccessToken";
-        //public const string TokenEndpoint = BaseAddress + "/connect/token";
+        public static async Task<TokenResponse> GetClientTokenAsync()
+        {
+            if (_clientToken == null || _clientTokenExpires < DateTime.UtcNow)
+            {
+                // get our client token - this can be cached
+                var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
+                _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
+                _clientTokenExpires = DateTime.UtcNow.AddSeconds(_clientToken.ExpiresIn);
+            }
+            return _clientToken;
+        }
+
+        public static void RemoveCookie(HttpResponseBase response, string cookieName)
+        {
+            var cookie = response.Cookies[cookieName];
+            if (cookie != null)
+            {
+                cookie.Expires = DateTime.UtcNow.AddDays(-1);
+            }
+        }
     }
 
     public class P4MTokenController : Controller
@@ -49,6 +64,7 @@ namespace OpenOrderFramework.Controllers
             UserManager = userManager;
         }
 
+        #region local site helpers
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
         {
@@ -82,9 +98,49 @@ namespace OpenOrderFramework.Controllers
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
+        #endregion
 
-        static TokenResponse _clientToken = null;
-        
+        [HttpGet]
+        [Route("p4m/checkEmail")]
+        public async Task<ActionResult> CheckEmail(string email)
+        {
+            // this is triggered in guest mode when a consumer enters their email address
+            // this endpoint should be loaded in a popup window
+            // first we check with P4M for their status:
+            // - if known and confirmed then we ask them to login. After login their "guest" cart will have to moved to their actual account
+            // - if known but not confirmed we redirect them to the sign up server to ask them to confirm their email
+            // - if unknown we close the popup and the consumer will have to enter all their details before purchasing
+            var result = new LoginMessage();
+            try
+            {
+                var clientToken = await P4MHelpers.GetClientTokenAsync();
+                // ready to check
+                _httpClient.SetBearerToken(clientToken.AccessToken);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var apiResult = await _httpClient.GetAsync($"{_urls.BaseIdSrvUrl}/consumerStatus/{email}");
+                // check the result
+                apiResult.EnsureSuccessStatusCode();
+                var messageString = await apiResult.Content.ReadAsStringAsync();
+                var statusResult = JsonConvert.DeserializeObject<ConsumerStatusMessage>(messageString);
+                if (!statusResult.Success)
+                    throw new Exception(statusResult.Error);
+                if (statusResult.IsConfirmed)
+                {
+                    return View("~/Views/P4M/P4MLogin.cshtml", new P4MUrls());
+                }
+                else if (statusResult.IsKnown)
+                    result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}confirmEmail/{email}";
+                else
+                    return View("~/Views/P4M/ClosePopup.cshtml");
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+                return View("Error");
+            }
+            return Redirect(result.RedirectUrl);
+        }
+
         [HttpGet]
         [Route("p4m/signup")]
         public async Task<ActionResult> SignUp()
@@ -101,19 +157,13 @@ namespace OpenOrderFramework.Controllers
                 else
                 {
                     // user is logged in so we can send details to P4M
-                    if (_clientToken == null)
-                    {
-                        // get our client token - this can be cached
-                        var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
-                        _clientToken = await client.RequestClientCredentialsAsync("p4mRetail");
-                    }
-
+                    var clientToken = await P4MHelpers.GetClientTokenAsync();
                     // now create a consumer from the local user details
                     var consumer = await GetConsumerFromAppUserAsync(authUser.Identity.GetUserId());
                     // we can also save their most recent cart
                     var cart = GetMostRecentCart(authUser.Identity.GetUserName());
                     // ready to send
-                    _httpClient.SetBearerToken(_clientToken.AccessToken);
+                    _httpClient.SetBearerToken(clientToken.AccessToken);
                     _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     var registerMessage = new ConsumerAndCartMessage { Consumer = consumer, Cart = cart };
                     var content = new ObjectContent<ConsumerAndCartMessage>(registerMessage, new JsonMediaTypeFormatter());
@@ -150,17 +200,15 @@ namespace OpenOrderFramework.Controllers
             GetTempState(out stateFromCookie, out nonceFromCookie);
             if (!state.Equals(stateFromCookie, StringComparison.Ordinal))
                 throw new Exception("Invalid state returned from ID server");
-            this.Response.Cookies["p4mState"].Expires = DateTime.UtcNow;
+            P4MHelpers.RemoveCookie(Response, "p4mState");
 
             var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
             var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
             if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
             {
-                //var parsedToken = ParseJwt(response.AccessToken);
-                this.Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
-                this.Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddYears(1);
-                //PostXMLData();
-                return View("ReturnToken");
+                Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
+                Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+                return View("~/Views/P4M/ClosePopup.cshtml");
             }
             return View("error");
         }
@@ -170,9 +218,12 @@ namespace OpenOrderFramework.Controllers
         public JsonResult IsLocallyLoggedIn()
         {
             var result = new P4MBaseMessage();
-            var authUser = AuthenticationManager.User;
-            if (authUser == null || !authUser.Identity.IsAuthenticated)
-                result.Error = "Not logged in";
+            if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive)
+            {
+                var authUser = AuthenticationManager.User;
+                if (authUser == null || !authUser.Identity.IsAuthenticated)
+                    result.Error = "Not logged in";
+            }
             this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
             return Json(result, JsonRequestBehavior.AllowGet);
         }
@@ -210,14 +261,22 @@ namespace OpenOrderFramework.Controllers
                 throw new Exception(consumerResult.Error ?? "Could not retrieve your details");
             var consumer = consumerResult.Consumer;
 
-            this.Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
-            this.Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
-            this.Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
-            this.Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
-            this.Response.Cookies["p4mDefaultPostCode"].Value = consumer.PrefDeliveryAddress?.PostCode;
-            this.Response.Cookies["p4mDefaultPostCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
-            this.Response.Cookies["p4mDefaultCountryCode"].Value = consumer.PrefDeliveryAddress?.CountryCode;
-            this.Response.Cookies["p4mDefaultCountryCode"].Expires = consumer.PrefDeliveryAddress == null ? DateTime.UtcNow : DateTime.UtcNow.AddYears(1);
+            Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
+            Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
+            Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
+            Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
+            if (consumer.PrefDeliveryAddress == null)
+            {
+                P4MHelpers.RemoveCookie(Response, "p4mDefaultPostCode");
+                P4MHelpers.RemoveCookie(Response, "p4mDefaultCountryCode");
+            }
+            else
+            {
+                Response.Cookies["p4mDefaultPostCode"].Value = consumer.PrefDeliveryAddress.PostCode;
+                Response.Cookies["p4mDefaultPostCode"].Expires = DateTime.UtcNow.AddYears(1);
+                Response.Cookies["p4mDefaultCountryCode"].Value = consumer.PrefDeliveryAddress.CountryCode;
+                Response.Cookies["p4mDefaultCountryCode"].Expires = DateTime.UtcNow.AddYears(1);
+            }
 
             // is there a logged in user already?
             string authUserId = null;
@@ -431,7 +490,7 @@ namespace OpenOrderFramework.Controllers
             var parameters = new TokenValidationParameters
             {
                 ValidAudience = _urls.ClientId,
-                ValidIssuers = new List<string> { _urls.BaseIdSrvUrl, "https://parcelfor.me" },
+                ValidIssuers = new List<string> { _urls.BaseIdSrvUrl, "https://parcelfor.me", "https://dev.parcelfor.me" },
                 IssuerSigningToken = new X509SecurityToken(cert)
             };
 
@@ -443,7 +502,7 @@ namespace OpenOrderFramework.Controllers
 
             if (!string.Equals(nonceClaim.Value, nonce, StringComparison.Ordinal))
                 throw new Exception("invalid nonce");
-            this.Response.Cookies["p4mNonce"].Expires = DateTime.UtcNow;
+            P4MHelpers.RemoveCookie(Response, "p4mNonce");
             return true;
         }
 
@@ -464,18 +523,13 @@ namespace OpenOrderFramework.Controllers
         public static void Logoff(HttpResponseBase response)
         {
             // clear the local P4M cookies
-            response.Cookies["p4mToken"].Value = string.Empty;
-            response.Cookies["p4mToken"].Expires = DateTime.UtcNow;
-            response.Cookies["p4mAvatarUrl"].Value = string.Empty;
-            response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow;
-            response.Cookies["p4mGivenName"].Value = string.Empty;
-            response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow;
-            response.Cookies["p4mLocalLogin"].Value = string.Empty;
-            response.Cookies["p4mLocalLogin"].Expires = DateTime.UtcNow;
-            response.Cookies["p4mDefaultPostCode"].Value = string.Empty;
-            response.Cookies["p4mDefaultPostCode"].Expires = DateTime.UtcNow;
-            response.Cookies["p4mDefaultCountry"].Value = string.Empty;
-            response.Cookies["p4mDefaultCountry"].Expires = DateTime.UtcNow;
+            P4MHelpers.RemoveCookie(response, "p4mToken");
+            P4MHelpers.RemoveCookie(response, "p4mTokenType");
+            P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
+            P4MHelpers.RemoveCookie(response, "p4mGivenName");
+            P4MHelpers.RemoveCookie(response, "p4mLocalLogin");
+            P4MHelpers.RemoveCookie(response, "p4mDefaultPostCode");
+            P4MHelpers.RemoveCookie(response, "p4mDefaultCountry");
         }
 
         void GetTempState(out string state, out string nonce)

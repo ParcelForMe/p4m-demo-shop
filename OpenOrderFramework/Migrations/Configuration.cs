@@ -103,13 +103,13 @@ namespace OpenOrderFramework.Migrations
                 {
                     Code = "DISCOUNT1",
                     Description = "10% discount",
-                    Percentage = 0.1m
+                    Percentage = 10m
                 },
                 new Discount
                 {
                     Code = "DISCOUNT2",
                     Description = "6% discount",
-                    Percentage = 0.06m
+                    Percentage = 6m
                 },
             };
 
