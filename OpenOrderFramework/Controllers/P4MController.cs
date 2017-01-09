@@ -12,7 +12,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json;
 using System.Text;
-using OpenOrderFramework.ViewModels;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -42,8 +41,14 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/checkout")]
-        public ActionResult P4MCheckout()
+        public async Task<ActionResult> P4MCheckout()
         {
+            if (Request.Cookies["p4mToken"] == null || string.IsNullOrWhiteSpace(Request.Cookies["p4mToken"].Value))
+            {
+                // no token so we must be in exclusive mode
+                if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive || !await GetGuestTokenAsync())
+                    return Redirect("/home");
+            }
             var localCart = ShoppingCart.GetCart(this.HttpContext);
             var cart = GetP4MCartFromLocalCart();
             if (localCart == null || cart == null || cart.Items.Count == 0)
@@ -71,25 +76,43 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Value = token;
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
-            ViewBag.AccessToken = token;          
+            ViewBag.AccessToken = token;
+            ViewBag.HostType = _urls.AppMode;
             ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
-            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;//p4mDefaultPostCode
-            if (ViewBag.InitialCountryCode == null || ViewBag.InitialCountryCode == "")
+            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;
+            if (ViewBag.InitialCountryCode == null)
             {
-                ViewBag.InitialCountryCode = "GB";
+                ViewBag.InitialCountryCode = P4MUrls.DefaultInitialCountryCode;
             }
             if (ViewBag.InitialPostCode == null)
             {
-                ViewBag.InitialPostCode = "W1A 0AX";
+                ViewBag.InitialPostCode = P4MUrls.DefaultInitialPostCode;
             }
 
             var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
             ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
-
-
+            
             // Return the view
             return View("P4MCheckout");
+        }
+
+        async Task<bool> GetGuestTokenAsync()
+        {
+            // consumer is unknown so if we're in exclusive mode we need a guest token to access the P4M API
+            var clientToken = await P4MHelpers.GetClientTokenAsync();
+            _httpClient.SetBearerToken(clientToken.AccessToken);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var locale = Request.Cookies["p4mLocale"].Value;
+            var result = await _httpClient.GetAsync($"{_urls.BaseApiAddress}guestAccessToken/{locale}");
+            var messageString = await result.Content.ReadAsStringAsync();
+            var message = JsonConvert.DeserializeObject<TokenMessage>(messageString);
+            if (message.Success)
+            {
+                Response.Cookies["p4mToken"].Value = message.Token;
+                Response.Cookies["p4mTokenType"].Value = "Guest";
+            }
+            return message.Success;
         }
 
         //async Task AddItemsToP4MCartAsync()
@@ -177,8 +200,7 @@ namespace OpenOrderFramework.Controllers
             {
                 result.Error = e.Message;
             }
-            Response.Cookies["p4mOfferCartRestore"].Value = null;
-            Response.Cookies["p4mOfferCartRestore"].Expires = DateTime.UtcNow;
+            P4MHelpers.RemoveCookie(Response, "p4mOfferCartRestore");
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
@@ -259,10 +281,12 @@ namespace OpenOrderFramework.Controllers
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
                 localCart.Shipping = details.Amount;
-                localCart.CalcTax();
-                result.Discount = localCart.Discount;
-                result.Tax = localCart.Tax;
-                result.Total = localCart.Total;
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
+                //result.Shipping = localCart.Shipping;
+                //result.Discount = localCart.Discount;
+                //result.Tax = localCart.Tax;
+                //result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -293,14 +317,14 @@ namespace OpenOrderFramework.Controllers
                         storeDB.CartDiscounts.Add(disc);
                         storeDB.SaveChanges();
                     }
-                    localCart.CalcTax();
+                    GetCartTotals(result, localCart);
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
-                    result.Discount = localCart.Discount;
-                    result.Shipping = localCart.Shipping;
-                    result.Tax = localCart.Tax;
-                    result.Total = localCart.Total;
+                    //result.Discount = localCart.Discount;
+                    //result.Shipping = localCart.Shipping;
+                    //result.Tax = localCart.Tax;
+                    //result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -321,13 +345,14 @@ namespace OpenOrderFramework.Controllers
                 var disc = storeDB.CartDiscounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discountCode).FirstOrDefault();
                 storeDB.CartDiscounts.Remove(disc);
                 storeDB.SaveChanges();
-                localCart.CalcTax();
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
                 result.Code = discountCode;
                 result.Amount = localCart.Discount;
-                result.Shipping = localCart.Shipping;
-                result.Tax = localCart.Tax;
-                result.Discount = localCart.Discount;
-                result.Total = localCart.Total;
+                //result.Shipping = localCart.Shipping;
+                //result.Tax = localCart.Tax;
+                //result.Discount = localCart.Discount;
+                //result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -351,18 +376,30 @@ namespace OpenOrderFramework.Controllers
                     var roundQty = (int)Math.Round(chgItem.Qty);
                     await localCart.SetItemQtyAsync(item.ID, roundQty);
                 }
-                localCart.CalcTax();
-                result.Tax = localCart.Tax;
-                result.Shipping = localCart.Shipping;
-                result.Discount = localCart.Discount;
-                result.Total = localCart.Total;
-                result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
+                GetCartTotals(result, localCart);
+                //localCart.CalcTax();
+                //result.Tax = localCart.Tax;
+                //result.Shipping = localCart.Shipping;
+                //result.Discount = localCart.Discount;
+                //result.Total = localCart.Total;
+                //result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
             {
                 result.Error = e.Message;
             }
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        void GetCartTotals(CartTotalsMessage result, ShoppingCart localCart = null)
+        {
+            if (localCart == null)
+                localCart = ShoppingCart.GetCart(this.HttpContext);
+            localCart.CalcTax();
+            result.Tax = localCart.Tax;
+            result.Shipping = localCart.Shipping;
+            result.Discount = localCart.Discount;
+            result.Total = localCart.Total;
         }
 
         [HttpPost]
@@ -428,7 +465,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/paypalSetup")]
-        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal)
+        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal, P4MAddress newDropPoint)
         {
             // this is the first part of a paypal transaction, which sends a request from P4M to Realex
             // when this returns we redirect the consumer to PP in a popup window
@@ -450,7 +487,12 @@ namespace OpenOrderFramework.Controllers
                 var token = Request.Cookies["p4mToken"].Value;
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
+
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, NewDropPoint = newDropPoint };
+                var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
+                var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "paypalSetup", content);
+
+                //var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
