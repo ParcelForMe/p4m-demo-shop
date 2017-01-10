@@ -172,15 +172,7 @@ namespace OpenOrderFramework.Controllers
                     apiResult.EnsureSuccessStatusCode();
                     var messageString = await apiResult.Content.ReadAsStringAsync();
                     var registerResult = JsonConvert.DeserializeObject<ConsumerIdMessage>(messageString);
-                    if (!registerResult.Success)
-                    {
-                        if (registerResult.Error.Contains("registered"))
-                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
-                        else
-                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
-                    }
-                    else
-                        result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}registerConsumer/{registerResult.ConsumerId}";
+                    result.RedirectUrl = registerResult.RedirectUrl;
                 }
             }
             catch (Exception e)
@@ -524,7 +516,7 @@ namespace OpenOrderFramework.Controllers
         {
             // clear the local P4M cookies
             P4MHelpers.RemoveCookie(response, "p4mToken");
-            P4MHelpers.RemoveCookie(response, "p4mTokenType");
+            //P4MHelpers.RemoveCookie(response, "p4mTokenType");
             P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
             P4MHelpers.RemoveCookie(response, "p4mGivenName");
             P4MHelpers.RemoveCookie(response, "p4mLocalLogin");

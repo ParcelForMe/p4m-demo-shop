@@ -110,7 +110,7 @@ namespace OpenOrderFramework.Controllers
             if (message.Success)
             {
                 Response.Cookies["p4mToken"].Value = message.Token;
-                Response.Cookies["p4mTokenType"].Value = "Guest";
+                //Response.Cookies["p4mTokenType"].Value = "Guest";
             }
             return message.Success;
         }

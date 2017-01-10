@@ -33,6 +33,7 @@ namespace OpenOrderFramework.Models
     public class ConsumerIdMessage : P4MBaseMessage
     {
         public string ConsumerId { get; set; }
+        public string RedirectUrl { get; set; }
     }
 
     public class ConsumerAndCartMessage
