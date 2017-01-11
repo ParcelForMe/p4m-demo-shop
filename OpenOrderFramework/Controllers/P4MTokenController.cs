@@ -102,15 +102,13 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/checkEmail")]
-        public async Task<ActionResult> CheckEmail(string email)
+        public async Task<ActionResult> CheckEmail(string email, string name)
         {
             // this is triggered in guest mode when a consumer enters their email address
             // this endpoint should be loaded in a popup window
             // first we check with P4M for their status:
-            // - if known and confirmed then we ask them to login. After login their "guest" cart will have to moved to their actual account
+            // - if known and confirmed, unknown, we close the popup immediately and continue as guest
             // - if known but not confirmed we redirect them to the sign up server to ask them to confirm their email
-            // - if unknown we close the popup and the consumer will have to enter all their details before purchasing
-            var result = new LoginMessage();
             try
             {
                 var clientToken = await P4MHelpers.GetClientTokenAsync();
@@ -124,21 +122,17 @@ namespace OpenOrderFramework.Controllers
                 var statusResult = JsonConvert.DeserializeObject<ConsumerStatusMessage>(messageString);
                 if (!statusResult.Success)
                     throw new Exception(statusResult.Error);
-                if (statusResult.IsConfirmed)
+                if (statusResult.IsGuest)
                 {
-                    return View("~/Views/P4M/P4MLogin.cshtml", new P4MUrls());
+                    return Redirect($"{_urls.BaseIdSrvUiUrl}confirmGuest?id={statusResult.UserId}&email={email}&name={name}");
                 }
-                else if (statusResult.IsKnown)
-                    result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}confirmEmail/{email}";
                 else
                     return View("~/Views/P4M/ClosePopup.cshtml");
             }
             catch (Exception e)
             {
-                result.Error = e.Message;
                 return View("Error");
             }
-            return Redirect(result.RedirectUrl);
         }
 
         [HttpGet]
