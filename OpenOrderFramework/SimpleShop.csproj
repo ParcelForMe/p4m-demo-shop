@@ -524,6 +524,8 @@
     <Content Include="Scripts\Lib\p4m-widgets\LICENSE" />
     <Content Include="Scripts\Lib\p4m-widgets\README.md" />
     <Content Include="Views\P4M\P4MLogin.cshtml" />
+    <Content Include="Views\P4M\ClosePopupAndRefresh.cshtml" />
+    <Content Include="Views\P4M\ClosePopupAndLogin.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
