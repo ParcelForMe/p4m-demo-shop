@@ -98,6 +98,7 @@ namespace OpenOrderFramework.Models
     public class P4MCartItem
     {
         public string LineId { get; set; }
+        public bool NonDeliverable { get; set; }
         public string Make { get; set; }
         public string Sku { get; set; }
         public string Desc { get; set; }
