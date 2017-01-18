@@ -102,15 +102,13 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/checkEmail")]
-        public async Task<ActionResult> CheckEmail(string email)
+        public async Task<ActionResult> CheckEmail(string email, string name)
         {
             // this is triggered in guest mode when a consumer enters their email address
             // this endpoint should be loaded in a popup window
             // first we check with P4M for their status:
-            // - if known and confirmed then we ask them to login. After login their "guest" cart will have to moved to their actual account
+            // - if known and confirmed, unknown, we close the popup immediately and continue as guest
             // - if known but not confirmed we redirect them to the sign up server to ask them to confirm their email
-            // - if unknown we close the popup and the consumer will have to enter all their details before purchasing
-            var result = new LoginMessage();
             try
             {
                 var clientToken = await P4MHelpers.GetClientTokenAsync();
@@ -124,21 +122,18 @@ namespace OpenOrderFramework.Controllers
                 var statusResult = JsonConvert.DeserializeObject<ConsumerStatusMessage>(messageString);
                 if (!statusResult.Success)
                     throw new Exception(statusResult.Error);
-                if (statusResult.IsConfirmed)
+                if (statusResult.IsGuest)
                 {
-                    return View("~/Views/P4M/P4MLogin.cshtml", new P4MUrls());
+                    var host = Uri.EscapeDataString("http://localhost:3000/");
+                    return Redirect($"{_urls.BaseIdSrvUiUrl}confirmGuest?id={statusResult.UserId}&email={email}&name={name}&host={host}");
                 }
-                else if (statusResult.IsKnown)
-                    result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}confirmEmail/{email}";
                 else
                     return View("~/Views/P4M/ClosePopup.cshtml");
             }
             catch (Exception e)
             {
-                result.Error = e.Message;
                 return View("Error");
             }
-            return Redirect(result.RedirectUrl);
         }
 
         [HttpGet]
@@ -172,15 +167,7 @@ namespace OpenOrderFramework.Controllers
                     apiResult.EnsureSuccessStatusCode();
                     var messageString = await apiResult.Content.ReadAsStringAsync();
                     var registerResult = JsonConvert.DeserializeObject<ConsumerIdMessage>(messageString);
-                    if (!registerResult.Success)
-                    {
-                        if (registerResult.Error.Contains("registered"))
-                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}alreadyRegistered?firstName={consumer.GivenName}&email={consumer.Email}";
-                        else
-                            result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}signupError?firstName={consumer.GivenName}&error={registerResult.Error}";
-                    }
-                    else
-                        result.RedirectUrl = $"{_urls.BaseIdSrvUiUrl}registerConsumer/{registerResult.ConsumerId}";
+                    result.RedirectUrl = registerResult.RedirectUrl;
                 }
             }
             catch (Exception e)
@@ -192,25 +179,36 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
+        [Route("p4m/loginConfirmedGuest")]
+        public ActionResult LoginConfirmedGuest()
+        {
+            // a guest has just confirmed their registration so we can now sign them in
+            Logoff(Response);
+            return View("~/Views/P4M/ClosePopupAndLogin.cshtml");
+        }
+
+        [HttpGet]
         [Route("p4m/getP4MAccessToken")]
         public async Task<ActionResult> GetToken(string code, string state)
         {
             // state should be validated here - get from cookie
             string stateFromCookie, nonceFromCookie;
             GetTempState(out stateFromCookie, out nonceFromCookie);
-            if (!state.Equals(stateFromCookie, StringComparison.Ordinal))
-                throw new Exception("Invalid state returned from ID server");
             P4MHelpers.RemoveCookie(Response, "p4mState");
-
-            var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
-            var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
-            if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
+            if (state.Equals(stateFromCookie, StringComparison.Ordinal))
             {
-                Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
-                Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-                return View("~/Views/P4M/ClosePopup.cshtml");
+                var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
+                var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
+                if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
+                {
+                    Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
+                    Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+                    return View("~/Views/P4M/ClosePopup.cshtml");
+                }
             }
-            return View("error");
+            // error occurred so try to recover
+            Logoff(Response);
+            return View("~/Views/P4M/ClosePopupAndRefresh.cshtml");
         }
 
         [HttpGet]
@@ -500,9 +498,9 @@ namespace OpenOrderFramework.Controllers
             // validate nonce
             var nonceClaim = principal.FindFirst("nonce");
 
+            P4MHelpers.RemoveCookie(Response, "p4mNonce");
             if (!string.Equals(nonceClaim.Value, nonce, StringComparison.Ordinal))
                 throw new Exception("invalid nonce");
-            P4MHelpers.RemoveCookie(Response, "p4mNonce");
             return true;
         }
 
@@ -524,12 +522,13 @@ namespace OpenOrderFramework.Controllers
         {
             // clear the local P4M cookies
             P4MHelpers.RemoveCookie(response, "p4mToken");
-            P4MHelpers.RemoveCookie(response, "p4mTokenType");
             P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
             P4MHelpers.RemoveCookie(response, "p4mGivenName");
             P4MHelpers.RemoveCookie(response, "p4mLocalLogin");
             P4MHelpers.RemoveCookie(response, "p4mDefaultPostCode");
             P4MHelpers.RemoveCookie(response, "p4mDefaultCountry");
+            P4MHelpers.RemoveCookie(response, "p4mState");
+            P4MHelpers.RemoveCookie(response, "p4mNonce");
         }
 
         void GetTempState(out string state, out string nonce)

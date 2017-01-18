@@ -28,11 +28,13 @@ namespace OpenOrderFramework.Models
         public string UserId { get; set; }
         public bool IsKnown { get; set; }
         public bool IsConfirmed { get; set; }
+        public bool IsGuest { get; set; }
     }
 
     public class ConsumerIdMessage : P4MBaseMessage
     {
         public string ConsumerId { get; set; }
+        public string RedirectUrl { get; set; }
     }
 
     public class ConsumerAndCartMessage
