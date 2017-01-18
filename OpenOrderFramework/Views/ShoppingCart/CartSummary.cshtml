@@ -1,7 +1,10 @@
 ﻿<a href='@Url.Action("Index", "ShoppingCart")'><strong>Cart</strong>  <span id="cart-status" class="badge">@ViewData["CartCount"]</span></a>
 <script>document.addEventListener('p4m_cart', function (data) {
-    var count = data.detail.Cart.Items.reduce(function (a, b) {
-                    return a + b['Qty'];
-                }, 0);
+    var count = 0;
+    if (data && data.detail && data.detail.Cart && data.detail.Cart.Items && data.detail.Cart.Items.length) {
+        count = data.detail.Cart.Items.reduce(function (a, b) {
+            return a + b['Qty'];
+        }, 0);
+    }
     $('#cart-status').text(count);
 });</script>
