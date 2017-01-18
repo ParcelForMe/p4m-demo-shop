@@ -78,7 +78,7 @@ namespace OpenOrderFramework.Controllers
             }
             ViewBag.AccessToken = token;
             ViewBag.HostType = _urls.AppMode;
-            ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
+            /*ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
             ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
             ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;
             if (ViewBag.InitialCountryCode == null)
@@ -88,10 +88,10 @@ namespace OpenOrderFramework.Controllers
             if (ViewBag.InitialPostCode == null)
             {
                 ViewBag.InitialPostCode = P4MUrls.DefaultInitialPostCode;
-            }
+            }*/
 
-            var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
-            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
+            //var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
+            //ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
             
             // Return the view
             return View("P4MCheckout");
@@ -404,7 +404,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpPost]
         [Route("p4m/purchase")]
-        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal, P4MAddress newDropPoint)
+        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal)
         {
             var result = new PurchaseResultMessage();
             try
@@ -427,7 +427,7 @@ namespace OpenOrderFramework.Controllers
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv, NewDropPoint = newDropPoint };
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
                 var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "purchase", content);
 
@@ -541,7 +541,7 @@ namespace OpenOrderFramework.Controllers
                 City = purchase.DeliverTo.City,
                 PostalCode = purchase.DeliverTo.PostCode,
                 State = purchase.DeliverTo.State,
-                Country = purchase.DeliverTo.Country,
+                Country = purchase.DeliverTo.CountryCode,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Phone = user.Phone
