@@ -20,7 +20,7 @@ namespace OpenOrderFramework.Controllers
         ApplicationDbContext storeDB = new ApplicationDbContext();
         private ApplicationUserManager _userManager;
         static HttpClient _httpClient = new HttpClient();
-        static P4MUrls _urls = new P4MUrls();
+        static P4MConsts _p4mConsts = new P4MConsts();
 
         public ApplicationUserManager UserManager
         {
@@ -46,7 +46,7 @@ namespace OpenOrderFramework.Controllers
             if (Request.Cookies["p4mToken"] == null || string.IsNullOrWhiteSpace(Request.Cookies["p4mToken"].Value))
             {
                 // no token so we must be in exclusive mode
-                if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive || !await GetGuestTokenAsync())
+                if (P4MConsts.CheckoutMode != CheckoutMode.Exclusive || !await GetGuestTokenAsync())
                     return Redirect("/home");
             }
             var localCart = ShoppingCart.GetCart(this.HttpContext);
@@ -58,14 +58,9 @@ namespace OpenOrderFramework.Controllers
             if (string.IsNullOrWhiteSpace(token))
             {
                 var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
-                
-                var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
-                    uri,
-                   "parcel_4_me",
-                   "needmoreparcels");
 
-                   //"ambitious_alice",
-                   //"m@dhatt3r");
+                var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
+                    uri, P4MConsts.GfsClientId, P4MConsts.GfsClientSecret);
 
                 var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
                 if (tokenResponse == null || tokenResponse.AccessToken == null)
@@ -77,22 +72,9 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
             ViewBag.AccessToken = token;
-            ViewBag.HostType = _urls.AppMode;
-            /*ViewBag.InitialAddress = Request.Cookies["p4mInitialAddress"]?.Value;
-            ViewBag.InitialPostCode = Request.Cookies["p4mDefaultPostCode"]?.Value;
-            ViewBag.InitialCountryCode = Request.Cookies["p4mDefaultCountryCode"]?.Value;
-            if (ViewBag.InitialCountryCode == null)
-            {
-                ViewBag.InitialCountryCode = P4MUrls.DefaultInitialCountryCode;
-            }
-            if (ViewBag.InitialPostCode == null)
-            {
-                ViewBag.InitialPostCode = P4MUrls.DefaultInitialPostCode;
-            }*/
-
-            //var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
-            //ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
-            
+            ViewBag.HostType = _p4mConsts.AppMode;
+            ViewBag.InitialCountryCode = P4MConsts.DefaultInitialCountryCode;
+            ViewBag.InitialPostCode = P4MConsts.DefaultInitialPostCode;
             // Return the view
             return View("P4MCheckout");
         }
@@ -104,7 +86,7 @@ namespace OpenOrderFramework.Controllers
             _httpClient.SetBearerToken(clientToken.AccessToken);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var locale = Request.Cookies["p4mLocale"].Value;
-            var result = await _httpClient.GetAsync($"{_urls.BaseApiAddress}guestAccessToken/{locale}");
+            var result = await _httpClient.GetAsync($"{_p4mConsts.BaseApiAddress}guestAccessToken/{locale}");
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<TokenMessage>(messageString);
             if (message.Success)
@@ -212,7 +194,7 @@ namespace OpenOrderFramework.Controllers
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var sessionId = HttpContext.Session[ShoppingCart.CartSessionKey].ToString();
-            var result = await _httpClient.GetAsync(string.Format("{0}restoreLastCart/{1}", _urls.BaseApiAddress, sessionId));
+            var result = await _httpClient.GetAsync(string.Format("{0}restoreLastCart/{1}", _p4mConsts.BaseApiAddress, sessionId));
             var messageString = await result.Content.ReadAsStringAsync();
             var message = JsonConvert.DeserializeObject<CartMessage>(messageString);
             if (!message.Success)
@@ -264,11 +246,6 @@ namespace OpenOrderFramework.Controllers
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
             ViewBag.AccessToken = token;
-
-            var gfsCheckoutInitialPostJson = GetGfsCheckoutPost();
-
-            // define initial post data
-            ViewBag.InitialData = Base64Encode(gfsCheckoutInitialPostJson);
             return View("P4MDelivery");
         }
 
@@ -429,7 +406,7 @@ namespace OpenOrderFramework.Controllers
 
                 var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
-                var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "purchase", content);
+                var apiResult = await _httpClient.PostAsync(_p4mConsts.BaseApiAddress + "purchase", content);
 
 //                var apiResult = await client.GetAsync(string.Format("{0}purchase/{1}/{2}", _urls.BaseApiAddress, cartId, cvv));
                 apiResult.EnsureSuccessStatusCode();
@@ -490,7 +467,7 @@ namespace OpenOrderFramework.Controllers
 
                 var purchaseMessage = new PostPurchaseMessage { CartId = cartId, NewDropPoint = newDropPoint };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
-                var apiResult = await _httpClient.PostAsync(_urls.BaseApiAddress + "paypalSetup", content);
+                var apiResult = await _httpClient.PostAsync(_p4mConsts.BaseApiAddress + "paypalSetup", content);
 
                 //var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
                 apiResult.EnsureSuccessStatusCode();
@@ -566,71 +543,6 @@ namespace OpenOrderFramework.Controllers
             return order.OrderId;
         }
 
-        // TODO: Build more details into the request!
-        public string GetGfsCheckoutPost()
-        {
-            var localCart = ShoppingCart.GetCart(HttpContext);
-
-            var checkoutRequest = new
-            {
-                Request = new
-                {
-                    DateRange = new
-                    {
-                        DateFrom = String.Format("{0:yyyy-MM-dd}", DateTime.Now),
-                        DateTo = String.Format("{0:yyyy-MM-dd}", DateTime.Now.AddDays(14))
-                    },
-                    Order = new
-                    {
-                        Transit = new
-                        {
-                            Recipient = new
-                            {
-                                Location = new
-                                {
-                                    CountryCode = new
-                                    {
-                                        Code = ViewBag.InitialCountryCode, //"GB",
-                                        Encoding = "ccISO_3166_1_Alpha2"
-                                    },
-                                    Postcode = ViewBag.InitialPostCode,// "SO40 7JF", //ViewBag.InitialPostCode,
-                                    town = "Soho",
-                                    addressLineCollection = new string[] { "AddressLine" },
-                                },
-                                contactDetails = new
-                                {
-                                    Email = "test@earsman.com"
-                                },
-                                Person = new
-                                {
-                                    firstName = "First",
-                                    lastName = "Last",
-                                    title = "Title"
-                                }
-                                
-                            }
-                        },
-                        Value = new
-                        {
-                            CurrencyCode = "GBP",
-                            Value = localCart.GetTotal()
-                        }
-                    },
-                    RequestedDeliveryTypes = new string[] { "dmDropPoint", "dmStandard" },
-                    Session = new  // TODO: Remove this when the Open ID connection is in place
-                    {
-                        APIKeyId = "CL-4CE92613-89A6-4248-A573-A9A7333E6A06",
-                        sessionID = ""
-
-                    }
-                }
-            };
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest);
-
-            //return Convert.ToBase64String(Encoding.ASCII.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(checkoutRequest)));
-        }
-
         [HttpGet]
         [Route("p4m/purchaseComplete/{cartId}")]
         public async Task<ActionResult> PurchaseComplete(string cartId)
@@ -676,7 +588,7 @@ namespace OpenOrderFramework.Controllers
             var token = Request.Cookies["p4mToken"].Value;
             _httpClient.SetBearerToken(token);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var apiResult = await _httpClient.GetAsync(string.Format("{0}cart/{1}?wantAddresses=true", _urls.BaseApiAddress, cartId));
+            var apiResult = await _httpClient.GetAsync(string.Format("{0}cart/{1}?wantAddresses=true", _p4mConsts.BaseApiAddress, cartId));
             var messageString = await apiResult.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<CartMessage>(messageString);
             if (!result.Success)

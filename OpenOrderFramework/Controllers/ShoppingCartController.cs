@@ -17,7 +17,7 @@ namespace OpenOrderFramework.Controllers
         public ActionResult Index()
         {
             // ***** P4M *****
-            if (P4MUrls.CheckoutMode == CheckoutMode.Exclusive || (this.Request.Cookies["p4mToken"] != null && !string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value)))
+            if (P4MConsts.CheckoutMode == CheckoutMode.Exclusive || (this.Request.Cookies["p4mToken"] != null && !string.IsNullOrWhiteSpace(this.Request.Cookies["p4mToken"].Value)))
                 return RedirectToAction("checkout", "p4m");
             // ***** P4M *****
 

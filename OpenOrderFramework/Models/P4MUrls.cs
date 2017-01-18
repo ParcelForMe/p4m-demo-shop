@@ -1,9 +1,9 @@
 ﻿namespace OpenOrderFramework.Models
 {
     public enum CheckoutMode { Shared, Exclusive }
-    public class P4MUrls
+    public class P4MConsts
     {
-        public P4MUrls()
+        public P4MConsts()
         {
             AppMode = System.Configuration.ConfigurationManager.AppSettings["appMode"];
             P4MUrl = $"https://{AppMode}.parcelfor.me";
@@ -13,6 +13,7 @@
             AuthBaseUrl = $"{BaseIdSrvUrl}/connect/authorize";
             TokenEndpoint = $"{BaseIdSrvUrl}/connect/token";
             LogoutUrl = $"{BaseIdSrvUrl}/connect/endsession";
+            JwksUrl = $"{BaseIdSrvUrl}/.well-known/openid-configuration/jwks";
 
             RedirectUrl = System.Configuration.ConfigurationManager.AppSettings["redirectUrl"];
             LogoutForm = "logoutForm";
@@ -35,6 +36,10 @@
         public string ClientSecret { get; set; }
         public string RedirectUrl { get; set; }  
         public string LogoutForm { get; set; } 
-        public string LogoutUrl { get; set; }  
+        public string LogoutUrl { get; set; }
+        public string JwksUrl { get; set; }
+        public string SigningCert { get; set; }
+        public static string GfsClientId { get; set; } = "parcel_4_me";
+        public static string GfsClientSecret { get; set; } = "needmoreparcels";
     }
 }

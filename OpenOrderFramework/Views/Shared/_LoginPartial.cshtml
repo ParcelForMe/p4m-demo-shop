@@ -1,5 +1,5 @@
 @using Microsoft.AspNet.Identity
-@model OpenOrderFramework.Models.P4MUrls
+@model OpenOrderFramework.Models.P4MConsts
 @if (Request.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
