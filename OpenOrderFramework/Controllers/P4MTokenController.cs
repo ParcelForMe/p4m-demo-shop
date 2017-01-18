@@ -26,7 +26,7 @@ namespace OpenOrderFramework.Controllers
     {
         static TokenResponse _clientToken = null;
         static DateTime _clientTokenExpires = DateTime.UtcNow;
-        static P4MUrls _urls = new P4MUrls();
+        static P4MConsts _urls = new P4MConsts();
 
         public static async Task<TokenResponse> GetClientTokenAsync()
         {
@@ -54,7 +54,7 @@ namespace OpenOrderFramework.Controllers
     {
         ApplicationDbContext storeDB = new ApplicationDbContext();
         static HttpClient _httpClient = new HttpClient();
-        static P4MUrls _urls = new P4MUrls();
+        static P4MConsts _urls = new P4MConsts();
         public P4MTokenController()
         {
         }
@@ -199,7 +199,7 @@ namespace OpenOrderFramework.Controllers
             {
                 var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
                 var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
-                if (!tokenResponse.IsHttpError && ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
+                if (!tokenResponse.IsHttpError && await ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
                 {
                     Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
                     Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
@@ -216,7 +216,7 @@ namespace OpenOrderFramework.Controllers
         public JsonResult IsLocallyLoggedIn()
         {
             var result = new P4MBaseMessage();
-            if (P4MUrls.CheckoutMode != CheckoutMode.Exclusive)
+            if (P4MConsts.CheckoutMode != CheckoutMode.Exclusive)
             {
                 var authUser = AuthenticationManager.User;
                 if (authUser == null || !authUser.Identity.IsAuthenticated)
@@ -477,14 +477,22 @@ namespace OpenOrderFramework.Controllers
                 throw new Exception(message.Error);
         }
 
-        bool ValidateToken(string token, string nonce)
+        async Task<string> GetSigningCertAsync()
         {
-            // this x509 string is taken from https://id.parcelfor.me:44333/core/.well-known/jwks "x5c" - if using a different server then might need to get a different cert from that server
-//            var x509Str = "MIIFKTCCBBGgAwIBAgIQBpXgM4drGUyWvFilY6mQ/DANBgkqhkiG9w0BAQsFADBNMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMScwJQYDVQQDEx5EaWdpQ2VydCBTSEEyIFNlY3VyZSBTZXJ2ZXIgQ0EwHhcNMTUwMzMwMDAwMDAwWhcNMTYwNDA2MTIwMDAwWjB3MQswCQYDVQQGEwJHQjEUMBIGA1UECBMLV2VzdCBTdXNzZXgxEDAOBgNVBAcTB0NyYXdsZXkxGjAYBgNVBAoTEVBhcmNlbCBGb3IgTWUgTHRkMQswCQYDVQQLEwJJVDEXMBUGA1UEAwwOKi5wYXJjZWxmb3IubWUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDuGud1W2It2TficmFGyflPx59t1zWOU0gjAKh118kV0TnrWM5V1dApFaRwIrnehHhOvQnAsACYV0K3T5ZlMPw3wWv8XF56SGrZHJx3SPlZEIl9UP2J4yU82Fyz8YIIzbdlEFJnQ/5bNkX/qmcL6oFjpkxalHiW04OZwh0fe7XnpvYmRiMP2x1Mss35cArTGagJA8jy2dLIkIp4x0fCng3pPzlNLlIEN1q2ERnuOfY26jJgh5AMoy8POMX2LrcH3HWI106yW4wlYqLGVyVAovx4+D4VJgqB/7Bg1uPKIG12hwMkX/sva/QLbdy3vmptHOn0l+RY4WOlveOVFKfPljnjAgMBAAGjggHZMIIB1TAfBgNVHSMEGDAWgBQPgGEcgjFh1S8o541GOLQs4cbZ4jAdBgNVHQ4EFgQUbM31cW4e631fz227xlUJwZE2UFYwJwYDVR0RBCAwHoIOKi5wYXJjZWxmb3IubWWCDHBhcmNlbGZvci5tZTAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMGsGA1UdHwRkMGIwL6AtoCuGKWh0dHA6Ly9jcmwzLmRpZ2ljZXJ0LmNvbS9zc2NhLXNoYTItZzMuY3JsMC+gLaArhilodHRwOi8vY3JsNC5kaWdpY2VydC5jb20vc3NjYS1zaGEyLWczLmNybDBCBgNVHSAEOzA5MDcGCWCGSAGG/WwBATAqMCgGCCsGAQUFBwIBFhxodHRwczovL3d3dy5kaWdpY2VydC5jb20vQ1BTMHwGCCsGAQUFBwEBBHAwbjAkBggrBgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMEYGCCsGAQUFBzAChjpodHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vRGlnaUNlcnRTSEEyU2VjdXJlU2VydmVyQ0EuY3J0MAwGA1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQADggEBALDPzKumlhai9D/EJxbwiHxfsZLDxGuoUXNp5gnL2TlE6e0S4HT9wGtTbfL4G+lp6ppxvJN+1ojKC31MuZro7z7s+k1ZZtQVGKucRxN95TQBUmv3gRu4C1zWFYoxCd8k1VZ77sKSOngQ7V7c9EIakA9Q5zfNo6vAcQzff0mMRfTHCNrZV5t9WQxi2HBLu3OLt98QZ8bJ31oGRR6pmAkKnhHzKc6qd8THn2WfEt5rFBRQ5ts785ZU+kOAMvVv0i1cwmMJYo9nySmkXd4EP3YZcHxSvESSBFwOhpVr6Gez+33nAR8hYj10Upv8SHtLYxouqz1EItDj/iXmLhSD4HLdkqg=";
-            // this x509 string is taken from https://dev.parcelfor.me:44333/core/.well-known/jwks "x5c" - if using a different server then might need to get a different cert from that server
-            var x509Str = "MIIFJjCCBA6gAwIBAgIQCs3kGwA/0NT7FDqMWVclDzANBgkqhkiG9w0BAQsFADBNMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMScwJQYDVQQDEx5EaWdpQ2VydCBTSEEyIFNlY3VyZSBTZXJ2ZXIgQ0EwHhcNMTYwMzMxMDAwMDAwWhcNMTcwNDE3MTIwMDAwWjBqMQswCQYDVQQGEwJHQjEUMBIGA1UECBMLV2VzdCBTdXNzZXgxEDAOBgNVBAcTB0NyYXdsZXkxGjAYBgNVBAoTEVBhcmNlbCBGb3IgTWUgTHRkMRcwFQYDVQQDDA4qLnBhcmNlbGZvci5tZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANJ4iwa49AoPgZQPpZ7FBOXl26VIvAIOFGgKVClI0atUXLS04hBFjifgzckDtWMFt8XX42wu0J3W8ERsetJnwrGrHUOhTnrESqU/H+6dS6lrSnPShBHplHxZIcMITVLEl5DsYBysBAMLEy38Ycy9mU4/jJDvHwBfmCy1DMBAh4wyePqqZVhed5daI+p9DFCwtsWT7ORCoE/WAkDeBBK73Wd2wYvRaQqnEWoNt3G+B71FLjNna8Jt8n5fRaRT16RFDISISWbALeO9lRfpOzDYQ2XNb5zvVCT6QZAX49ke7xFfpj0R2o70FX53l4pqUHEjjYJ1N5UMMOnBuZDXeYYFAakCAwEAAaOCAeMwggHfMB8GA1UdIwQYMBaAFA+AYRyCMWHVLyjnjUY4tCzhxtniMB0GA1UdDgQWBBRlsWweAbsWzTLzPIzbEXKYpg/+rjAnBgNVHREEIDAegg4qLnBhcmNlbGZvci5tZYIMcGFyY2VsZm9yLm1lMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwawYDVR0fBGQwYjAvoC2gK4YpaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL3NzY2Etc2hhMi1nNS5jcmwwL6AtoCuGKWh0dHA6Ly9jcmw0LmRpZ2ljZXJ0LmNvbS9zc2NhLXNoYTItZzUuY3JsMEwGA1UdIARFMEMwNwYJYIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQICMHwGCCsGAQUFBwEBBHAwbjAkBggrBgEFBQcwAYYYaHR0cDovL29jc3AuZGlnaWNlcnQuY29tMEYGCCsGAQUFBzAChjpodHRwOi8vY2FjZXJ0cy5kaWdpY2VydC5jb20vRGlnaUNlcnRTSEEyU2VjdXJlU2VydmVyQ0EuY3J0MAwGA1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQADggEBABvdWOTOhnslGMxkosvsKlsYNRPVjEmLMvO1YaKdW6TuKvHl64Hmj+KcW8HbiACuijnlcdk/AxVmVxAMDmw+V38494SysF/xSmVqyp9pPIcGTq10mc/GivfRBfdhU06kP+X3vo7iJi5aUDBm5OkZ233dhKYpXFXuPs9lrEeHSAdctQ278wIxPkjTAS9baRnevByAEmUC6ILIfjQA30LWdrvpl/IAtAQDhjqFW/Eju70S7ckb8720Km/u5P697dGQLanmcS73URzcbjJ7vgYI5YHIMj1LUGSS/RJEj/w5RlJ0mELxvkLhhIUrhC2riAbXWmkiaOk+aHQ2es13R1BvzII=";
-            var cert = new X509Certificate2(Convert.FromBase64String(x509Str));
+            if (_urls.SigningCert == null)
+            {
+                var result = await _httpClient.GetAsync(_urls.JwksUrl);
+                var messageString = await result.Content.ReadAsStringAsync();
+                dynamic jwks = JsonConvert.DeserializeObject(messageString);
+                _urls.SigningCert = jwks.keys[0].x5c[0];
+            }
+            return _urls.SigningCert;
+        }
 
+        async Task<bool> ValidateToken(string token, string nonce)
+        {
+            var x509Str = await GetSigningCertAsync();
+            var cert = new X509Certificate2(Convert.FromBase64String(x509Str));
             var parameters = new TokenValidationParameters
             {
                 ValidAudience = _urls.ClientId,
