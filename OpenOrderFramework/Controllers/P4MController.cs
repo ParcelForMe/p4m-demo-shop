@@ -272,8 +272,8 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet); 
         }
 
-        [HttpGet]
-        [Route("p4m/applyDiscountCode/{discountCode}")]
+        [HttpPost]
+        [Route("p4m/applyDiscountCode")]
         public JsonResult ApplyDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
@@ -311,8 +311,8 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
-        [Route("p4m/removeDiscountCode/{discountCode}")]
+        [HttpPost]
+        [Route("p4m/removeDiscountCode")]
         public JsonResult RemoveDiscountCode(string discountCode)
         {
             var result = new DiscountMessage();
