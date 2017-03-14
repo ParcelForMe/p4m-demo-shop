@@ -95,6 +95,5 @@ namespace OpenOrderFramework.Models
     {
         public string  CartId { get; set; }
         public string CVV { get; set; }
-        public P4MAddress NewDropPoint { get; set; }
     }
 }

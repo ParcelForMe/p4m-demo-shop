@@ -416,7 +416,6 @@
     <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\peli-logo-green.png" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\peli-logo-grey.png" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-purchase\p4m-purchase.html" />
-    <Content Include="Scripts\Lib\p4m-widgets\p4m-register\logo-icon.png" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-register\p4m-register.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-shared\p4m.css" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-wish\p4m-wish.html" />

@@ -124,7 +124,7 @@ namespace OpenOrderFramework.Controllers
                 Reference = localCart.ShoppingCartId,
                 SessionId = localCart.ShoppingCartId,
                 Date = DateTime.UtcNow,
-                PaymentType = "DB",
+                PaymentType = "PA",
                 Currency = "GBP",
                 ShippingAmt = (double)localCart.Shipping,
                 Tax = (double)localCart.Tax,
@@ -413,7 +413,14 @@ namespace OpenOrderFramework.Controllers
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var purchaseResult = JsonConvert.DeserializeObject<PurchaseResultMessage>(messageString);
                 if (!purchaseResult.Success)
+                {
+                    if (purchaseResult.Error.Contains("has already been processed!"))
+                    {
+                        ShoppingCart.GetCart(this).EmptyCart();
+                        HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                    }
                     throw new Exception(purchaseResult.Error);
+                }
                 // if ACSUrl is blank then the purchase proceeded without 3D Secure
                 if (purchaseResult.ACSUrl == null)
                 {
@@ -442,7 +449,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/paypalSetup")]
-        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal, P4MAddress newDropPoint)
+        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal)
         {
             // this is the first part of a paypal transaction, which sends a request from P4M to Realex
             // when this returns we redirect the consumer to PP in a popup window
@@ -465,16 +472,23 @@ namespace OpenOrderFramework.Controllers
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, NewDropPoint = newDropPoint };
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
                 var apiResult = await _httpClient.PostAsync(_p4mConsts.BaseApiAddress + "paypalSetup", content);
 
                 //var apiResult = await _httpClient.GetAsync(string.Format("{0}paypalSetup/{1}", _urls.BaseApiAddress, cartId));
-                apiResult.EnsureSuccessStatusCode();
+                //apiResult.EnsureSuccessStatusCode();
                 var messageString = await apiResult.Content.ReadAsStringAsync();
                 var setupResult = JsonConvert.DeserializeObject<TokenMessage>(messageString);
                 if (!setupResult.Success)
+                {
+                    if (setupResult.Error.Contains("has already been processed!"))
+                    {
+                        ShoppingCart.GetCart(this).EmptyCart();
+                        HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+                    }
                     throw new Exception(setupResult.Error);
+                }
                 result.Token = setupResult.Token;
             }
             catch (Exception e)

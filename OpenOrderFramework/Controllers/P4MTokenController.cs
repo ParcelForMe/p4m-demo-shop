@@ -221,8 +221,13 @@ namespace OpenOrderFramework.Controllers
                 var authUser = AuthenticationManager.User;
                 if (authUser == null || !authUser.Identity.IsAuthenticated)
                     result.Error = "Not logged in";
+                this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
             }
-            this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
+            else
+            {
+                var hasToken = this.Response.Cookies.AllKeys.Contains("p4mToken") && !string.IsNullOrWhiteSpace(this.Response.Cookies["p4mLocalLogin"].Value);
+                this.Response.Cookies["p4mLocalLogin"].Value = hasToken ? "true" : "false";
+            }
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
@@ -258,23 +263,11 @@ namespace OpenOrderFramework.Controllers
             if (consumerResult == null || !consumerResult.Success)
                 throw new Exception(consumerResult.Error ?? "Could not retrieve your details");
             var consumer = consumerResult.Consumer;
-
+            
             Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
-            Response.Cookies["p4mAvatarUrl"].Expires = DateTime.UtcNow.AddYears(1);
+            Response.Cookies["p4mAvatarUrl"].Expires = Request.Cookies["p4mToken"].Expires;
             Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
-            Response.Cookies["p4mGivenName"].Expires = DateTime.UtcNow.AddYears(1);
-            if (consumer.PrefDeliveryAddress == null)
-            {
-                P4MHelpers.RemoveCookie(Response, "p4mDefaultPostCode");
-                P4MHelpers.RemoveCookie(Response, "p4mDefaultCountryCode");
-            }
-            else
-            {
-                Response.Cookies["p4mDefaultPostCode"].Value = consumer.PrefDeliveryAddress.PostCode;
-                Response.Cookies["p4mDefaultPostCode"].Expires = DateTime.UtcNow.AddYears(1);
-                Response.Cookies["p4mDefaultCountryCode"].Value = consumer.PrefDeliveryAddress.CountryCode;
-                Response.Cookies["p4mDefaultCountryCode"].Expires = DateTime.UtcNow.AddYears(1);
-            }
+            Response.Cookies["p4mGivenName"].Expires = Request.Cookies["p4mToken"].Expires;
 
             // is there a logged in user already?
             string authUserId = null;
@@ -533,8 +526,6 @@ namespace OpenOrderFramework.Controllers
             P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
             P4MHelpers.RemoveCookie(response, "p4mGivenName");
             P4MHelpers.RemoveCookie(response, "p4mLocalLogin");
-            P4MHelpers.RemoveCookie(response, "p4mDefaultPostCode");
-            P4MHelpers.RemoveCookie(response, "p4mDefaultCountry");
             P4MHelpers.RemoveCookie(response, "p4mState");
             P4MHelpers.RemoveCookie(response, "p4mNonce");
         }

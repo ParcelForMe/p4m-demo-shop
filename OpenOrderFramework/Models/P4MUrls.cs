@@ -24,7 +24,7 @@
 
         public static string DefaultInitialPostCode { get; set; } = "W1D 1LL";
         public static string DefaultInitialCountryCode { get; set; } = "GB";
-        public static CheckoutMode CheckoutMode { get; set; } = CheckoutMode.Exclusive;
+        public static CheckoutMode CheckoutMode { get; set; } = CheckoutMode.Shared;
         public string AuthBaseUrl { get; set; }
         public string AppMode { get; set; }
         public string P4MUrl { get; set; }
