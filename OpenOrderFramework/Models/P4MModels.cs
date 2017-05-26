@@ -155,5 +155,6 @@ namespace OpenOrderFramework.Models
         public string Service { get; set; }
         public decimal Amount { get; set; }
         public DateTime DueDate { get; set; }
+        public P4MAddress Address { get; set; }
     }
 }

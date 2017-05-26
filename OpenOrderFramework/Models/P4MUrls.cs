@@ -6,9 +6,19 @@
         public P4MConsts()
         {
             AppMode = System.Configuration.ConfigurationManager.AppSettings["appMode"];
-            P4MUrl = $"https://{AppMode}.parcelfor.me";
-            BaseIdSrvUrl = $"{P4MUrl}:44333";
-            BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
+            if (AppMode == "local")
+            {
+                BaseIdSrvUrl = "http://localhost:8089";
+                BaseApiAddress = "http://localhost:8088/api/v2/";
+            }
+            else
+            {
+                BaseIdSrvUrl = $"https://{AppMode}-ids.parcelfor.me";
+                BaseApiAddress = $"https://{AppMode}-api.parcelfor.me/api/v2/";
+            }
+            //P4MUrl = $"https://{AppMode}.parcelfor.me";
+            //BaseIdSrvUrl = $"{P4MUrl}:44333";
+            //BaseApiAddress = $"{P4MUrl}:44321/api/v2/";
             BaseIdSrvUiUrl = $"{BaseIdSrvUrl}/ui/";
             AuthBaseUrl = $"{BaseIdSrvUrl}/connect/authorize";
             TokenEndpoint = $"{BaseIdSrvUrl}/connect/token";
@@ -27,7 +37,7 @@
         public static CheckoutMode CheckoutMode { get; set; } = CheckoutMode.Shared;
         public string AuthBaseUrl { get; set; }
         public string AppMode { get; set; }
-        public string P4MUrl { get; set; }
+        private string P4MUrl { get; set; }
         public string BaseIdSrvUrl { get; set; }
         public string BaseApiAddress { get; set; }
         public string BaseIdSrvUiUrl { get; set; }

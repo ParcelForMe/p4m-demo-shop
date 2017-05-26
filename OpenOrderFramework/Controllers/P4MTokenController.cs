@@ -57,6 +57,8 @@ namespace OpenOrderFramework.Controllers
         static P4MConsts _urls = new P4MConsts();
         public P4MTokenController()
         {
+            if (_httpClient.DefaultRequestHeaders.Accept.Count == 0)
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public P4MTokenController(ApplicationUserManager userManager)
@@ -451,7 +453,6 @@ namespace OpenOrderFramework.Controllers
         {
             // get the consumer's details from P4M. 
             _httpClient.SetBearerToken(token);
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var result = await _httpClient.GetAsync(_urls.BaseApiAddress + "consumer?checkHasOpenCart=true");
             var messageString = await result.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ConsumerMessage>(messageString);
@@ -461,7 +462,7 @@ namespace OpenOrderFramework.Controllers
         {
             // save the local consumer Id as an "extra" in P4M 
             _httpClient.SetBearerToken(token);
-            string json = "{\"LocalId\":\""+id+"\"}";
+            string json = "{'LocalId':'"+id+"','Tags':'tag1,tag2'}";
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var result = await _httpClient.PostAsync(_urls.BaseApiAddress + "consumerExtras", content);
             var messageString = await result.Content.ReadAsStringAsync();
