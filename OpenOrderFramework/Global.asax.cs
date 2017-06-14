@@ -1,4 +1,5 @@
-﻿using OpenOrderFramework.Models;
+﻿using OpenOrderFramework.Controllers;
+using OpenOrderFramework.Models;
 using System.Data.Entity;
 using System.Net;
 using System.Web.Mvc;
@@ -18,6 +19,7 @@ namespace OpenOrderFramework
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            GlobalFilters.Filters.Add(new JsonHandlerAttribute());
         }
     }
 }
