@@ -132,7 +132,7 @@ namespace OpenOrderFramework.Models
         public string Phone { get; set; }   // phone number of the contact or landline at the address
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public int DropPointProviderId { get; set; }
+        public string DropPointProviderId { get; set; }
         public string DropPointId { get; set; }
         public int CollectPrefOrder { get; set; }
     }
