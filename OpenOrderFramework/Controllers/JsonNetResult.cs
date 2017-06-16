@@ -25,8 +25,8 @@ namespace OpenOrderFramework.Controllers
                 response.ContentEncoding = ContentEncoding;
 
             // If you need special handling, you can call another form of SerializeObject below
-//            var serializedObject = JsonConvert.SerializeObject(Data, new JsonSerializerSettings{ ContractResolver = new CamelCasePropertyNamesContractResolver() });
-            var serializedObject = JsonConvert.SerializeObject(Data, new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() });
+            var serializedObject = JsonConvert.SerializeObject(Data, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            //var serializedObject = JsonConvert.SerializeObject(Data, new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() });
             response.Write(serializedObject);
         }
     }
