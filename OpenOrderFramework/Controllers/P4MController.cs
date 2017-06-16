@@ -381,7 +381,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpPost]
         [Route("p4m/purchase")]
-        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal)
+        public async Task<JsonResult> Purchase(string cartId, string cvv, decimal cartTotal, string carrier = null)
         {
             var result = new PurchaseResultMessage();
             try
@@ -400,11 +400,13 @@ namespace OpenOrderFramework.Controllers
                     throw new Exception("Your cart is invalid and has been cleared. We're sorry for any inconvenience. Please keep shopping");
                 }
 
+                var orderId = await CreateLocalOrderAsync(localCart);
+                
                 var token = Request.Cookies["p4mToken"].Value;
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv };
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, CVV = cvv, OrderId = orderId.ToString(), Carrier = carrier };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
                 var apiResult = await _httpClient.PostAsync(_p4mConsts.BaseApiAddress + "purchase", content);
 
@@ -428,7 +430,7 @@ namespace OpenOrderFramework.Controllers
                     // so the retailer can store whatever is required at this point
                     ShoppingCart.GetCart(this).EmptyCart();
                     HttpContext.Session[ShoppingCart.CartSessionKey] = null;
-                    var orderId = await CreateLocalOrderAsync(purchaseResult);
+                    orderId = await CreateLocalOrderAsync(localCart);
                     result.RedirectUrl = this.Url.Action("Complete", "Checkout", new { id = orderId }, this.Request.Url.Scheme);
                 }
                 else
@@ -449,7 +451,7 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/paypalSetup")]
-        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal)
+        public async Task<JsonResult> PaypalSetup(string cartId, decimal cartTotal, string carrier = null)
         {
             // this is the first part of a paypal transaction, which sends a request from P4M to Realex
             // when this returns we redirect the consumer to PP in a popup window
@@ -468,11 +470,13 @@ namespace OpenOrderFramework.Controllers
                     throw new Exception("Your cart is invalid and has been cleared. We're sorry for any inconvenience. Please keep shopping");
                 }
 
+                var orderId = await CreateLocalOrderAsync(localCart);
+
                 var token = Request.Cookies["p4mToken"].Value;
                 _httpClient.SetBearerToken(token);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var purchaseMessage = new PostPurchaseMessage { CartId = cartId };
+                var purchaseMessage = new PostPurchaseMessage { CartId = cartId, OrderId = orderId.ToString(), Carrier = carrier };
                 var content = new ObjectContent<PostPurchaseMessage>(purchaseMessage, new JsonMediaTypeFormatter());
                 var apiResult = await _httpClient.PostAsync(_p4mConsts.BaseApiAddress + "paypalSetup", content);
 
@@ -513,7 +517,7 @@ namespace OpenOrderFramework.Controllers
             return htmlResponse;
         }
 
-        public async Task<int> CreateLocalOrderAsync(PurchaseResultMessage purchase)
+        public async Task<int> CreateLocalOrderAsync(ShoppingCart cart)
         {
             Order order = null;
             // get the current user details for creating the order
@@ -526,13 +530,13 @@ namespace OpenOrderFramework.Controllers
             {
                 Username = User.Identity.Name,
                 Email = User.Identity.Name,
-                OrderDate = (DateTime)purchase.Cart.Date,
+                OrderDate = DateTime.UtcNow,
                 Experation = DateTime.Now.AddYears(10),
-                Address = purchase.DeliverTo.Street1,
-                City = purchase.DeliverTo.City,
-                PostalCode = purchase.DeliverTo.PostCode,
-                State = purchase.DeliverTo.State,
-                Country = purchase.DeliverTo.CountryCode,
+                Address = "123 Main St",
+                City = "Gotham City",
+                PostalCode = "ABC123",
+                State = "Gotham State",
+                Country = "GB",
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Phone = user.Phone
@@ -542,14 +546,15 @@ namespace OpenOrderFramework.Controllers
             // get the new order Id
             storeDB.SaveChanges();
             // add the items
-            foreach (var item in purchase.Cart.Items)
+            foreach (var item in cart.Items)
             {
+                var prod = await storeDB.Items.FindAsync(item.ItemId);
                 var ordItem = new OrderDetail
                 {
-                    ItemId = Convert.ToInt32(item.Sku),
+                    ItemId = item.ItemId,
                     OrderId = order.OrderId,
-                    Quantity = (int)item.Qty,
-                    UnitPrice = (decimal)item.Price
+                    Quantity = item.Count,
+                    UnitPrice = prod.Price
                 };
                 storeDB.OrderDetails.Add(ordItem);
             }
@@ -558,24 +563,12 @@ namespace OpenOrderFramework.Controllers
         }
 
         [HttpGet]
-        [Route("p4m/purchaseComplete/{cartId}")]
-        public async Task<ActionResult> PurchaseComplete(string cartId)
+        [Route("p4m/purchaseComplete/{orderId}")]
+        public ActionResult PurchaseComplete(string orderId)
         {
-            var cartMessage = await GetCartFromP4MAsync(cartId);
-            if (cartMessage.Success)
-            {
-                var purchase = new PurchaseResultMessage
-                {
-                    Cart = cartMessage.Cart,
-                    BillTo = cartMessage.BillTo,
-                    DeliverTo = cartMessage.DeliverTo
-                };
-                var orderId = await CreateLocalOrderAsync(purchase);
-                ShoppingCart.GetCart(this).EmptyCart();
-                HttpContext.Session[ShoppingCart.CartSessionKey] = null;
-                return RedirectToAction("Complete", "Checkout", new { id = orderId });
-            }
-            return View("error");
+            ShoppingCart.GetCart(this).EmptyCart();
+            HttpContext.Session[ShoppingCart.CartSessionKey] = null;
+            return RedirectToAction("Complete", "Checkout", new { id = orderId });
         }
         //        public ActionResult ThreeDSPurchaseComplete(string purchaseResult)
         //        {

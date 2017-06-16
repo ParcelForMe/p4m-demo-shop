@@ -94,6 +94,8 @@ namespace OpenOrderFramework.Models
     public class PostPurchaseMessage : P4MBaseMessage
     {
         public string  CartId { get; set; }
+        public string OrderId { get; set; }
+        public string Carrier { get; set; }
         public string CVV { get; set; }
     }
 }
