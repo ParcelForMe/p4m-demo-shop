@@ -14,7 +14,7 @@ var htmlmin = require('gulp-htmlmin');
 var pump = require('pump');
 
 gulp.task('default', function () {
-    runSeries('clean', 'copyBowerComponents');
+    /*runSeries('clean', 'copyBowerComponents');*/
 });
 
 gulp.task('copyBowerComponents', function () {

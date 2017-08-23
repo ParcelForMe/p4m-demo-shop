@@ -433,13 +433,13 @@ namespace OpenOrderFramework.Controllers
         string GeneratePassword()
         {
             return "Password1";
-            StringBuilder strB = new StringBuilder(100);
-            int i = 0;
-            while (i++ < passLength)
-            {
-                strB.Append(validChars[random.Next(validChars.Length)]);
-            }
-            return strB.ToString();
+            //StringBuilder strB = new StringBuilder(100);
+            //int i = 0;
+            //while (i++ < passLength)
+            //{
+            //    strB.Append(validChars[random.Next(validChars.Length)]);
+            //}
+            //return strB.ToString();
         }
 
         async Task LocalLoginAsync(ApplicationUser user)

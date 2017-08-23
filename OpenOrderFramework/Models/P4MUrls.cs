@@ -8,6 +8,8 @@
             AppMode = System.Configuration.ConfigurationManager.AppSettings["appMode"];
             if (AppMode == "local")
             {
+                //BaseIdSrvUrl = "https://local.parcelfor.me:44333";
+                //BaseApiAddress = "https://local.parcelfor.me:44321/api/v2/";
                 BaseIdSrvUrl = "http://localhost:8089";
                 BaseApiAddress = "http://localhost:8088/api/v2/";
             }
