@@ -56,27 +56,47 @@ namespace OpenOrderFramework.Controllers
 
             var token = Response.Cookies["gfsCheckoutToken"].Value;
             if (string.IsNullOrWhiteSpace(token))
-            {
-                var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
-
-                var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
-                    uri, P4MConsts.GfsClientId, P4MConsts.GfsClientSecret);
-
-                var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
-                if (tokenResponse == null || tokenResponse.AccessToken == null)
-                {
-                    throw new Exception("Request for client credentials denied");
-                }
-                token = Base64Encode(tokenResponse.AccessToken);
-                Response.Cookies["gfsCheckoutToken"].Value = token;
-                Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-            }
+                token = await GetGFSTokenAsync();
             ViewBag.AccessToken = token;
             ViewBag.HostType = _p4mConsts.AppMode;
             ViewBag.InitialCountryCode = P4MConsts.DefaultInitialCountryCode;
             ViewBag.InitialPostCode = P4MConsts.DefaultInitialPostCode;
             // Return the view
             return View("P4MCheckout");
+        }
+
+        async Task<string> GetGFSTokenAsync()
+        {
+            var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
+
+            var client = new Thinktecture.IdentityModel.Client.OAuth2Client(
+                uri, P4MConsts.GfsClientId, P4MConsts.GfsClientSecret);
+
+            var tokenResponse = await client.RequestClientCredentialsAsync("read checkout-api");
+            if (tokenResponse == null || tokenResponse.AccessToken == null)
+            {
+                throw new Exception("Request for client credentials denied");
+            }
+            var token = Base64Encode(tokenResponse.AccessToken);
+            Response.Cookies["gfsCheckoutToken"].Value = token;
+            Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+            return token;
+        }
+
+        [HttpGet]
+        [Route("p4m/renewShippingToken")]
+        public async Task<JsonResult> GetNewShippingToken()
+        {
+            var result = new TokenMessage();
+            try
+            {
+                result.Token = await GetGFSTokenAsync();
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         async Task<bool> GetGuestTokenAsync()
@@ -134,6 +154,9 @@ namespace OpenOrderFramework.Controllers
             foreach (var cartItem in localCart.Items)
             {
                 var item = storeDB.Items.Single(i => i.ID == cartItem.ItemId);
+                var picUrl = item.ItemPictureUrl;
+                if (!picUrl.StartsWith("http") && !picUrl.StartsWith("/"))
+                    picUrl = "http://localhost:3000/" + picUrl;
                 p4mCart.Items.Add(new P4MCartItem
                 {
                     Make = item.Name,
@@ -320,16 +343,19 @@ namespace OpenOrderFramework.Controllers
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
                 var disc = storeDB.CartDiscounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discountCode).FirstOrDefault();
-                storeDB.CartDiscounts.Remove(disc);
-                storeDB.SaveChanges();
-                GetCartTotals(result, localCart);
-                //localCart.CalcTax();
-                result.Code = discountCode;
-                result.Amount = localCart.Discount;
-                //result.Shipping = localCart.Shipping;
-                //result.Tax = localCart.Tax;
-                //result.Discount = localCart.Discount;
-                //result.Total = localCart.Total;
+                if (disc != null)
+                {
+                    storeDB.CartDiscounts.Remove(disc);
+                    storeDB.SaveChanges();
+                    GetCartTotals(result, localCart);
+                    //localCart.CalcTax();
+                    result.Code = discountCode;
+                    result.Amount = localCart.Discount;
+                    //result.Shipping = localCart.Shipping;
+                    //result.Tax = localCart.Tax;
+                    //result.Discount = localCart.Discount;
+                    //result.Total = localCart.Total;
+                }
             }
             catch (Exception e)
             {

@@ -334,6 +334,22 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\demo\index.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\demo\simple-overlay.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\index.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\iron-focusables-helper.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\iron-overlay-backdrop.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\iron-overlay-behavior.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\iron-overlay-manager.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\index.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\iron-focusables-helper.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\iron-overlay-backdrop.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\iron-overlay-behavior.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\test-buttons-wrapper.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\test-buttons.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\test-menu-button.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\test-overlay.html" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\test\test-overlay2.html" />
     <Content Include="Scripts\Lib\p4m-widgets\address-lookup-field\address-lookup-field.html" />
     <Content Include="Scripts\Lib\p4m-widgets\gfs-calendar\gfs-calendar.html" />
     <Content Include="Scripts\Lib\p4m-widgets\gfs-checkout-widget\css\custom.css" />
@@ -412,6 +428,7 @@
     <Content Include="Scripts\Lib\p4m-widgets\p4m-order-summary\p4m-order-summary.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-order-text\p4m-order-glance.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-order-text\p4m-order-text.html" />
+    <Content Include="Scripts\Lib\p4m-widgets\p4m-overlay\p4m-general-fault.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-overlay\p4m-overlay.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\p4m-profile.html" />
     <Content Include="Scripts\Lib\p4m-widgets\p4m-profile\peli-logo-green.png" />
@@ -526,6 +543,13 @@
     <Content Include="Views\P4M\P4MLogin.cshtml" />
     <Content Include="Views\P4M\ClosePopupAndRefresh.cshtml" />
     <Content Include="Views\P4M\ClosePopupAndLogin.cshtml" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\.bower.json" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\.github\ISSUE_TEMPLATE.md" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\.gitignore" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\.travis.yml" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\bower.json" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\CONTRIBUTING.md" />
+    <Content Include="Scripts\Lib\iron-overlay-behavior\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
