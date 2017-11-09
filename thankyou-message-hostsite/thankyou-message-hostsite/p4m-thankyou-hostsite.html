@@ -1,18 +1,18 @@
 <div class="p4m-thankyou">
 	<div class="blurb">
 		<h1>Thank You</h1>
-		<h2>For shopping with Easy Tees</h2>
-		<p class="blurb-text hr">Thanks for checking out with Parcel For Me.<br/>
+		<h2>For shopping with {{retailer}}</h2>
+		<p class="blurb-text hr">Thanks for checking out with Parcel For Me.<br>
 		You can easily keep track of you orders,
 		delivery details &amp; purchase history with
 		the Parcel For Me mobile app.</p>
 		<div class="app-store-logos">
-			<a href="#"><img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/app-store-196px.jpg" /></a>
-			<a href="#"><img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/google-play-store-196px.jpg" /></a>
+			<a href="#"><img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/app-store-196px.jpg"></a>
+			<a href="#"><img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/google-play-store-196px.jpg"></a>
 		</div>
 	</div>
 	<div class="app-promo-images">
-		<img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/p4m-apps.jpg" />
+		<img src="https://p4mtestcdn.azureedge.net/pw/thankyou/img/p4m-apps.jpg">
 	</div>
 	<style include="p4m-shared-styles"> 
 		@font-face {
@@ -42,6 +42,7 @@
 			flex-direction: row;
 			justify-content: center;
 			font-family: 'Proxima Nova', sans-serif;
+			background: #fff;
 		}
 		.p4m-thankyou .blurb {
 			flex: 1;
@@ -52,27 +53,33 @@
 			justify-content: center;
 		}
 		.p4m-thankyou .blurb h1 {
+			font-family: 'Proxima Nova', sans-serif;
 			font-weight: 600;
 			font-size: 64px;
 			line-height: 64px;
 			letter-spacing: -0.02em;
 			margin-bottom: 0;
 			text-align: center;
+			color: #222;
 		}
 		.p4m-thankyou .blurb h2 {
+			font-family: 'Proxima Nova', sans-serif;
 			font-weight: 600;
 			font-size: 32px;
 			letter-spacing: -0.02em;
 			margin-top: .2em;
 			margin-bottom: 0;
 			text-align: center;
+			color: #222;
 		}
 		.p4m-thankyou .blurb p {
+			font-family: 'Proxima Nova', sans-serif;
 			font-weight: 400;
 			font-size: 18px;
 			text-align: center;
 			max-width: 66%;
 			margin: 30px 0;
+			color: #222;
 		}
 		.p4m-thankyou .hr:before {
 		    content: '';
@@ -92,7 +99,7 @@
 			justify-content: center;
 		}
 		.p4m-thankyou .app-store-logos a {
-			max-width: 30%;
+			max-width: 35%;
 			margin: 8px;
 		}
 		.p4m-thankyou .app-store-logos img {
@@ -103,6 +110,7 @@
 			align-items: flex-end;
 			flex: 1;
 			justify-content: center;
+			max-width: 570px;
 		}
 		.p4m-thankyou .app-promo-images img {
 			width: 100%;
@@ -121,6 +129,12 @@
 			.p4m-thankyou .app-promo-images img {
 				width: 50%;
 			}
+			.p4m-thankyou .blurb h1 {
+                font-size: 48px;
+            }
+            .p4m-thankyou .blurb h2 {
+                font-size: 22px;
+            }
 		}
 	</style>
 </div>
