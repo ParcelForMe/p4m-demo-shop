@@ -218,6 +218,7 @@ namespace OpenOrderFramework.Models
                 Guid tempCartId = Guid.NewGuid();
                 // Send tempCartId back to client as a cookie
                 context.Session[CartSessionKey] = tempCartId.ToString();
+                P4MConsts.SessionId = tempCartId.ToString();
             }
             return context.Session[CartSessionKey].ToString();
         }

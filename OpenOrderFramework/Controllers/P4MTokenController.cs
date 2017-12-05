@@ -255,21 +255,31 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        async Task<bool> LocalConsumerLoginAsync(string token)
+        [HttpPost]
+        [Route("p4m/localLogin")]
+        public async Task<JsonResult> LocalLogin(LoginConsumerMessage message)
         {
-            // get the consumer's details from P4M. 
+            this.Response.Cookies["p4mLocalLogin"].Value = "false";
+            var result = new LoginMessage();
+            try
+            {
+                result.LocalId = await LocalConsumerLoginAsync(message.Consumer);
+                if (message.CurrentPage.ToLower().Contains("/account/login"))
+                    result.RedirectUrl = "/p4m/checkout";
+            }
+            catch (Exception e)
+            {
+                result.Error = e.Message;
+                Logoff(Response);
+            }
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        async Task<string> LocalConsumerLoginAsync(Consumer consumer)
+        {
             // Check if there is a local ID and login. 
             // If not try to match on Email. If found then store local ID for consumer and login.
             // If not local ID or Email then create a new user and store the new local ID
-            var consumerResult = await GetConsumerAsync(token);
-            if (consumerResult == null || !consumerResult.Success)
-                throw new Exception(consumerResult.Error ?? "Could not retrieve your details");
-            var consumer = consumerResult.Consumer;
-            
-            Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
-            Response.Cookies["p4mAvatarUrl"].Expires = Request.Cookies["p4mToken"].Expires;
-            Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
-            Response.Cookies["p4mGivenName"].Expires = Request.Cookies["p4mToken"].Expires;
 
             // is there a logged in user already?
             string authUserId = null;
@@ -282,9 +292,9 @@ namespace OpenOrderFramework.Controllers
             }
             // get the local Id from P4M if possible
             string p4mLocalId = null;
-            if (consumer.Extras != null && consumer.Extras.ContainsKey("LocalId"))
+            if (consumer.Extras != null && consumer.Extras.ContainsKey("localId"))
             {
-                p4mLocalId = consumer.Extras["LocalId"];
+                p4mLocalId = consumer.Extras["localId"];
                 if (alreadyLoggedIn && p4mLocalId != authUserId)
                 {
                     // switching local users here
@@ -299,6 +309,87 @@ namespace OpenOrderFramework.Controllers
             // update the local user details with the current P4M details - this will create a new user if required
             ApplicationUser appUser = await GetAppUserAsync(consumer, p4mLocalId ?? authUserId);
             
+            // if this is a new local user then appUser.PasswordHash will be null
+            if (alreadyLoggedIn || appUser.PasswordHash != null)
+            {
+                if (!alreadyLoggedIn)
+                    await LocalLoginAsync(appUser);
+                this.Response.Cookies["p4mLocalLogin"].Value = "true";
+#pragma warning disable 4014
+                // save any possible changes to the local user 
+                UserManager.UpdateAsync(appUser);
+                // store the local Id if not already stored
+#pragma warning restore 4014
+                return appUser.Id;
+            }
+            // local user has NOT been found for the P4M consumer so we need to create one and log them in
+            var idResult = await UserManager.CreateAsync(appUser);
+            if (idResult.Succeeded)
+            {
+                appUser = await UserManager.FindByEmailAsync(consumer.Email);
+                var password = GeneratePassword();
+                await UserManager.AddPasswordAsync(appUser.Id, password);
+                await LocalLoginAsync(appUser);
+                this.Response.Cookies["p4mLocalLogin"].Value = "true";
+            }
+            return appUser.Id;
+        }
+        
+        async Task<bool> LocalConsumerLoginAsync(string token)
+        {
+            // get the consumer's details from P4M. 
+            // Check if there is a local ID and login. 
+            // If not try to match on Email. If found then store local ID for consumer and login.
+            // If not local ID or Email then create a new user and store the new local ID
+            var consumerResult = await GetConsumerAsync(token);
+            if (consumerResult == null || !consumerResult.Success)
+                throw new Exception(consumerResult.Error ?? "Could not retrieve your details");
+            var consumer = consumerResult.Consumer;
+
+            var tokenExpires = Helpers.GetTokenExpiry(token);
+            Response.Cookies["p4mAvatarUrl"].Value = consumer.ProfilePicUrl;
+            Response.Cookies["p4mAvatarUrl"].Expires = tokenExpires;
+            Response.Cookies["p4mGivenName"].Value = consumer.GivenName;
+            Response.Cookies["p4mGivenName"].Expires = tokenExpires;
+
+            //if (consumer.PrefDeliveryAddress != null)
+            //{
+            //    var addr = consumer.PrefDeliveryAddress;
+            //    Response.Cookies["p4mConsumer"].Value =
+            //        consumer.Id + "|" + addr.Id + "|" + addr.Street1 + "|" + addr.Street2 + "|" + addr.City + "|" +
+            //        addr.PostCode + "|" + addr.State + "|" + addr.CountryCode + "|" +
+            //        addr.Latitude + "|" + addr.Longitude + "|" + consumer.DeliveryPreferences;
+            //    Response.Cookies["p4mConsumer"].Expires = tokenExpires;
+            //}
+
+            // is there a logged in user already?
+            string authUserId = null;
+            var alreadyLoggedIn = false;
+            var authUser = AuthenticationManager.User;
+            if (authUser != null && authUser.Identity.IsAuthenticated)
+            {
+                authUserId = authUser.Identity.GetUserId();
+                alreadyLoggedIn = true;
+            }
+            // get the local Id from P4M if possible
+            string p4mLocalId = null;
+            if (consumer.Extras != null && consumer.Extras.ContainsKey("localId"))
+            {
+                p4mLocalId = consumer.Extras["localId"];
+                if (alreadyLoggedIn && p4mLocalId != authUserId)
+                {
+                    // switching local users here
+                    AuthenticationManager.SignOut();
+                    authUserId = null;
+                    authUser = null;
+                    alreadyLoggedIn = false;
+                }
+            }
+
+            // if P4M already has a localId we use that, otherwise we use the Id of the logged in user (if any)
+            // update the local user details with the current P4M details - this will create a new user if required
+            ApplicationUser appUser = await GetAppUserAsync(consumer, p4mLocalId ?? authUserId);
+
             // if this is a new local user then appUser.PasswordHash will be null
             if (alreadyLoggedIn || appUser.PasswordHash != null)
             {
@@ -354,7 +445,7 @@ namespace OpenOrderFramework.Controllers
             };
             consumer.Addresses = new List<P4MAddress> { address };
             consumer.Extras = new Dictionary<string, string>();
-            consumer.Extras.Add("LocalId", localId);
+            consumer.Extras.Add("localId", localId);
             return consumer;
         }
 
@@ -365,7 +456,7 @@ namespace OpenOrderFramework.Controllers
                 return null;
             var p4mCart = new P4MCart
             {
-                Reference = order.OrderId.ToString(),
+                OrderId = order.OrderId.ToString(),
                 SessionId = "Register",
                 Date = order.OrderDate,
                 PaymentType = "DB",

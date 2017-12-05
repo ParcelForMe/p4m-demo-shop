@@ -12,9 +12,16 @@ namespace OpenOrderFramework.Models
         public string Error { get; set; }
     }
 
+    public class LoginConsumerMessage : P4MBaseMessage
+    {
+        public Consumer Consumer { get; set; }
+        public string CurrentPage { get; set; }
+    }
+
     public class LoginMessage : P4MBaseMessage
     {
         public string RedirectUrl { get; set; }
+        public string LocalId { get; set; }
     }
 
     public class ConsumerMessage : P4MBaseMessage

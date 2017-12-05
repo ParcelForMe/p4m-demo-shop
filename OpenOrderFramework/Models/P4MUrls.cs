@@ -34,6 +34,7 @@
             ClientSecret = System.Configuration.ConfigurationManager.AppSettings["clientSecret"];
         }
 
+        public static string SessionId;
         public static string DefaultInitialPostCode { get; set; } = "W1D 1LL";
         public static string DefaultInitialCountryCode { get; set; } = "GB";
         public static CheckoutMode CheckoutMode { get; set; } = CheckoutMode.Shared;

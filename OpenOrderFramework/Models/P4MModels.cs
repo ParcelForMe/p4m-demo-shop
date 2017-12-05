@@ -74,16 +74,17 @@ namespace OpenOrderFramework.Models
     public class P4MCart
     {
         public string Id { get; set; }
-        public string Reference { get; set; }
+        public string OrderId { get; set; }
         public string SessionId { get; set; }
         public string AddressId { get; set; }
+        public string DropPointId { get; set; }
         public string BillingAddressId { get; set; }
         public DateTime? Date { get; set; }
         public string Currency { get; set; }
         public double ShippingAmt { get; set; }
         public double Tax { get; set; }
         public double Total { get; set; }
-        public string ServiceLevel { get; set; }
+        public string ServiceId { get; set; }
         public DateTime? ExpDeliveryDate { get; set; }
         public string CarrierToken { get; set; }
         public string Carrier { get; set; }

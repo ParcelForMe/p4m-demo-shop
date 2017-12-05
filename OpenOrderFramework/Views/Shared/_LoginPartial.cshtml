@@ -1,5 +1,6 @@
 @using Microsoft.AspNet.Identity
-@model OpenOrderFramework.Models.P4MConsts
+@using OpenOrderFramework.Models
+@model P4MConsts
 @if (Request.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
@@ -9,7 +10,7 @@
         <ul class="nav navbar-nav navbar-right NavBarPad">
             <li class="active">@{Html.RenderAction("CartSummary", "ShoppingCart");}</li>
             <!-- ***** P4M ***** -->
-            <li><p4m-login host-type="@Model.AppMode" id-srv-url="@Model.BaseIdSrvUrl" client-id="@Model.ClientId" redirect-url="@Model.RedirectUrl" logout-form="@Model.LogoutForm"></p4m-login></li>
+            <li><p4m-login session-id="@P4MConsts.SessionId" host-type="@Model.AppMode" id-srv-url="@Model.BaseIdSrvUrl" client-id="@Model.ClientId" redirect-url="@Model.RedirectUrl" logout-form="@Model.LogoutForm"></p4m-login></li>
             <!-- ***** P4M ***** -->
             <li>
                 @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
@@ -22,7 +23,7 @@ else {
     <ul class="nav navbar-nav navbar-right NavBarPad" style="padding-right:40px">
         <li class="active">@{Html.RenderAction("CartSummary", "ShoppingCart");}</li>
         <!-- ***** P4M ***** -->
-        <li><p4m-login host-type="@Model.AppMode" id-srv-url="@Model.BaseIdSrvUrl" client-id="@Model.ClientId" redirect-url="@Model.RedirectUrl" logout-form="@Model.LogoutForm"></p4m-login></li>
+        <li><p4m-login session-id="@P4MConsts.SessionId" host-type="@Model.AppMode" id-srv-url="@Model.BaseIdSrvUrl" client-id="@Model.ClientId" redirect-url="@Model.RedirectUrl" logout-form="@Model.LogoutForm"></p4m-login></li>
         <!-- ***** P4M ***** -->
         <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>
         <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>

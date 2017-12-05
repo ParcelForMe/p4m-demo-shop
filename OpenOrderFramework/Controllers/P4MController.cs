@@ -54,10 +54,10 @@ namespace OpenOrderFramework.Controllers
             if (localCart == null || cart == null || cart.Items.Count == 0)
                 return Redirect("/home");
 
-            var token = Response.Cookies["gfsCheckoutToken"].Value;
-            if (string.IsNullOrWhiteSpace(token))
-                token = await GetGFSTokenAsync();
-            ViewBag.AccessToken = token;
+            //var token = Response.Cookies["gfsCheckoutToken"].Value;
+            //if (string.IsNullOrWhiteSpace(token))
+            //    token = await GetGFSTokenAsync();
+            //ViewBag.AccessToken = token;
             ViewBag.HostType = _p4mConsts.AppMode;
             ViewBag.InitialCountryCode = P4MConsts.DefaultInitialCountryCode;
             ViewBag.InitialPostCode = P4MConsts.DefaultInitialPostCode;
@@ -77,10 +77,11 @@ namespace OpenOrderFramework.Controllers
             {
                 throw new Exception("Request for client credentials denied");
             }
-            var token = Base64Encode(tokenResponse.AccessToken);
-            Response.Cookies["gfsCheckoutToken"].Value = token;
-            Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-            return token;
+            var token = Helpers.Base64Encode(tokenResponse.AccessToken);
+            //return token;
+            //Response.Cookies["gfsCheckoutToken"].Value = token;
+            //Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+            return tokenResponse.AccessToken;
         }
 
         [HttpGet]
@@ -141,7 +142,6 @@ namespace OpenOrderFramework.Controllers
             this.Response.Cookies[ShoppingCart.CartSessionKey].Value = localCart.ShoppingCartId;
             var p4mCart = new P4MCart
             {
-                Reference = localCart.ShoppingCartId,
                 SessionId = localCart.ShoppingCartId,
                 Date = DateTime.UtcNow,
                 PaymentType = "PA",
@@ -191,23 +191,41 @@ namespace OpenOrderFramework.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("p4m/restoreLastCart")]
-        public async Task<JsonResult> RestoreLastCart()
+        public async Task<JsonResult> RestoreLastCart(P4MCart cart)
         {
             var result = new P4MBaseMessage();
             try
             {
-                var cart = await GetOpenCartFromP4M();
                 await CreateLocalCartFromP4MCart(cart);
             }
             catch (Exception e)
             {
                 result.Error = e.Message;
             }
-            P4MHelpers.RemoveCookie(Response, "p4mOfferCartRestore");
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+
+        //[HttpGet]
+        //[Route("p4m/restoreLastCart")]
+        //public async Task<JsonResult> RestoreLastCart()
+        //{
+        //    var result = new P4MBaseMessage();
+        //    try
+        //    {
+        //        var cart = await GetOpenCartFromP4M();
+        //        var dateStr = cart.ExpDeliveryDate != null ? ((DateTime)cart.ExpDeliveryDate).ToString("yyyy-MM-ddThh:mm:ssZ") : string.Empty;
+        //        Response.Cookies["p4mCart"].Value = cart.Id + "|" + cart.AddressId + "|" + cart.DropPointId + "|" + cart.ServiceId + "|" + dateStr;
+        //        await CreateLocalCartFromP4MCart(cart);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.Error = e.Message;
+        //    }
+        //    P4MHelpers.RemoveCookie(Response, "p4mOfferCartRestore");
+        //    return Json(result, JsonRequestBehavior.AllowGet);
+        //}
 
         async Task<P4MCart> GetOpenCartFromP4M()
         {
@@ -230,20 +248,22 @@ namespace OpenOrderFramework.Controllers
             var localCart = ShoppingCart.GetCart(HttpContext);
             localCart.Shipping = (decimal)p4mCart.ShippingAmt;
             localCart.Tax = (decimal)p4mCart.Tax;
-            foreach(var discount in p4mCart.Discounts)
-            {
-                localCart.Discounts.Add(new CartDiscount
+            if (p4mCart.Discounts != null)
+                foreach(var discount in p4mCart.Discounts)
                 {
-                    DiscountCode = discount.Code,
-                    Description = discount.Description,
-                    Amount = (decimal)discount.Amount
-                });
-            }
-            foreach (var item in p4mCart.Items)
-            {
-                var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
-                localCart.AddToCart(localItem, (int)Math.Round(item.Qty));
-            }
+                    localCart.Discounts.Add(new CartDiscount
+                    {
+                        DiscountCode = discount.Code,
+                        Description = discount.Description,
+                        Amount = (decimal)discount.Amount
+                    });
+                }
+            if (p4mCart.Items != null)
+                foreach (var item in p4mCart.Items)
+                {
+                    var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
+                    localCart.AddToCart(localItem, (int)Math.Round(item.Qty));
+                }
             await storeDB.SaveChangesAsync();
         }
 
@@ -264,7 +284,7 @@ namespace OpenOrderFramework.Controllers
                    // "m@dhatt3r");
 
                 var tokenResponse = client.RequestClientCredentialsAsync("read checkout-api").Result;
-                token = Base64Encode(tokenResponse.AccessToken);
+                token = Helpers.Base64Encode(tokenResponse.AccessToken);
                 Response.Cookies["gfsCheckoutToken"].Value = token;
                 Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
             }
@@ -628,18 +648,5 @@ namespace OpenOrderFramework.Controllers
                 throw new Exception(result.Error);
             return result;
         }
-
-        public string Base64Encode(string plainText)
-        {
-            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(plainTextBytes);
-        }
-
-        public string Base64Decode(string base64EncodedData)
-        {
-            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
-            return Encoding.UTF8.GetString(base64EncodedBytes);
-        }
-
     }
 }
