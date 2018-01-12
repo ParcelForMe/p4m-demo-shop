@@ -191,22 +191,48 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/getP4MAccessToken")]
-        public async Task<ActionResult> GetToken(string code, string state)
+        public async Task<ActionResult> GetToken()
         {
+            // this is all handled by the hidden iframe so just return nothing here
+            return Content("<html><body></body></html>");
             // state should be validated here - get from cookie
             string stateFromCookie, nonceFromCookie;
+            var state = Request.Params.GetValues("p4mState").FirstOrDefault();
             GetTempState(out stateFromCookie, out nonceFromCookie);
             P4MHelpers.RemoveCookie(Response, "p4mState");
             if (state.Equals(stateFromCookie, StringComparison.Ordinal))
             {
-                var client = new OAuth2Client(new Uri(_urls.TokenEndpoint), _urls.ClientId, _urls.ClientSecret);
-                var tokenResponse = await client.RequestAuthorizationCodeAsync(code, _urls.RedirectUrl);
-                if (!tokenResponse.IsHttpError && await ValidateToken(tokenResponse.IdentityToken, nonceFromCookie) && !string.IsNullOrEmpty(tokenResponse.AccessToken))
-                {
-                    Response.Cookies["p4mToken"].Value = tokenResponse.AccessToken;
-                    Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-                    return View("~/Views/P4M/ClosePopup.cshtml");
-                }
+                var token = Request.Params.GetValues("access_token").FirstOrDefault();
+                Response.Cookies["p4mToken"].Value = token;
+                //Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+                return View("~/Views/P4M/ClosePopup.cshtml");
+            }
+            // error occurred so try to recover
+            Logoff(Response);
+            return View("~/Views/P4M/ClosePopupAndRefresh.cshtml");
+        }
+
+        [HttpPost]
+        [Route("p4m/getP4MAccessToken")]
+        public async Task<ActionResult> GetToken(dynamic theForm)
+        {
+            // state should be validated here - get from cookie
+            string stateFromCookie, nonceFromCookie;
+            var state = Request.Params.GetValues("p4mState").FirstOrDefault();
+            GetTempState(out stateFromCookie, out nonceFromCookie);
+            P4MHelpers.RemoveCookie(Response, "p4mState");
+            if (state.Equals(stateFromCookie, StringComparison.Ordinal))
+            {
+                var token = Request.Params.GetValues("access_token").FirstOrDefault();
+                var expiresInStr = Request.Params.GetValues("expires_in").FirstOrDefault();
+                int expiresIn = 0;
+                int.TryParse(expiresInStr, out expiresIn);
+                var expires = DateTime.UtcNow.AddSeconds(expiresIn);
+                Response.Cookies["p4mToken"].Value = token;
+                Response.Cookies["p4mToken"].Expires = expires;
+                Response.Cookies["p4mTokenExpires"].Value = expires.ToString("s") + "Z";
+                Response.Cookies["p4mTokenExpires"].Expires = expires;
+                return View("~/Views/P4M/ClosePopup.cshtml");
             }
             // error occurred so try to recover
             Logoff(Response);

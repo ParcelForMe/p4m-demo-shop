@@ -158,4 +158,10 @@ namespace OpenOrderFramework.Models
         public DateTime DueDate { get; set; }
         public P4MAddress Address { get; set; }
     }
+
+    public class CartUpdates
+    {
+        public ShippingDetails ShippingDetails { get; set; }
+        public List<ChangedItem> Items { get; set; }
+    }
 }

@@ -302,11 +302,6 @@ namespace OpenOrderFramework.Controllers
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
                 localCart.Shipping = details.Amount;
                 GetCartTotals(result, localCart);
-                //localCart.CalcTax();
-                //result.Shipping = localCart.Shipping;
-                //result.Discount = localCart.Discount;
-                //result.Tax = localCart.Tax;
-                //result.Total = localCart.Total;
             }
             catch (Exception e)
             {
@@ -341,10 +336,6 @@ namespace OpenOrderFramework.Controllers
                     result.Code = discountCode;
                     disc = localCart.Discounts.Where(d => d.CartId == localCart.ShoppingCartId && d.DiscountCode == discount.Code).FirstOrDefault();
                     result.Amount = disc.Amount;
-                    //result.Discount = localCart.Discount;
-                    //result.Shipping = localCart.Shipping;
-                    //result.Tax = localCart.Tax;
-                    //result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -368,13 +359,8 @@ namespace OpenOrderFramework.Controllers
                     storeDB.CartDiscounts.Remove(disc);
                     storeDB.SaveChanges();
                     GetCartTotals(result, localCart);
-                    //localCart.CalcTax();
                     result.Code = discountCode;
                     result.Amount = localCart.Discount;
-                    //result.Shipping = localCart.Shipping;
-                    //result.Tax = localCart.Tax;
-                    //result.Discount = localCart.Discount;
-                    //result.Total = localCart.Total;
                 }
             }
             catch (Exception e)
@@ -386,13 +372,15 @@ namespace OpenOrderFramework.Controllers
 
         [HttpPost]
         [Route("p4m/itemQtyChanged")]
-        public async Task<JsonResult> ItemQtyChanged(List<ChangedItem> items)
+        public async Task<JsonResult> ItemQtyChanged(CartUpdates cartUpdates)
         {
             var result = new CartUpdateMessage();
             try
             {
                 var localCart = ShoppingCart.GetCart(this.HttpContext);
-                foreach (var chgItem in items)
+                if (cartUpdates.ShippingDetails != null)
+                    localCart.Shipping = cartUpdates.ShippingDetails.Amount;
+                foreach (var chgItem in cartUpdates.Items)
                 {
                     var intCode = Convert.ToInt32(chgItem.ItemCode);
                     var item = storeDB.Items.Single(i => i.ID == intCode);
@@ -400,12 +388,6 @@ namespace OpenOrderFramework.Controllers
                     await localCart.SetItemQtyAsync(item.ID, roundQty);
                 }
                 GetCartTotals(result, localCart);
-                //localCart.CalcTax();
-                //result.Tax = localCart.Tax;
-                //result.Shipping = localCart.Shipping;
-                //result.Discount = localCart.Discount;
-                //result.Total = localCart.Total;
-                //result.Discounts = localCart.Discounts.Select(d => new P4MDiscount { Code = d.DiscountCode, Description = d.Description, Amount = (double)d.Amount }).ToList();
             }
             catch (Exception e)
             {
