@@ -142,7 +142,7 @@ namespace OpenOrderFramework.Controllers
             this.Response.Cookies[ShoppingCart.CartSessionKey].Value = localCart.ShoppingCartId;
             var p4mCart = new P4MCart
             {
-                SessionId = localCart.ShoppingCartId,
+                SessionId = P4MConsts.SessionId, //localCart.ShoppingCartId,
                 Date = DateTime.UtcNow,
                 PaymentType = "PA",
                 Currency = "GBP",
