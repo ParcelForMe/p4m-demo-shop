@@ -1,4 +1,6 @@
-﻿namespace OpenOrderFramework.Models
+﻿using System;
+
+namespace OpenOrderFramework.Models
 {
     public enum CheckoutMode { Shared, Exclusive }
     public class P4MConsts
@@ -28,7 +30,7 @@
             JwksUrl = $"{BaseIdSrvUrl}/.well-known/openid-configuration/jwks";
 
             RedirectUrl = System.Configuration.ConfigurationManager.AppSettings["redirectUrl"];
-            LogoutForm = "logoutForm";
+            //LogoutToken = "logoutForm";
 
             ClientId = System.Configuration.ConfigurationManager.AppSettings["clientId"];
             ClientSecret = System.Configuration.ConfigurationManager.AppSettings["clientSecret"];
@@ -47,8 +49,16 @@
         public string TokenEndpoint { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
-        public string RedirectUrl { get; set; }  
-        public string LogoutForm { get; set; } 
+        public string RedirectUrl { get; set; }
+        static string _logoutToken;
+        public static string LogoutToken {
+            get {
+                if (_logoutToken == null)
+                    _logoutToken = Guid.NewGuid().ToString("N");
+                return _logoutToken;
+            }
+            set { _logoutToken = value; }
+        }
         public string LogoutUrl { get; set; }
         public string JwksUrl { get; set; }
         public string SigningCert { get; set; }
