@@ -191,30 +191,30 @@ namespace OpenOrderFramework.Controllers
 
         [HttpGet]
         [Route("p4m/getP4MAccessToken")]
-        public async Task<ActionResult> GetToken()
+        public ActionResult GetToken()
         {
             // this is all handled by the hidden iframe so just return nothing here
             return Content("<html><body></body></html>");
             // state should be validated here - get from cookie
-            string stateFromCookie, nonceFromCookie;
-            var state = Request.Params.GetValues("p4mState").FirstOrDefault();
-            GetTempState(out stateFromCookie, out nonceFromCookie);
-            P4MHelpers.RemoveCookie(Response, "p4mState");
-            if (state.Equals(stateFromCookie, StringComparison.Ordinal))
-            {
-                var token = Request.Params.GetValues("access_token").FirstOrDefault();
-                Response.Cookies["p4mToken"].Value = token;
-                //Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-                return View("~/Views/P4M/ClosePopup.cshtml");
-            }
-            // error occurred so try to recover
-            Logoff(Response);
-            return View("~/Views/P4M/ClosePopupAndRefresh.cshtml");
+            //string stateFromCookie, nonceFromCookie;
+            //var state = Request.Params.GetValues("p4mState").FirstOrDefault();
+            //GetTempState(out stateFromCookie, out nonceFromCookie);
+            //P4MHelpers.RemoveCookie(Response, "p4mState");
+            //if (state.Equals(stateFromCookie, StringComparison.Ordinal))
+            //{
+            //    var token = Request.Params.GetValues("access_token").FirstOrDefault();
+            //    Response.Cookies["p4mToken"].Value = token;
+            //    //Response.Cookies["p4mToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+            //    return View("~/Views/P4M/ClosePopup.cshtml");
+            //}
+            //// error occurred so try to recover
+            //Logoff(Response);
+            //return View("~/Views/P4M/ClosePopupAndRefresh.cshtml");
         }
 
         [HttpPost]
         [Route("p4m/getP4MAccessToken")]
-        public async Task<ActionResult> GetToken(dynamic theForm)
+        public ActionResult GetAccessToken()
         {
             // state should be validated here - get from cookie
             string stateFromCookie, nonceFromCookie;
@@ -239,25 +239,25 @@ namespace OpenOrderFramework.Controllers
             return View("~/Views/P4M/ClosePopupAndRefresh.cshtml");
         }
 
-        [HttpGet]
-        [Route("p4m/isLocallyLoggedIn")]
-        public JsonResult IsLocallyLoggedIn()
-        {
-            var result = new P4MBaseMessage();
-            if (P4MConsts.CheckoutMode != CheckoutMode.Exclusive)
-            {
-                var authUser = AuthenticationManager.User;
-                if (authUser == null || !authUser.Identity.IsAuthenticated)
-                    result.Error = "Not logged in";
-                this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
-            }
-            else
-            {
-                var hasToken = this.Response.Cookies.AllKeys.Contains("p4mToken") && !string.IsNullOrWhiteSpace(this.Response.Cookies["p4mLocalLogin"].Value);
-                this.Response.Cookies["p4mLocalLogin"].Value = hasToken ? "true" : "false";
-            }
-            return Json(result, JsonRequestBehavior.AllowGet);
-        }
+        //[HttpGet]
+        //[Route("p4m/isLocallyLoggedIn")]
+        //public JsonResult IsLocallyLoggedIn()
+        //{
+        //    var result = new P4MBaseMessage();
+        //    if (P4MConsts.CheckoutMode != CheckoutMode.Exclusive)
+        //    {
+        //        var authUser = AuthenticationManager.User;
+        //        if (authUser == null || !authUser.Identity.IsAuthenticated)
+        //            result.Error = "Not logged in";
+        //        this.Response.Cookies["p4mLocalLogin"].Value = result.Success ? "true" : "false";
+        //    }
+        //    else
+        //    {
+        //        var hasToken = this.Response.Cookies.AllKeys.Contains("p4mToken") && !string.IsNullOrWhiteSpace(this.Response.Cookies["p4mLocalLogin"].Value);
+        //        this.Response.Cookies["p4mLocalLogin"].Value = hasToken ? "true" : "false";
+        //    }
+        //    return Json(result, JsonRequestBehavior.AllowGet);
+        //}
 
         [HttpGet]
         [Route("p4m/localLogin")]
@@ -475,6 +475,18 @@ namespace OpenOrderFramework.Controllers
             return consumer;
         }
 
+        [HttpPost]
+        [Route("p4m/localLogout")]
+        public ActionResult LocalLogout(string logoutToken)
+        {
+            if (logoutToken == P4MConsts.LogoutToken)
+            {
+                AuthenticationManager.SignOut();
+                Logoff(this.Response);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
         P4MCart GetMostRecentCart(string localUsername)
         {
             var order = storeDB.Orders.Where(o => o.Username == localUsername).OrderByDescending(o => o.OrderDate).FirstOrDefault();
@@ -641,11 +653,19 @@ namespace OpenOrderFramework.Controllers
         {
             // clear the local P4M cookies
             P4MHelpers.RemoveCookie(response, "p4mToken");
+            P4MHelpers.RemoveCookie(response, "p4mTokenExpires");
             P4MHelpers.RemoveCookie(response, "p4mAvatarUrl");
             P4MHelpers.RemoveCookie(response, "p4mGivenName");
             P4MHelpers.RemoveCookie(response, "p4mLocalLogin");
             P4MHelpers.RemoveCookie(response, "p4mState");
             P4MHelpers.RemoveCookie(response, "p4mNonce");
+            P4MHelpers.RemoveCookie(response, "p4mOfferCartRestore");
+            P4MHelpers.RemoveCookie(response, "p4mLocale");
+            P4MHelpers.RemoveCookie(response, "p4mConsumer");
+            P4MHelpers.RemoveCookie(response, "p4mPrefAddress");
+            P4MHelpers.RemoveCookie(response, "p4mCart");
+            P4MHelpers.RemoveCookie(response, "p4mCartAddress");
+            P4MHelpers.RemoveCookie(response, "gfsCheckoutToken");
         }
 
         void GetTempState(out string state, out string nonce)
