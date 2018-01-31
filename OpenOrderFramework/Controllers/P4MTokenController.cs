@@ -218,7 +218,7 @@ namespace OpenOrderFramework.Controllers
         {
             // state should be validated here - get from cookie
             string stateFromCookie, nonceFromCookie;
-            var state = Request.Params.GetValues("p4mState").FirstOrDefault();
+            var state = Request.Params.GetValues("state").FirstOrDefault();
             GetTempState(out stateFromCookie, out nonceFromCookie);
             P4MHelpers.RemoveCookie(Response, "p4mState");
             if (state.Equals(stateFromCookie, StringComparison.Ordinal))
@@ -259,27 +259,27 @@ namespace OpenOrderFramework.Controllers
         //    return Json(result, JsonRequestBehavior.AllowGet);
         //}
 
-        [HttpGet]
-        [Route("p4m/localLogin")]
-        public async Task<JsonResult> LocalLogin(string currentPage)
-        {
-            this.Response.Cookies["p4mLocalLogin"].Value = "false";
-            var result = new LoginMessage();
-            try
-            {
-                var token = this.Request.Cookies["p4mToken"].Value;
-                var hasOpenCart = await LocalConsumerLoginAsync(token);
-                this.Response.Cookies["p4mOfferCartRestore"].Value = hasOpenCart ? "true" : "false";
-                if (currentPage.ToLower().Contains("/account/login"))
-                    result.RedirectUrl = "/p4m/checkout";
-            }
-            catch (Exception e)
-            {
-                result.Error = e.Message;
-                Logoff(Response);
-            }
-            return Json(result, JsonRequestBehavior.AllowGet);
-        }
+        //[HttpGet]
+        //[Route("p4m/localLogin")]
+        //public async Task<JsonResult> LocalLogin(string currentPage)
+        //{
+        //    this.Response.Cookies["p4mLocalLogin"].Value = "false";
+        //    var result = new LoginMessage();
+        //    try
+        //    {
+        //        var token = this.Request.Cookies["p4mToken"].Value;
+        //        var hasOpenCart = await LocalConsumerLoginAsync(token);
+        //        this.Response.Cookies["p4mOfferCartRestore"].Value = hasOpenCart ? "true" : "false";
+        //        if (currentPage.ToLower().Contains("/account/login"))
+        //            result.RedirectUrl = "/p4m/checkout";
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.Error = e.Message;
+        //        Logoff(Response);
+        //    }
+        //    return Json(result, JsonRequestBehavior.AllowGet);
+        //}
 
         [HttpPost]
         [Route("p4m/localLogin")]
