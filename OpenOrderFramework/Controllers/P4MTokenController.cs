@@ -229,9 +229,9 @@ namespace OpenOrderFramework.Controllers
                 int.TryParse(expiresInStr, out expiresIn);
                 var expires = DateTime.UtcNow.AddSeconds(expiresIn);
                 Response.Cookies["p4mToken"].Value = token;
-                Response.Cookies["p4mToken"].Expires = expires;
+                //Response.Cookies["p4mToken"].Expires = expires; only expire this when the browser is closed
                 Response.Cookies["p4mTokenExpires"].Value = expires.ToString("s") + "Z";
-                Response.Cookies["p4mTokenExpires"].Expires = expires;
+                //Response.Cookies["p4mTokenExpires"].Expires = expires; only expire this when the browser is closed
                 return View("~/Views/P4M/ClosePopup.cshtml");
             }
             // error occurred so try to recover
@@ -361,6 +361,7 @@ namespace OpenOrderFramework.Controllers
             return appUser.Id;
         }
         
+        /*
         async Task<bool> LocalConsumerLoginAsync(string token)
         {
             // get the consumer's details from P4M. 
@@ -448,6 +449,7 @@ namespace OpenOrderFramework.Controllers
             }
             return consumerResult.HasOpenCart;
         }
+        */
 
         async Task<Consumer> GetConsumerFromAppUserAsync(string localId)
         {
