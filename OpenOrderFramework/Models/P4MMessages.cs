@@ -68,6 +68,7 @@ namespace OpenOrderFramework.Models
     public class TokenMessage : P4MBaseMessage
     {
         public string Token { get; set; }
+        public string Expires { get; set; }
     }
 
     public class CartUpdateMessage : CartTotalsMessage

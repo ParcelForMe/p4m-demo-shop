@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json;
 using System.Text;
+using Thinktecture.IdentityModel.Client;
 
 namespace OpenOrderFramework.Controllers
 {
@@ -65,7 +66,7 @@ namespace OpenOrderFramework.Controllers
             return View("P4MCheckout");
         }
 
-        async Task<string> GetGFSTokenAsync()
+        async Task<TokenResponse> GetGFSTokenAsync()
         {
             var uri = new Uri(@"https://identity.justshoutgfs.com/connect/token");
 
@@ -77,11 +78,9 @@ namespace OpenOrderFramework.Controllers
             {
                 throw new Exception("Request for client credentials denied");
             }
-            var token = Helpers.Base64Encode(tokenResponse.AccessToken);
-            //return token;
             //Response.Cookies["gfsCheckoutToken"].Value = token;
             //Response.Cookies["gfsCheckoutToken"].Expires = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
-            return tokenResponse.AccessToken;
+            return tokenResponse;
         }
 
         [HttpGet]
@@ -91,7 +90,9 @@ namespace OpenOrderFramework.Controllers
             var result = new TokenMessage();
             try
             {
-                result.Token = await GetGFSTokenAsync();
+                var resp = await GetGFSTokenAsync();
+                result.Token = resp.AccessToken;
+                result.Expires = DateTime.UtcNow.AddSeconds(resp.ExpiresIn).ToString("yyyy-MM-ddThh:mm:ssZ"); 
             }
             catch (Exception e)
             {
@@ -267,6 +268,7 @@ namespace OpenOrderFramework.Controllers
             await storeDB.SaveChangesAsync();
         }
 
+        /*
         [HttpGet]
         [Route("p4m/shippingSelector")]
         public ActionResult ShippingSelector()
@@ -290,7 +292,7 @@ namespace OpenOrderFramework.Controllers
             }
             ViewBag.AccessToken = token;
             return View("P4MDelivery");
-        }
+        }*/
 
         [HttpPost]
         [Route("p4m/updShippingService")]
