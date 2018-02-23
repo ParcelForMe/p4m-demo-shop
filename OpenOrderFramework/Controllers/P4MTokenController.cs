@@ -232,6 +232,8 @@ namespace OpenOrderFramework.Controllers
                 //Response.Cookies["p4mToken"].Expires = expires; only expire this when the browser is closed
                 Response.Cookies["p4mTokenExpires"].Value = expires.ToString("s") + "Z";
                 //Response.Cookies["p4mTokenExpires"].Expires = expires; only expire this when the browser is closed
+                Response.Cookies["p4mHasAccount"].Value = "Y";
+                Response.Cookies["p4mHasAccount"].Expires = DateTime.UtcNow.AddYears(1); 
                 return View("~/Views/P4M/ClosePopup.cshtml");
             }
             // error occurred so try to recover
