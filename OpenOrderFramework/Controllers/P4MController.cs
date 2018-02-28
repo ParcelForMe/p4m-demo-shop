@@ -263,7 +263,8 @@ namespace OpenOrderFramework.Controllers
                 foreach (var item in p4mCart.Items)
                 {
                     var localItem = storeDB.Items.Find(Convert.ToInt32(item.Sku));
-                    localCart.AddToCart(localItem, (int)Math.Round(item.Qty));
+                    if (localItem != null)
+                        localCart.AddToCart(localItem, (int)Math.Round(item.Qty));
                 }
             await storeDB.SaveChangesAsync();
         }
